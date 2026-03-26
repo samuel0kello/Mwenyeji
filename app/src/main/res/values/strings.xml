@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Mwenyeji</string>
+    <string name="context_maters">Context Maters</string>
+    <string name="morning_evening_rush_hour_locals_move_differently">Morning, evening, rush hour — locals move differently.</string>
+    <string name="onboarding_title_2">Not just tricks - local routes</string>
+    <string name="onboarding_desc_2">Where to board, what to avoid, when to connect</string>
+    <string name="onboarding_title_3">Shared and confirmed by locals</string>
+    <string name="onboarding_desc_3">Advice stays fresh through community confirmation</string>
+</resources>
