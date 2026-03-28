@@ -109,7 +109,7 @@ fun MwenyejiAppTheme(
     content: @Composable () -> Unit
 ) {
     val appColors = if (darkTheme) DarkColorScheme else LightColorScheme
-    val materialColors = appColors.toMaterialColorScheme(darkTheme)  // ← one line
+    val materialColors = appColors.toMaterialColorScheme(darkTheme)
 
     CompositionLocalProvider(
         LocalAppColorScheme provides appColors,
