@@ -1,6 +1,5 @@
 package com.samuelokello.mwenyeji.navigation
 
-import androidx.annotation.DrawableRes
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -29,7 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -104,8 +103,8 @@ fun AppBottomNavigationBar(
 @Composable
 fun RowScope.AppBottomNavigationBarItem(
     modifier: Modifier = Modifier,
-    @DrawableRes icon: Int,
-    @DrawableRes selectedIcon: Int,
+    icon: ImageVector,
+    selectedIcon: ImageVector,
     label: String,
     onClick: () -> Unit,
     selected: Boolean,
@@ -148,7 +147,7 @@ fun RowScope.AppBottomNavigationBarItem(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResource(if (isShowingSelected) selectedIcon else icon),
+                imageVector = (if (isShowingSelected) selectedIcon else icon),
                 contentDescription = null,
                 tint = color,
                 modifier = Modifier

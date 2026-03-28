@@ -62,8 +62,8 @@ fun MwenyejiInputField(
             cursorColor = MwenyejiTheme.colorScheme.primary,
 
             // 5. Placeholder/Label Colors
-            unfocusedLabelColor = MwenyejiTheme.colorScheme.onSurfaceVariant,
-            focusedLabelColor = MwenyejiTheme.colorScheme.onSurfaceVariant,
+            unfocusedLabelColor = MwenyejiTheme.colorScheme.primary,
+            focusedLabelColor = MwenyejiTheme.colorScheme.primary,
         ),
         modifier = modifier.fillMaxWidth()
     )

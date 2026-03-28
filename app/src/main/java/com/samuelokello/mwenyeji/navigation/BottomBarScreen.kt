@@ -1,26 +1,32 @@
 package com.samuelokello.mwenyeji.navigation
 
 import androidx.annotation.DrawableRes
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.outlined.AddCircle
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.ui.graphics.vector.ImageVector
 import com.samuelokello.mwenyeji.R
 import kotlinx.serialization.Serializable
 
 sealed class BottomBarScreen(
     val route: BottomScreenRoutes,
     var title: String,
-    @DrawableRes val defaultIcon: Int,
-    @DrawableRes val selectedIcon: Int
+    val defaultIcon: ImageVector,
+    val selectedIcon: ImageVector
 ) {
     data object Home : BottomBarScreen(
         route = BottomScreenRoutes.Home,
         title = "feed",
-        defaultIcon = R.drawable.ic_navigation,
-        selectedIcon = R.drawable.ic_navigation
+        defaultIcon = Icons.Outlined.LocationOn,
+        selectedIcon = Icons.Default.LocationOn
     )
     data object Contribute : BottomBarScreen(
         route = BottomScreenRoutes.Contribute,
-        title = "feed",
-        defaultIcon = R.drawable.ic_navigation,
-        selectedIcon = R.drawable.ic_navigation
+        title = "Contribute",
+        defaultIcon = Icons.Outlined.AddCircle,
+        selectedIcon = Icons.Default.AddCircle
     )
 }
 

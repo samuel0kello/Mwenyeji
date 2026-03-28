@@ -3,6 +3,7 @@ package com.samuelokello.mwenyeji.feature.feed.components
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,10 +29,20 @@ internal fun FeedScreenContent(modifier: Modifier = Modifier) {
         LazyColumn(
             modifier = Modifier.padding(paddingValues)
         ) {
-            item {  }
+            item {
+
+            }
         }
     }
 }
+
+@Composable
+fun LocationInput(modifier: Modifier = Modifier) {
+    TextField(
+        state =
+    )
+}
+
 
 @Preview
 @Composable

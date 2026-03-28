@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.samuelokello.mwenyeji.R
+import com.samuelokello.mwenyeji.datasources.preference.MwenyejiPrefs
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +18,9 @@ sealed interface OnboardingNavigationEvent {
     data object NavigateToHome : OnboardingNavigationEvent
 }
 
-class OnboardingViewModel : ViewModel() {
+class OnboardingViewModel(
+    private val pref: MwenyejiPrefs
+) : ViewModel() {
 
     private val _currentPage = MutableStateFlow(0)
     val currentPage: StateFlow<Int> = _currentPage.asStateFlow()
@@ -54,6 +57,7 @@ class OnboardingViewModel : ViewModel() {
 
     fun onFinish() {
         viewModelScope.launch {
+            pref.setOnBoardingComplete(true)
             _navigationEvent.send(OnboardingNavigationEvent.NavigateToHome)
         }
     }

@@ -1,40 +1,51 @@
 package com.samuelokello.mwenyeji.navigation
 
-import android.widget.Toast
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavController
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
+import com.samuelokello.mwenyeji.datasources.preference.MwenyejiPrefs
 import com.samuelokello.mwenyeji.feature.feed.components.FeedScreen
 import com.samuelokello.mwenyeji.feature.onboarding.navigation.OnBoarding
 import com.samuelokello.mwenyeji.feature.onboarding.navigation.onBoarding
+import kotlinx.coroutines.flow.first
 import kotlinx.serialization.Serializable
+import org.koin.compose.koinInject
 
 @Composable
 fun MwenyejiNavGraph(navController: NavHostController) {
-    val context = LocalContext.current
 
-    NavHost(
-        navController = navController,
-        startDestination = OnBoarding
-    ){
-        mainGraph(navController)
+    val prefs: MwenyejiPrefs = koinInject()
+    var startDestination by remember { mutableStateOf<Any?>(null) }
 
-        onBoarding(
-            navController,
-            onFinishOnBoarding = {
-                Toast.makeText(context,"OnBoarding Finished", Toast.LENGTH_LONG).show()
-                navController.navigate(Main) {
-                    popUpTo<OnBoarding> { inclusive = true }
+    LaunchedEffect(Unit) {
+        val isComplete = prefs.isOnBoardingComplete().first()
+        startDestination = if (isComplete) Main else OnBoarding
+    }
+
+    startDestination?.let { destination ->
+        NavHost(
+            navController = navController,
+            startDestination = destination
+        ) {
+            mainGraph(navController)
+
+            onBoarding(
+                navController,
+                onFinishOnBoarding = {
+                    navController.navigate(Main) {
+                        popUpTo<OnBoarding> { inclusive = true }
+                    }
                 }
-            }
-
-        )
+            )
+        }
     }
 }
 
@@ -44,11 +55,11 @@ fun NavGraphBuilder.mainGraph(
     navigation<Main>(
         startDestination = BottomScreenRoutes.Home
     ) {
-        composable <BottomScreenRoutes.Home>{
+        composable<BottomScreenRoutes.Home> {
             FeedScreen()
         }
 
-        composable <BottomScreenRoutes.Contribute>{
+        composable<BottomScreenRoutes.Contribute> {
 
         }
     }
