@@ -6,121 +6,91 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.samuelokello.mwenyeji.ui.theme.color.*
-import com.samuelokello.mwenyeji.ui.theme.typography.*
-import com.samuelokello.mwenyeji.ui.theme.shape.*
-import com.samuelokello.mwenyeji.ui.theme.spacing.*
-import com.samuelokello.mwenyeji.ui.theme.elevation.*
+import com.samuelokello.mwenyeji.ui.theme.color.AppColorScheme
+import com.samuelokello.mwenyeji.ui.theme.color.LightColorScheme
+import com.samuelokello.mwenyeji.ui.theme.color.resolveAppColorScheme
+import com.samuelokello.mwenyeji.ui.theme.color.resolveMaterialColorScheme
+import com.samuelokello.mwenyeji.ui.theme.elevation.AppElevation
+import com.samuelokello.mwenyeji.ui.theme.elevation.Elevation
+import com.samuelokello.mwenyeji.ui.theme.shape.AppShapes
+import com.samuelokello.mwenyeji.ui.theme.shape.CornerRadius
+import com.samuelokello.mwenyeji.ui.theme.shape.CornerRadii
+import com.samuelokello.mwenyeji.ui.theme.shape.Shapes
+import com.samuelokello.mwenyeji.ui.theme.shape.toMaterialShapes
+import com.samuelokello.mwenyeji.ui.theme.spacing.AppSizes
+import com.samuelokello.mwenyeji.ui.theme.spacing.AppSpacing
+import com.samuelokello.mwenyeji.ui.theme.spacing.Sizes
+import com.samuelokello.mwenyeji.ui.theme.spacing.Spacing
+import com.samuelokello.mwenyeji.ui.theme.typography.AppFontFamily
+import com.samuelokello.mwenyeji.ui.theme.typography.AppTypography
+import com.samuelokello.mwenyeji.ui.theme.typography.createTypography
+import com.samuelokello.mwenyeji.ui.theme.typography.toMaterialTypography
 
-/**
- * CompositionLocal providers for theme tokens
- */
+
 val LocalAppColorScheme = staticCompositionLocalOf { LightColorScheme }
-val LocalAppTypography = staticCompositionLocalOf { createTypography() }
-val LocalAppShapes = staticCompositionLocalOf { Shapes }
-val LocalAppSpacing = staticCompositionLocalOf { Spacing }
-val LocalAppSizes = staticCompositionLocalOf { Sizes }
-val LocalAppElevation = staticCompositionLocalOf { Elevation }
-val LocalCornerRadius = staticCompositionLocalOf { CornerRadii }
+val LocalAppTypography  = staticCompositionLocalOf { createTypography() }
+val LocalAppShapes      = staticCompositionLocalOf { Shapes }
+val LocalAppSpacing     = staticCompositionLocalOf { Spacing }
+val LocalAppSizes       = staticCompositionLocalOf { Sizes }
+val LocalAppElevation   = staticCompositionLocalOf { Elevation }
+val LocalCornerRadius   = staticCompositionLocalOf { CornerRadii }
 
-/**
- * Main theme object for Mwenyeji app
- * Provides access to all design tokens
- *
- * Usage:
- * ```
- * Text(
- *     text = "Hello",
- *     color = MwenyejiTheme.colorScheme.primary,
- *     style = MwenyejiTheme.typography.bodyLarge
- * )
- * ```
- */
+
+
 object MwenyejiTheme {
-
-    /**
-     * Color scheme tokens
-     */
     val colorScheme: AppColorScheme
-        @Composable
-        @ReadOnlyComposable
+        @Composable @ReadOnlyComposable
         get() = LocalAppColorScheme.current
 
-    /**
-     * Typography tokens
-     */
     val typography: AppTypography
-        @Composable
-        @ReadOnlyComposable
+        @Composable @ReadOnlyComposable
         get() = LocalAppTypography.current
 
-    /**
-     * Shape tokens
-     */
     val shapes: AppShapes
-        @Composable
-        @ReadOnlyComposable
+        @Composable @ReadOnlyComposable
         get() = LocalAppShapes.current
 
-    /**
-     * Spacing tokens
-     */
     val spacing: AppSpacing
-        @Composable
-        @ReadOnlyComposable
+        @Composable @ReadOnlyComposable
         get() = LocalAppSpacing.current
 
-    /**
-     * Size tokens
-     */
     val sizes: AppSizes
-        @Composable
-        @ReadOnlyComposable
+        @Composable @ReadOnlyComposable
         get() = LocalAppSizes.current
 
-    /**
-     * Elevation tokens
-     */
     val elevation: AppElevation
-        @Composable
-        @ReadOnlyComposable
+        @Composable @ReadOnlyComposable
         get() = LocalAppElevation.current
 
-    /**
-     * Corner radius tokens (Dp values)
-     */
     val cornerRadius: CornerRadius
-        @Composable
-        @ReadOnlyComposable
+        @Composable @ReadOnlyComposable
         get() = LocalCornerRadius.current
 }
 
-/**
- * Main theme composable
- * Wraps your app content and provides all theme tokens
- *
- * @param darkTheme Whether to use dark theme (defaults to system setting)
- * @param dynamicColor Whether to use dynamic theming from Android 12+
- * @param content Your app content
- */
+
 @Composable
 fun MwenyejiAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
+    dynamicColor: Boolean = false,
+    content: @Composable () -> Unit,
 ) {
-    val appColors = if (darkTheme) DarkColorScheme else LightColorScheme
-    val materialColors = appColors.toMaterialColorScheme(darkTheme)
+    val appColors      = resolveAppColorScheme(darkTheme, dynamicColor)
+    val materialColors = resolveMaterialColorScheme(darkTheme, dynamicColor)
 
     CompositionLocalProvider(
         LocalAppColorScheme provides appColors,
-        LocalAppTypography provides createTypography(AppFontFamily),
-        LocalAppShapes provides Shapes,
-        LocalAppSpacing provides Spacing,
-        LocalAppSizes provides Sizes,
-        LocalAppElevation provides Elevation,
-        LocalCornerRadius provides CornerRadii,
+        LocalAppTypography  provides createTypography(AppFontFamily),
+        LocalAppShapes      provides Shapes,
+        LocalAppSpacing     provides Spacing,
+        LocalAppSizes       provides Sizes,
+        LocalAppElevation   provides Elevation,
+        LocalCornerRadius   provides CornerRadii,
     ) {
-        MaterialTheme(colorScheme = materialColors) {
+        MaterialTheme(
+            colorScheme = materialColors,
+            typography  = createTypography(AppFontFamily).toMaterialTypography(),
+            shapes      = Shapes.toMaterialShapes(),
+        ) {
             content()
         }
     }

@@ -1,90 +1,105 @@
 package com.samuelokello.mwenyeji.ui.theme.color
 
-import androidx.compose.ui.graphics.Color
-
 /**
- * Dark theme color palette for Mwenyeji
+ * Dark theme color scheme for Mwenyeji.
+ *
+ * Source of truth: Mwenyeji Design System v1.0 — Figma "ColorScheme" frame.
+ * Figma exact values used as anchors:
+ *   Background  #121212   Surface     #1E1E1E
+ *   SurfaceRaised #2A2A2A Border      #333333
+ *   Primary     #2D6B4D   PrimaryLight #3D88B0  PrimaryDark #1D4B35
+ *   Success     #4CAF50   Info        #2196F3
+ *   Warning     #FF9800   Error       #F44336
+ *
+ * M3 dark-theme tonal mapping:
+ *   primary role  → Green80  (#9BD4B1)  — light enough on dark bg, AA contrast
+ *   on-primary    → Green20  (#003920)  — text/icon ON the primary-colored button
+ *   surface roles → Neutral6–Neutral30 tonal ramp (green-tinted near-blacks)
  */
 val DarkColorScheme = AppColorScheme(
-    // Primary
-    primary = Color(0xFF9BD4B1),
-    primaryLight = Color(0xFFB7F0CC),
-    primaryDark = Color(0xFF1D3D2A),          // deep green — used for icon circle bg
-    onPrimary = Color(0xFF003921),
-    primaryContainer = Color(0xFF1D3D2A),      // matches primaryDark for circle consistency
-    onPrimaryContainer = Color(0xFFB7F0CC),
 
-    // Secondary
-    secondary = Color(0xFFB6CCB9),
-    onSecondary = Color(0xFF223527),
-    secondaryContainer = Color(0xFF384B3C),
-    onSecondaryContainer = Color(0xFFD2E8D5),
+    // ── Primary ───────────────────────────────────────────────────────────────
+    // M3 rule: primary in dark = ~tonal 80. Green80 = #9BD4B1.
+    primary              = AppColors.Green80,          // #9BD4B1
+    primaryLight         = AppColors.Green90,          // #B7F0CC  — hover
+    primaryDark          = AppColors.Green70,          // #6DC496  — pressed
+    onPrimary            = AppColors.Green20,          // #003920
+    primaryContainer     = AppColors.Green30,          // #1D4B35  — icon circle bg
+    onPrimaryContainer   = AppColors.Green90,          // #B7F0CC
 
-    // Tertiary
-    tertiary = Color(0xFFA5CCDE),
-    onTertiary = Color(0xFF073543),
-    tertiaryContainer = Color(0xFF244C5A),
-    onTertiaryContainer = Color(0xFFC1E8FB),
+    // ── Secondary ─────────────────────────────────────────────────────────────
+    secondary            = AppColors.GreenGray70,      // #B6CCB9
+    onSecondary          = AppColors.GreenGray20,      // #223527
+    secondaryContainer   = AppColors.GreenGray30,      // #384B3C
+    onSecondaryContainer = AppColors.GreenGray80,      // #D2E8D5
 
-    // Background & Surface
-    background = Color(0xFF0E1210),            // very dark green-black, richer than neutral black
-    onBackground = Color(0xFFE5E6E0),
-    surface = Color(0xFF161A17),               // slightly lighter than background
-    onSurface = Color(0xFFE5E6E0),
-    surfaceVariant = Color(0xFF424940),
-    onSurfaceVariant = Color(0xFFC2C9BE),
-    surfaceTint = Color(0xFF9BD4B1),           // always matches primary
-    surfaceDim = Color(0xFF0E1210),            // matches background — dimmest surface
-    surfaceBright = Color(0xFF383A35),         // elevated surfaces
-    surfaceContainerLowest = Color(0xFF0A0F0C),
-    surfaceContainerLow = Color(0xFF161A17),
-    surfaceContainer = Color(0xFF1C2119),      // illustration card bg — dark green tinted
-    surfaceContainerHigh = Color(0xFF252B22),
-    surfaceContainerHighest = Color(0xFF303530),
+    // ── Tertiary (info / matatu tag) ─────────────────────────────────────────
+    // Figma Info/Matatu = #2196F3 → blue tonal ramp
+    tertiary             = AppColors.Blue80,           // #90CAF9
+    onTertiary           = AppColors.Blue10,           // #003258
+    tertiaryContainer    = AppColors.Blue20,           // #00497D
+    onTertiaryContainer  = AppColors.Blue90,           // #BBDEFB
 
-    // Inverse
-    inverseSurface = Color(0xFFE5E6E0),
-    inverseOnSurface = Color(0xFF2F312D),
-    inversePrimary = Color(0xFF2D6B4D),
+    // ── Background & Surface ──────────────────────────────────────────────────
+    // Figma: Background #121212 — we use green-tinted 0E1210 to honour brand warmth
+    background           = AppColors.Neutral6,         // #0E1210  (≈ Figma #121212, green tint)
+    onBackground         = AppColors.Neutral90,        // #E5E6E0
+    surface              = AppColors.Neutral12,        // #161A17  (Figma Surface #1E1E1E → green tint)
+    onSurface            = AppColors.Neutral90,        // #E5E6E0
+    surfaceVariant       = AppColors.Neutral50,        // #424940
+    onSurfaceVariant     = AppColors.NeutralVariant80, // #C2C9BE
+    surfaceTint          = AppColors.Green80,          // = primary
+    surfaceDim           = AppColors.Neutral6,         // dimmest = background
+    surfaceBright        = AppColors.Neutral40,        // #383A35  — most elevated
+    surfaceContainerLowest  = AppColors.Neutral4,      // #0A0F0C
+    surfaceContainerLow     = AppColors.Neutral12,     // #161A17
+    surfaceContainer        = AppColors.Neutral17,     // #1C2119  — card / illustration bg
+    surfaceContainerHigh    = AppColors.Neutral22,     // #252B22
+    surfaceContainerHighest = AppColors.Neutral30,     // #303530
 
-    // Outline & Border
-    outline = Color(0xFF8C9388),
-    outlineVariant = Color(0xFF424940),
-    border = Color(0xFF2E3330),
-    divider = Color(0xFF252925),
+    // ── Inverse ───────────────────────────────────────────────────────────────
+    inverseSurface       = AppColors.Neutral90,        // #E5E6E0
+    inverseOnSurface     = AppColors.Neutral17,        // #1C2119
+    inversePrimary       = AppColors.Green40,          // #2D6B4D  — Figma brand primary
 
-    // Semantic - Success
-    success = Color(0xFF81C784),
-    onSuccess = Color(0xFF003909),
-    successContainer = Color(0xFF00530F),
-    onSuccessContainer = Color(0xFF9EDD9F),
+    // ── Outline & Border ──────────────────────────────────────────────────────
+    outline              = AppColors.Neutral70,        // #8C9388
+    outlineVariant       = AppColors.Neutral50,        // #424940
+    border               = AppColors.Neutral35,        // #333333  — exact Figma Border
+    divider              = AppColors.Neutral22,        // #252B22  — subtle row separators
 
-    // Semantic - Info
-    info = Color(0xFF64B5F6),
-    onInfo = Color(0xFF003258),
-    infoContainer = Color(0xFF00497D),
-    onInfoContainer = Color(0xFFBBDEFB),
+    // ── Semantic: Success (#4CAF50) ───────────────────────────────────────────
+    success              = AppColors.SuccessGreen80,   // #81C784  (M3 dark = tonal 80)
+    onSuccess            = AppColors.SuccessGreen20,   // #003909
+    successContainer     = AppColors.SuccessGreen30,   // #00530F
+    onSuccessContainer   = AppColors.SuccessGreen80,   // #81C784
 
-    // Semantic - Warning
-    warning = Color(0xFFFFB74D),
-    onWarning = Color(0xFF4A2800),
-    warningContainer = Color(0xFF6A3C00),
-    onWarningContainer = Color(0xFFFFDDB3),
+    // ── Semantic: Info (#2196F3) ──────────────────────────────────────────────
+    info                 = AppColors.Blue80,           // #90CAF9
+    onInfo               = AppColors.Blue10,           // #003258
+    infoContainer        = AppColors.Blue20,           // #00497D
+    onInfoContainer      = AppColors.Blue90,           // #BBDEFB
 
-    // Semantic - Error
-    error = Color(0xFFFFB4AB),
-    onError = Color(0xFF690005),
-    errorContainer = Color(0xFF93000A),
-    onErrorContainer = Color(0xFFFFDAD6),
+    // ── Semantic: Warning (#FF9800) ───────────────────────────────────────────
+    warning              = AppColors.Amber60,          // #FFB74D  (M3 dark = lighter tonal)
+    onWarning            = AppColors.Amber10,          // #4A2800
+    warningContainer     = AppColors.Amber20,          // #6A3C00
+    onWarningContainer   = AppColors.Amber80,          // #FFCC80
 
-    // Overlays
-    scrim = Color(0xB3000000),
-    overlay = Color(0x80000000),
+    // ── Semantic: Error (#F44336) ─────────────────────────────────────────────
+    error                = AppColors.Red80,            // #FFB4AB  (M3 dark = tonal 80)
+    onError              = AppColors.Red20,            // #690005
+    errorContainer       = AppColors.Red30,            // #93000A
+    onErrorContainer     = AppColors.Red90,            // #FFDA D6
 
-    // Interactive states
-    disabled = Color(0x61FFFFFF),
-    disabledContainer = Color(0x1FFFFFFF),
+    // ── Overlays & Scrims ─────────────────────────────────────────────────────
+    scrim                = AppColors.Neutral0.copy(alpha = 0.70f),   // #000000 @ 70%
+    overlay              = AppColors.Neutral0.copy(alpha = 0.50f),   // #000000 @ 50%
 
-    // Shadow
-    shadow = Color(0xFF000000),
+    // ── Interactive States ────────────────────────────────────────────────────
+    disabled             = AppColors.Neutral100.copy(alpha = 0.38f), // white @ 38%
+    disabledContainer    = AppColors.Neutral100.copy(alpha = 0.12f), // white @ 12%
+
+    // ── Shadow ────────────────────────────────────────────────────────────────
+    shadow               = AppColors.Neutral0,         // #000000
 )

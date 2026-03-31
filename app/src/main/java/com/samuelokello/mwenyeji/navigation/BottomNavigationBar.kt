@@ -118,9 +118,9 @@ fun RowScope.AppBottomNavigationBarItem(
 
     val color by animateColorAsState(
         targetValue = if (selected) {
-            MaterialTheme.colorScheme.primary
+            MwenyejiTheme.colorScheme.primary
         } else {
-            MaterialTheme.colorScheme.outline
+            MwenyejiTheme.colorScheme.outline
         }
     )
 
