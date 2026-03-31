@@ -54,6 +54,9 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
+    //splash-api
+    implementation(libs.androidx.core.splashscreen)
+
     implementation(libs.androidx.material.icons.extended)
 
 

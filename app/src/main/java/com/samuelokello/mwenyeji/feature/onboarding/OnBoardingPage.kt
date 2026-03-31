@@ -171,8 +171,8 @@ fun PageIndicator(
     totalPages: Int,
     modifier: Modifier = Modifier
 ) {
-    val activeColor = MwenyejiTheme.colorScheme.primary        // active dot — brand green
-    val inactiveColor = MwenyejiTheme.colorScheme.outlineVariant // inactive dot — muted, theme-aware
+    val activeColor = MwenyejiTheme.colorScheme.primary
+    val inactiveColor = MwenyejiTheme.colorScheme.outlineVariant
 
     Row(
         modifier = modifier,
