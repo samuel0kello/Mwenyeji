@@ -15,6 +15,7 @@ kotlinxSerializationJson = "1.10.0"
 koin-bom = "4.2.0"
 datastore = "1.2.1"
 lifecycleRuntimeCompose = "2.10.0"
+material = "1.13.0"
 
 
 [libraries]
@@ -38,6 +39,7 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
 koin-core = { module = "io.insert-koin:koin-core" }

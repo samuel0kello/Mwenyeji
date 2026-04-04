@@ -12,7 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.samuelokello.mwenyeji.datasources.preference.MwenyejiPrefs
-import com.samuelokello.mwenyeji.feature.feed.components.FeedScreen
+import com.samuelokello.mwenyeji.feature.feed.FeedScreen
 import com.samuelokello.mwenyeji.feature.onboarding.navigation.OnBoarding
 import com.samuelokello.mwenyeji.feature.onboarding.navigation.onBoarding
 import kotlinx.coroutines.flow.first
@@ -38,12 +38,7 @@ fun MwenyejiNavGraph(navController: NavHostController) {
             mainGraph(navController)
 
             onBoarding(
-                navController,
-                onFinishOnBoarding = {
-                    navController.navigate(Main) {
-                        popUpTo<OnBoarding> { inclusive = true }
-                    }
-                }
+                navController
             )
         }
     }
@@ -56,7 +51,10 @@ fun NavGraphBuilder.mainGraph(
         startDestination = BottomScreenRoutes.Home
     ) {
         composable<BottomScreenRoutes.Home> {
-            FeedScreen()
+            FeedScreen(
+                onNavigateToRouteDetail = {},
+                onNavigateToSeeAll = {},
+            )
         }
 
         composable<BottomScreenRoutes.Contribute> {
@@ -68,3 +66,8 @@ fun NavGraphBuilder.mainGraph(
 
 @Serializable
 data object Main
+
+
+fun NavHostController.navigateToManin() {
+    navigate(Main)
+}

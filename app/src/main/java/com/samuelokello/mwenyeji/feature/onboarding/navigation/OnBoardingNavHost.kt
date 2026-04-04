@@ -1,9 +1,11 @@
 package com.samuelokello.mwenyeji.feature.onboarding.navigation
 
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.samuelokello.mwenyeji.feature.onboarding.OnBoardingScreen
+import com.samuelokello.mwenyeji.navigation.Main
 import kotlinx.serialization.Serializable
 
 
@@ -12,11 +14,14 @@ data object OnBoarding
 
 fun NavGraphBuilder.onBoarding(
     navController: NavHostController,
-    onFinishOnBoarding: () -> Unit
 ) {
     composable <OnBoarding>{
         OnBoardingScreen(
-            onFinish = onFinishOnBoarding
+            onFinish = {navController.navigate(Main)}
         )
     }
+}
+
+fun NavController.navigateToOnboarding() {
+    navigate(OnBoarding)
 }
