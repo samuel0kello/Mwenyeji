@@ -30,6 +30,12 @@ class OnboardingViewModel(
 
     val pages = listOf(
         Page(
+            title = R.string.move_like_a_local,
+            description = R.string.real_advice_from_people_who_actually_know_nairobi_streets,
+            drawable = R.drawable.ic_launcher_foreground,
+            btnText = "continue"
+        ),
+        Page(
             title = R.string.context_maters,
             description = R.string.morning_evening_rush_hour_locals_move_differently,
             drawable = R.drawable.ic_launcher_foreground,
@@ -57,7 +63,7 @@ class OnboardingViewModel(
 
     fun onFinish() {
         viewModelScope.launch {
-            pref.setOnBoardingComplete(true)
+//            pref.setOnBoardingComplete(true)
             _navigationEvent.send(OnboardingNavigationEvent.NavigateToHome)
         }
     }
