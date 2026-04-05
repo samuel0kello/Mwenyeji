@@ -12,7 +12,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.samuelokello.mwenyeji.datasources.preference.MwenyejiPrefs
-import com.samuelokello.mwenyeji.feature.feed.FeedScreen
+import com.samuelokello.mwenyeji.feature.feed.navigation.FeedsGraph
+import com.samuelokello.mwenyeji.feature.feed.navigation.feedsNavGraph
 import com.samuelokello.mwenyeji.feature.onboarding.navigation.OnBoarding
 import com.samuelokello.mwenyeji.feature.onboarding.navigation.onBoarding
 import kotlinx.coroutines.flow.first
@@ -48,14 +49,9 @@ fun NavGraphBuilder.mainGraph(
     navController: NavHostController
 ) {
     navigation<Main>(
-        startDestination = BottomScreenRoutes.Home
+        startDestination = FeedsGraph
     ) {
-        composable<BottomScreenRoutes.Home> {
-            FeedScreen(
-                onNavigateToRouteDetail = {},
-                onNavigateToSeeAll = {},
-            )
-        }
+        feedsNavGraph(navController)
 
         composable<BottomScreenRoutes.Contribute> {
 
