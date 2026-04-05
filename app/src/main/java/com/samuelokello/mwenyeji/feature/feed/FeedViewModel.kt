@@ -128,6 +128,7 @@ fun mockRoutes() = listOf(
         tags = setOf(RouteTag.FAST),
         confirmedCount = 47,
         lastConfirmedAt = System.currentTimeMillis() - 7_200_000L,
+        warnings = "Do not use this route from 5-4pm"
     ),
     Route(
         id = "2",
@@ -136,6 +137,7 @@ fun mockRoutes() = listOf(
         via = "via Ngara shortcut",
         fareKsh = 40.0,
         bestTimeOfDay = TimeOfDay.MIDDAY,
+        timingReason = "Morning (7-9) before highway gets packed",
         steps = listOf(
             RouteStep(1, "Less known route through Ngara. Cheaper but needs one connection. Works great midday."),
         ),

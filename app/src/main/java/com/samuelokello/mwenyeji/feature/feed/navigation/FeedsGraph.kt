@@ -30,8 +30,7 @@ fun NavGraphBuilder.feedsNavGraph(navController: NavHostController) {
     ) {
         composable<FeedsRoute> {
             FeedScreen(
-                onNavigateToRouteDetail = { routeId ->
-                },
+                onNavigateToRouteDetail = { routeId -> navController.navigateTofeedRoute(routeId) },
                 onNavigateToSeeAll = {
                 },
             )
@@ -52,4 +51,8 @@ fun NavGraphBuilder.feedsNavGraph(navController: NavHostController) {
 
 fun NavController.navigateToFeeds() {
     navigate(FeedsGraph)
+}
+
+fun NavController.navigateTofeedRoute(routeId: String) {
+    navigate(RouteDetailsRoute(routeId))
 }

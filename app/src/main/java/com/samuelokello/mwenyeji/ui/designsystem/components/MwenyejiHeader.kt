@@ -17,6 +17,7 @@ import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -27,9 +28,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.dp
-import androidx.compose.material3.Text
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiAppTheme
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 
@@ -273,16 +273,23 @@ fun MwenyejiRouteBar(
     modifier: Modifier = Modifier,
     actions: List<AppBarAction> = emptyList(),
     backgroundColor: Color = MwenyejiTheme.colorScheme.surface,
+    bottomPadding: androidx.compose.ui.unit.Dp = 12.dp,
+    content: @Composable () -> Unit = {},
     showDivider: Boolean = true,
 ) {
     val colors = MwenyejiTheme.colorScheme
 
-    Column(modifier = modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(backgroundColor),
+        verticalArrangement = Arrangement.spacedBy(0.dp),
+    ) {
         TopAppBar(
             title = {
                 Column(
                     modifier = Modifier.padding(end = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
@@ -325,6 +332,14 @@ fun MwenyejiRouteBar(
                 actionIconContentColor     = colors.onSurface,
             ),
         )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, bottom = bottomPadding),
+        ) {
+            content()
+        }
 
         if (showDivider) {
             HorizontalDivider(color = colors.border, thickness = 1.dp)
