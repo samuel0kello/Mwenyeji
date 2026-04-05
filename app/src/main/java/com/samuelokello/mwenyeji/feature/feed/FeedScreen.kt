@@ -316,7 +316,7 @@ fun TimeOfDayChipGroup(
                 title = option,
                 selected = option == selectedOption,
                 onSelected = onOptionSelected,
-                modifier = Modifier.weight(1f),    // equal-width chips in a row
+                modifier = Modifier.weight(1f),
             )
         }
     }
