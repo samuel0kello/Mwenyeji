@@ -31,30 +31,37 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
+import com.samuelokello.mwenyeji.feature.feed.navigation.FeedsGraph
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 
 @Composable
-fun BottomNavigationBar(navController: NavHostController) {
-    val homeItem = BottomBarScreen.Home
-    val contributeItem = BottomBarScreen.Contribute
-
-    val screens = listOf(
-        homeItem,
-        contributeItem
-    )
+fun BottomNavigationBar(
+    navController: NavHostController,
+    navBackStackEntry: NavBackStackEntry?,
+) {
+    val screens = listOf(BottomBarScreen.Home, BottomBarScreen.Contribute)
+    val currentDestination = navBackStackEntry?.destination  // ← use the passed entry
 
     AppBottomNavigationBar(
-        show = navController.shouldShowBottomBar()
+        show = currentDestination?.hierarchy?.any { dest ->
+            dest.hasRoute<FeedsGraph>() ||
+                    dest.hasRoute<BottomScreenRoutes.Contribute>()
+        } ?: false
     ) {
         screens.forEach { item ->
-            val currentDestination = navController.currentBackStackEntry?.destination
-            val isSelected = when(item.route){
-                BottomScreenRoutes.Contribute -> currentDestination.isRoute<BottomScreenRoutes.Contribute>()
-                BottomScreenRoutes.Home -> currentDestination.isRoute<BottomScreenRoutes.Home>()
+            val isSelected = when (item.route) {
+                BottomScreenRoutes.Home -> currentDestination?.hierarchy?.any {
+                    it.hasRoute<FeedsGraph>()
+                } ?: false
+
+                BottomScreenRoutes.Contribute -> currentDestination?.hierarchy?.any {
+                    it.hasRoute<BottomScreenRoutes.Contribute>()
+                } ?: false
             }
 
             AppBottomNavigationBarItem(
@@ -68,10 +75,6 @@ fun BottomNavigationBar(navController: NavHostController) {
     }
 }
 
-inline fun <reified T : Any> NavDestination?.isRoute(): Boolean {
-    return this?.hasRoute<T>() == true
-}
-
 @Composable
 fun AppBottomNavigationBar(
     modifier: Modifier = Modifier,
@@ -83,15 +86,19 @@ fun AppBottomNavigationBar(
         contentColor = MwenyejiTheme.colorScheme.onBackground,
         modifier = modifier.windowInsetsPadding(BottomAppBarDefaults.windowInsets),
     ) {
-        if(show) {
+        if (show) {
             Column {
                 HorizontalDivider(
-                    modifier = Modifier.fillMaxWidth().height(1.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp),
                     color = MwenyejiTheme.colorScheme.outline.copy(alpha = 0.2f),
                 )
-
                 Row(
-                    modifier = Modifier.fillMaxWidth().height(65.dp).selectableGroup(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(65.dp)
+                        .selectableGroup(),
                     verticalAlignment = Alignment.CenterVertically,
                     content = content,
                 )
@@ -109,7 +116,6 @@ fun RowScope.AppBottomNavigationBarItem(
     onClick: () -> Unit,
     selected: Boolean,
 ) {
-
     val rotation by animateFloatAsState(
         targetValue = if (selected) 180f else 0f,
         animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
@@ -128,12 +134,10 @@ fun RowScope.AppBottomNavigationBarItem(
     val iconRotation = if (isShowingSelected) rotation - 180f else rotation
 
     Column(
-        modifier =
-            modifier.fillMaxHeight()
-                .weight(1f)
-                .clickable(
-                    onClick = onClick,
-                ),
+        modifier = modifier
+            .fillMaxHeight()
+            .weight(1f)
+            .clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -147,26 +151,19 @@ fun RowScope.AppBottomNavigationBarItem(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = (if (isShowingSelected) selectedIcon else icon),
+                imageVector = if (isShowingSelected) selectedIcon else icon,
                 contentDescription = null,
                 tint = color,
                 modifier = Modifier
                     .size(24.dp)
-                    .graphicsLayer {
-                        rotationY = iconRotation
-                    },
+                    .graphicsLayer { rotationY = iconRotation },
             )
         }
         Spacer(Modifier.height(4.dp))
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            fontWeight =
-                if (selected) {
-                    FontWeight.SemiBold
-                } else {
-                    FontWeight.Medium
-                },
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
             color = color,
         )
     }
@@ -176,11 +173,14 @@ private fun navigateBottomBar(
     navController: NavController,
     destination: BottomScreenRoutes,
 ) {
-    navController.navigate(destination) {
-        navController.graph.startDestinationRoute?.let { route ->
-            popUpTo<BottomScreenRoutes.Home> {
-                saveState = true
-            }
+    val target: Any = when (destination) {
+        BottomScreenRoutes.Home -> FeedsGraph
+        BottomScreenRoutes.Contribute -> BottomScreenRoutes.Contribute
+    }
+
+    navController.navigate(target) {
+        popUpTo<Main> {
+            saveState = true
         }
         launchSingleTop = true
         restoreState = true
