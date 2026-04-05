@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.samuelokello.mwenyeji.feature.feed.FeedScreen
+import com.samuelokello.mwenyeji.feature.feed.route.AllRoutes
 import com.samuelokello.mwenyeji.feature.feed.route.RouteDetailsScreen
 import com.samuelokello.mwenyeji.navigation.navigateBack
 import kotlinx.serialization.Serializable
@@ -30,9 +31,8 @@ fun NavGraphBuilder.feedsNavGraph(navController: NavHostController) {
     ) {
         composable<FeedsRoute> {
             FeedScreen(
-                onNavigateToRouteDetail = { routeId -> navController.navigateTofeedRoute(routeId) },
-                onNavigateToSeeAll = {
-                },
+                onNavigateToRouteDetail = { routeId -> navController.navigateToRouteDetails(routeId) },
+                onNavigateToSeeAll = { navController.navigateToAllRoutes()},
             )
         }
         composable<RouteDetailsRoute> { backStackEntry ->
@@ -44,7 +44,10 @@ fun NavGraphBuilder.feedsNavGraph(navController: NavHostController) {
         }
 
         composable<SeeAllRoutesRoute> {
-
+            AllRoutes(
+                onNavigateToRouteDetail = { navController.navigateToRouteDetails(it)},
+                onNavigateBack = { navController.navigateBack()}
+            )
         }
     }
 }
@@ -53,6 +56,10 @@ fun NavController.navigateToFeeds() {
     navigate(FeedsGraph)
 }
 
-fun NavController.navigateTofeedRoute(routeId: String) {
+fun NavController.navigateToRouteDetails(routeId: String) {
     navigate(RouteDetailsRoute(routeId))
+}
+
+fun NavController.navigateToAllRoutes() {
+    navigate(SeeAllRoutesRoute)
 }

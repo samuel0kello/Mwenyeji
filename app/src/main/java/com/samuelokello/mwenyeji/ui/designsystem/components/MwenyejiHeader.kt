@@ -468,10 +468,8 @@ private fun AppBarIconButton(
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Previews
-// ─────────────────────────────────────────────────────────────────────────────
 
+// Previews
 @Preview(showBackground = true, backgroundColor = 0xFF0E1210)
 @Composable
 private fun TopBarPreview() {
