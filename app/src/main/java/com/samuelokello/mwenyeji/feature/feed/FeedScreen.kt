@@ -32,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.samuelokello.mwenyeji.data.models.TimeOfDay
 import com.samuelokello.mwenyeji.feature.feed.components.RouteCard
 import com.samuelokello.mwenyeji.ui.designsystem.components.MwenyejiLargeHeaderBar
@@ -232,9 +231,6 @@ internal fun FeedScreenContent(
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Preview
-// ─────────────────────────────────────────────────────────────────────────────
 
 @Preview(showBackground = true, backgroundColor = 0xFF0E1210)
 @Composable
