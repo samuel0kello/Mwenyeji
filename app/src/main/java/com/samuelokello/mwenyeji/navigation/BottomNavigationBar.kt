@@ -31,28 +31,27 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.samuelokello.mwenyeji.feature.feed.navigation.FeedsGraph
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 
 @Composable
 fun BottomNavigationBar(
     navController: NavHostController,
-    navBackStackEntry: NavBackStackEntry?,
 ) {
-    val screens = listOf(BottomBarScreen.Home, BottomBarScreen.Contribute)
-    val currentDestination = navBackStackEntry?.destination  // ← use the passed entry
+    // Observe back stack as state so recomposition fires on every navigation event
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
 
-    AppBottomNavigationBar(
-        show = currentDestination?.hierarchy?.any { dest ->
-            dest.hasRoute<FeedsGraph>() ||
-                    dest.hasRoute<BottomScreenRoutes.Contribute>()
-        } ?: false
-    ) {
+    val screens = listOf(BottomBarScreen.Home, BottomBarScreen.Contribute)
+
+    val show = navController.shouldShowBottomBar()
+
+    AppBottomNavigationBar(show = show) {
         screens.forEach { item ->
             val isSelected = when (item.route) {
                 BottomScreenRoutes.Home -> currentDestination?.hierarchy?.any {
@@ -68,8 +67,8 @@ fun BottomNavigationBar(
                 icon = item.defaultIcon,
                 selectedIcon = item.selectedIcon,
                 label = item.title,
+                selected = isSelected,
                 onClick = { navigateBottomBar(navController, item.route) },
-                selected = isSelected
             )
         }
     }
@@ -79,20 +78,19 @@ fun BottomNavigationBar(
 fun AppBottomNavigationBar(
     modifier: Modifier = Modifier,
     show: Boolean,
-    content: @Composable (RowScope.() -> Unit),
+    content: @Composable RowScope.() -> Unit,
 ) {
     Surface(
-        color = MwenyejiTheme.colorScheme.background,
-        contentColor = MwenyejiTheme.colorScheme.onBackground,
+        color = MwenyejiTheme.colorScheme.surface,
+        contentColor = MwenyejiTheme.colorScheme.onSurface,
         modifier = modifier.windowInsetsPadding(BottomAppBarDefaults.windowInsets),
     ) {
         if (show) {
             Column {
                 HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp),
-                    color = MwenyejiTheme.colorScheme.outline.copy(alpha = 0.2f),
+                    modifier = Modifier.fillMaxWidth(),
+                    thickness = 1.dp,
+                    color = MwenyejiTheme.colorScheme.border,
                 )
                 Row(
                     modifier = Modifier
@@ -113,21 +111,18 @@ fun RowScope.AppBottomNavigationBarItem(
     icon: ImageVector,
     selectedIcon: ImageVector,
     label: String,
-    onClick: () -> Unit,
     selected: Boolean,
+    onClick: () -> Unit,
 ) {
     val rotation by animateFloatAsState(
         targetValue = if (selected) 180f else 0f,
         animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
-        label = "iconRotation"
+        label = "iconRotation",
     )
-
     val color by animateColorAsState(
-        targetValue = if (selected) {
-            MwenyejiTheme.colorScheme.primary
-        } else {
-            MwenyejiTheme.colorScheme.outline
-        }
+        targetValue = if (selected) MwenyejiTheme.colorScheme.primary
+        else MwenyejiTheme.colorScheme.outline,
+        label = "itemColor",
     )
 
     val isShowingSelected = rotation > 90f
@@ -148,11 +143,11 @@ fun RowScope.AppBottomNavigationBarItem(
                     rotationY = rotation
                     cameraDistance = 8 * density
                 },
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = if (isShowingSelected) selectedIcon else icon,
-                contentDescription = null,
+                contentDescription = label,
                 tint = color,
                 modifier = Modifier
                     .size(24.dp)
@@ -177,11 +172,8 @@ private fun navigateBottomBar(
         BottomScreenRoutes.Home -> FeedsGraph
         BottomScreenRoutes.Contribute -> BottomScreenRoutes.Contribute
     }
-
     navController.navigate(target) {
-        popUpTo<Main> {
-            saveState = true
-        }
+        popUpTo<Main> { saveState = true }
         launchSingleTop = true
         restoreState = true
     }
