@@ -197,10 +197,10 @@ private fun ConfidenceDot(
  * Small pill chip for route tags and fare.
  *
  * @param isPrimary When true uses a green-tinted surface matching
- *                  the "fast" / "Cheap" chips in the screenshot.
+ *                  the "fast" / "Cheap" chips
  */
 @Composable
-private fun RouteTagChip(
+internal fun RouteTagChip(
     label: String,
     modifier: Modifier = Modifier,
     isPrimary: Boolean = false,
