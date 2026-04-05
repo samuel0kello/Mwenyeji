@@ -93,7 +93,7 @@ data class Route(
     val lastConfirmedAt: Long? = null,
     val createdAt: Long = System.currentTimeMillis(),
 ) {
-    // ── Derived helpers ───────────────────────────────────────────────────────
+    // Derived helpers
 
     /** Display title shown on route cards e.g. "CBD → Westlands". */
     val title: String get() = "$from → $to"
