@@ -22,12 +22,6 @@ sealed class BottomBarScreen(
         defaultIcon = Icons.Outlined.LocationOn,
         selectedIcon = Icons.Default.LocationOn
     )
-    data object Contribute : BottomBarScreen(
-        route = BottomScreenRoutes.Contribute,
-        title = "Contribute",
-        defaultIcon = Icons.Outlined.AddCircle,
-        selectedIcon = Icons.Default.AddCircle
-    )
 }
 
 @Serializable

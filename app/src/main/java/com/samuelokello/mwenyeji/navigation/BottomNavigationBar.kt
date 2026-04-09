@@ -4,34 +4,24 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.material3.BottomAppBarDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
@@ -42,33 +32,39 @@ import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 @Composable
 fun BottomNavigationBar(
     navController: NavHostController,
+    onContributeTapped: () -> Unit,
+    isContributeSheetOpen: Boolean = false,
 ) {
-    // Observe back stack as state so recomposition fires on every navigation event
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-
-    val screens = listOf(BottomBarScreen.Home, BottomBarScreen.Contribute)
-
     val show = navController.shouldShowBottomBar()
 
-    AppBottomNavigationBar(show = show) {
-        screens.forEach { item ->
-            val isSelected = when (item.route) {
-                BottomScreenRoutes.Home -> currentDestination?.hierarchy?.any {
-                    it.hasRoute<FeedsGraph>()
-                } ?: false
+    // Only Home is a real nav item now
+    val screens = listOf(BottomBarScreen.Home)
 
-                BottomScreenRoutes.Contribute -> currentDestination?.hierarchy?.any {
-                    it.hasRoute<BottomScreenRoutes.Contribute>()
-                } ?: false
-            }
+    AppBottomNavigationBar(
+        show = show,
+        onContributeTapped = onContributeTapped,
+        isContributeSheetOpen = isContributeSheetOpen,
+    ) {
+        // Left side: Home item
+        screens.forEach { item ->
+            val isSelected = currentDestination?.hierarchy?.any {
+                it.hasRoute<FeedsGraph>()
+            } ?: false
 
             AppBottomNavigationBarItem(
                 icon = item.defaultIcon,
                 selectedIcon = item.selectedIcon,
                 label = item.title,
                 selected = isSelected,
-                onClick = { navigateBottomBar(navController, item.route) },
+                onClick = {
+                    navController.navigate(FeedsGraph) {
+                        popUpTo<Main> { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
             )
         }
     }
@@ -78,6 +74,8 @@ fun BottomNavigationBar(
 fun AppBottomNavigationBar(
     modifier: Modifier = Modifier,
     show: Boolean,
+    onContributeTapped: () -> Unit,
+    isContributeSheetOpen: Boolean,
     content: @Composable RowScope.() -> Unit,
 ) {
     Surface(
@@ -92,16 +90,78 @@ fun AppBottomNavigationBar(
                     thickness = 1.dp,
                     color = MwenyejiTheme.colorScheme.border,
                 )
-                Row(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(65.dp)
-                        .selectableGroup(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    content = content,
-                )
+                        .height(65.dp),
+                ) {
+                    // Regular nav items in a row
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .selectableGroup(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        // Left half for nav items
+                        Row(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            content = content,
+                        )
+                        // Right half is empty — FAB sits over it
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+
+                    // FAB floats in the center-right of the bar
+                    ContributeFab(
+                        isOpen = isContributeSheetOpen,
+                        onClick = onContributeTapped,
+                        modifier = Modifier.align(Alignment.CenterEnd).padding(end = 40.dp),
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun ContributeFab(
+    isOpen: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val rotation by animateFloatAsState(
+        targetValue = if (isOpen) 45f else 0f,
+        animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+        label = "fabRotation",
+    )
+
+    Box(
+        modifier = modifier
+            .size(48.dp)
+            // Lifts the FAB above the bar visually
+            .offset(y = (-10).dp)
+            .shadow(
+                elevation = 6.dp,
+                shape = RoundedCornerShape(14.dp),
+                ambientColor = MwenyejiTheme.colorScheme.primary,
+                spotColor = MwenyejiTheme.colorScheme.primary,
+            )
+            .clip(RoundedCornerShape(14.dp))
+            .background(MwenyejiTheme.colorScheme.primary)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = if (isOpen) "Close contribute sheet" else "Contribute a guide",
+            tint = MwenyejiTheme.colorScheme.onPrimary,
+            modifier = Modifier
+                .size(24.dp)
+                .graphicsLayer { rotationZ = rotation },
+        )
     }
 }
 
@@ -124,7 +184,6 @@ fun RowScope.AppBottomNavigationBarItem(
         else MwenyejiTheme.colorScheme.outline,
         label = "itemColor",
     )
-
     val isShowingSelected = rotation > 90f
     val iconRotation = if (isShowingSelected) rotation - 180f else rotation
 
@@ -161,20 +220,5 @@ fun RowScope.AppBottomNavigationBarItem(
             fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
             color = color,
         )
-    }
-}
-
-private fun navigateBottomBar(
-    navController: NavController,
-    destination: BottomScreenRoutes,
-) {
-    val target: Any = when (destination) {
-        BottomScreenRoutes.Home -> FeedsGraph
-        BottomScreenRoutes.Contribute -> BottomScreenRoutes.Contribute
-    }
-    navController.navigate(target) {
-        popUpTo<Main> { saveState = true }
-        launchSingleTop = true
-        restoreState = true
     }
 }

@@ -51,8 +51,8 @@ fun MwenyejiInputField(
             unfocusedContainerColor = MwenyejiTheme.colorScheme.surfaceContainer,
 
             // 2. Text Colors
-            focusedTextColor = Color.Green,
-            unfocusedTextColor = Color.White.copy(alpha = 0.8f),
+            focusedTextColor = MwenyejiTheme.colorScheme.onSurfaceVariant,
+            unfocusedTextColor = MwenyejiTheme.colorScheme.onSurface,
 
             // 3. Border Colors (Making them transparent to look like "Filled" cards)
             focusedBorderColor = Color.Transparent,

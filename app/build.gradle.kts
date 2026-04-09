@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.koin.compose.viewmodel)
 
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.composable.core)
 
     implementation(libs.material)
 }
