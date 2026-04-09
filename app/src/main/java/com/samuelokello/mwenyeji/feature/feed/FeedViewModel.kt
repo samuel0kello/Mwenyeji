@@ -27,7 +27,6 @@ class FeedViewModel : ViewModel() {
         loadRoutes()
     }
 
-    // Intent handler
 
     fun onIntent(intent: FeedIntent) {
         when (intent) {
@@ -39,7 +38,6 @@ class FeedViewModel : ViewModel() {
         }
     }
 
-    // Private handlers
 
     private fun loadRoutes() {
         viewModelScope.launch {

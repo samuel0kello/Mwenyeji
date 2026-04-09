@@ -9,7 +9,6 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.samuelokello.mwenyeji.datasources.preference.MwenyejiPrefs
 import com.samuelokello.mwenyeji.feature.feed.navigation.FeedsGraph
@@ -22,7 +21,6 @@ import org.koin.compose.koinInject
 
 @Composable
 fun MwenyejiNavGraph(navController: NavHostController) {
-
     val prefs: MwenyejiPrefs = koinInject()
     var startDestination by remember { mutableStateOf<Any?>(null) }
 
@@ -34,36 +32,24 @@ fun MwenyejiNavGraph(navController: NavHostController) {
     startDestination?.let { destination ->
         NavHost(
             navController = navController,
-            startDestination = destination
+            startDestination = destination,
         ) {
             mainGraph(navController)
-
-            onBoarding(
-                navController
-            )
+            onBoarding(navController)
         }
     }
 }
 
-fun NavGraphBuilder.mainGraph(
-    navController: NavHostController
-) {
-    navigation<Main>(
-        startDestination = FeedsGraph
-    ) {
+fun NavGraphBuilder.mainGraph(navController: NavHostController) {
+    navigation<Main>(startDestination = FeedsGraph) {
         feedsNavGraph(navController)
-
-        composable<BottomScreenRoutes.Contribute> {
-
-        }
+        // ← contributeNavGraph removed — sheet is shown from App.kt
     }
 }
-
 
 @Serializable
 data object Main
 
-
-fun NavHostController.navigateToManin() {
+fun NavHostController.navigateToMain() {
     navigate(Main)
 }
