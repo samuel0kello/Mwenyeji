@@ -10,11 +10,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.samuelokello.mwenyeji.feature.contribute.step.InstructionsStepScreen
 import com.samuelokello.mwenyeji.feature.contribute.step.RouteStepScreen
 import com.samuelokello.mwenyeji.feature.contribute.step.TimingStepScreen
 import com.samuelokello.mwenyeji.feature.contribute.step.WarningsStepScreen
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * Parent screen for the 4-step guide contribution flow.
@@ -32,7 +32,7 @@ fun ContributeScreen(
     onNavigateBack: () -> Unit,
     onNavigateToSuccess: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ContributeViewModel = viewModel(),
+    viewModel: ContributeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 

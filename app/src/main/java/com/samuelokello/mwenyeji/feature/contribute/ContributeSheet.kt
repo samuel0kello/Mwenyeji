@@ -33,7 +33,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.composables.core.DragIndication
 import com.composables.core.ModalBottomSheet
 import com.composables.core.Scrim
@@ -47,6 +46,7 @@ import com.samuelokello.mwenyeji.feature.contribute.step.TimingStepScreen
 import com.samuelokello.mwenyeji.feature.contribute.step.WarningsStepScreen
 import com.samuelokello.mwenyeji.ui.designsystem.components.button.MwenyejiButton
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ContributeSheet(
@@ -54,17 +54,17 @@ fun ContributeSheet(
     onDismiss: () -> Unit,
     onNavigateToSuccess: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ContributeViewModel = viewModel(),
+    viewModel: ContributeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val colors = MwenyejiTheme.colorScheme
 
-    // ✅ Always start Hidden — we animate to FullyExpanded reactively
+    // Always start Hidden — we animate to FullyExpanded reactively
     val sheetState = rememberModalBottomSheetState(
         initialDetent = Hidden,
     )
 
-    // ✅ Drive the sheet purely from `visible` — no LaunchedEffect needed
+    // Drive the sheet purely from `visible` — no LaunchedEffect needed
     sheetState.currentDetent = if (visible) FullyExpanded else Hidden
 
     LaunchedEffect(Unit) {

@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,7 +18,6 @@ import com.samuelokello.mwenyeji.data.models.TimeOfDay
 import com.samuelokello.mwenyeji.feature.contribute.ContributeActions
 import com.samuelokello.mwenyeji.feature.contribute.ContributeState
 import com.samuelokello.mwenyeji.feature.feed.TimeOfDayChip
-import com.samuelokello.mwenyeji.ui.designsystem.components.inputFields.MwenyejiInputField
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -73,57 +70,13 @@ fun TimingStepScreen(
         // WHY? field — correctly binds to timingReason, not from
         StepInputField(
             label = "WHY? (OPTIONAL)",
-            value = state.timingReason,                           // ← was state.from
+            value = state.timingReason,
             placeholder = "e.g., Highway is clear, fewer matatus...",
             onValueChange = { onAction(ContributeActions.TimingReasonChanged(it)) }, // ← was FromChanged
         )
     }
 }
 
-
-@Composable
-fun InputField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    placeholder: String = "",
-    errorMessage: String? = null,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    keyboardActions: KeyboardActions = KeyboardActions.Default,
-) {
-    val colors = MwenyejiTheme.colorScheme
-    val typography = MwenyejiTheme.typography
-
-    Column(
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        androidx.compose.material3.Text(
-            text = label,
-            style = typography.titleMedium,
-            color = colors.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(8.dp))
-        MwenyejiInputField(
-            value = value,
-            onValueChange = onValueChange,
-            placeholder = { androidx.compose.material3.Text(text = placeholder) },
-            isError = errorMessage != null,
-            keyboardOptions = keyboardOptions,
-            keyboardActions = keyboardActions,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        // Validation error
-        if (errorMessage != null) {
-            Spacer(Modifier.height(4.dp))
-            androidx.compose.material3.Text(
-                text = errorMessage,
-                style = typography.labelSmall,
-                color = colors.error,
-            )
-        }
-    }
-}
 
 @Preview(showBackground = true)
 @Composable

@@ -11,24 +11,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewModelScope
-import com.samuelokello.mwenyeji.data.models.Route
 import com.samuelokello.mwenyeji.feature.feed.components.RouteCard
 import com.samuelokello.mwenyeji.ui.designsystem.components.MwenyejiTopBar
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 
 @Composable
 fun AllRoutes(
-    viewmodel: AllRoutesViewmodel = koinViewModel(),
+    viewmodel: AllRoutesViewModel = koinViewModel(),
     onNavigateToRouteDetail: (id: String) -> Unit,
     onNavigateBack: () -> Unit
 ) {

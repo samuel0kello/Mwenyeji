@@ -33,7 +33,6 @@ fun WarningsStepScreen(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
-        // ── Warnings textarea ─────────────────────────────────────────────────
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = "WARNINGS",
@@ -58,7 +57,6 @@ fun WarningsStepScreen(
             )
         }
 
-        // ── Tags multi-select ─────────────────────────────────────────────────
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = "TAGS (SELECT ALL THAT APPLY)",
