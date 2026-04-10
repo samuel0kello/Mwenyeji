@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "788424238904",
+    "project_id": "mwenyeji-d7ad3",
+    "storage_bucket": "mwenyeji-d7ad3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:788424238904:android:8b3e78003a0acce00203cd",
+        "android_client_info": {
+          "package_name": "com.samuelokello.mwenyeji"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUe4veHTT7tAAy3QadAAY_TRPZIQcFD7U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
