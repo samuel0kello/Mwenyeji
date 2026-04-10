@@ -239,7 +239,7 @@ private fun FeedScreenContentPreview() {
         FeedScreenContent(
             state = FeedState(
                 selectedTimeOfDay = TimeOfDay.MORNING_RUSH,
-                filteredRoutes = mockRoutes(),
+                filteredRoutes = emptyList(),
             ),
             onIntent = {},
         )
