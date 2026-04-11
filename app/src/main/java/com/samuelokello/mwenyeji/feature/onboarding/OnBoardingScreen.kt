@@ -1,74 +1,71 @@
 package com.samuelokello.mwenyeji.feature.onboarding
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.samuelokello.mwenyeji.feature.onboarding.steps.Screen1KnowNairobi
+import com.samuelokello.mwenyeji.feature.onboarding.steps.Screen2FindRoute
+import com.samuelokello.mwenyeji.feature.onboarding.steps.Screen3ShareKnowledge
+import com.samuelokello.mwenyeji.feature.onboarding.steps.Screen4Community
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
-import org.koin.compose.viewmodel.koinViewModel
-
+import kotlinx.coroutines.launch
 
 @Composable
-fun OnBoardingScreen(
-    onFinish: () -> Unit,
-    viewModel: OnboardingViewModel = koinViewModel()
-) {
-    val currentPage by viewModel.currentPage.collectAsStateWithLifecycle()
+fun OnboardingScreen(onFinish: () -> Unit) {
+    val pagerState = rememberPagerState(pageCount = { 4 })
+    val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
-        viewModel.navigationEvent.collect { event ->
-            when (event) {
-                is OnboardingNavigationEvent.NavigateToHome -> onFinish()
+    fun next() {
+        scope.launch {
+            if (pagerState.currentPage < 3) {
+                pagerState.animateScrollToPage(pagerState.currentPage + 1)
+            } else {
+                onFinish()
             }
         }
     }
 
-    OnBoardingContent(
-        pages = viewModel.pages,
-        currentPage = currentPage,
-        onNextPage = viewModel::onNextPage,
-        onFinish = viewModel::onFinish
-    )
-}
-
-
-@Composable
-fun OnBoardingContent(
-    pages: List<Page>,
-    currentPage: Int,
-    onNextPage: () -> Unit,
-    onFinish: () -> Unit
-) {
     Scaffold(
-        containerColor = MwenyejiTheme.colorScheme.background
-    ) { innerPadding ->
-        Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .navigationBarsPadding()
+            .background(MwenyejiTheme.colorScheme.surfaceContainer),
+    ) { paddingValues ->
+        HorizontalPager(
+            state = pagerState,
             modifier = Modifier
-                .padding(innerPadding)
-                .safeContentPadding()
                 .fillMaxSize()
-        ) {
-            key(currentPage) {
-                val page = pages[currentPage]
-                OnboardingPage(
-                    title = stringResource(page.title),
-                    description = stringResource(page.description),
-                    imageRes = page.drawable,
-                    buttonText = page.btnText,
-                    currentPage = currentPage,
-                    totalPages = pages.size,
-                    onButtonClick = {
-                        if (currentPage < pages.lastIndex) onNextPage()
-                        else onFinish()
-                    }
+                .padding(paddingValues),
+        ) { page ->
+            when (page) {
+                0 -> Screen1KnowNairobi(
+                    currentPage = pagerState.currentPage,
+                    onNext = ::next,
+                    onSkip = onFinish,
+                )
+
+                1 -> Screen2FindRoute(
+                    currentPage = pagerState.currentPage,
+                    onNext = ::next,
+                    onSkip = onFinish,
+                )
+
+                2 -> Screen3ShareKnowledge(
+                    currentPage = pagerState.currentPage,
+                    onNext = ::next,
+                    onSkip = onFinish,
+                )
+
+                3 -> Screen4Community(
+                    currentPage = pagerState.currentPage,
+                    onFinish = onFinish,
                 )
             }
         }
