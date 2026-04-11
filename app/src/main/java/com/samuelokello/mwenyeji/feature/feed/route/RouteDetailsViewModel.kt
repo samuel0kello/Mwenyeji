@@ -49,7 +49,21 @@ class RouteDetailsViewModel(
                 }
                 .collect { route ->
                     _state.update { it.copy(isLoading = false, route = route) }
+                    // Load user's existing verdict once route is loaded
+                    loadUserVerdict(routeId)
                 }
+        }
+    }
+
+    private fun loadUserVerdict(routeId: String) {
+        val userId = authRepository.currentUserId ?: return
+        viewModelScope.launch {
+            val firestoreVerdict = routeRepository.getUserVerdict(routeId, userId)
+            // Map the Firestore string back to the enum
+            val verdict = RouteVerdict.entries.find {
+                it.firestoreValue == firestoreVerdict
+            }
+            _state.update { it.copy(selectedVerdict = verdict) }
         }
     }
 
@@ -57,25 +71,32 @@ class RouteDetailsViewModel(
         val routeId = _state.value.route?.id ?: return
         val userId = authRepository.currentUserId ?: return
 
+        // If tapping the already-selected verdict, toggle it off
+        val newVerdict = if (_state.value.selectedVerdict == verdict) null else verdict
+
         // Optimistic update
-        _state.update { it.copy(selectedVerdict = verdict) }
+        _state.update { it.copy(selectedVerdict = newVerdict) }
 
         viewModelScope.launch {
+            val firestoreVerdict = newVerdict?.firestoreValue
+                ?: _state.value.selectedVerdict?.firestoreValue
+                ?: return@launch
+
             routeRepository.confirmRoute(
                 routeId = routeId,
                 userId = userId,
-                verdict = verdict.name,
+                verdict = firestoreVerdict, // ← now passes "CONFIRMED" not "WORKS"
             ).onSuccess {
-                // Show thank you message via snackbar
-                val message = when (verdict) {
+                val message = when (newVerdict) {
                     RouteVerdict.WORKS -> "Thanks for confirming this route works! 👍"
                     RouteVerdict.DIDNT -> "Thanks for the feedback — we'll note this route had issues."
                     RouteVerdict.OUTDATED -> "Thanks! We'll flag this route as potentially outdated."
+                    null -> "Feedback removed."
                 }
                 snackbarManager.showSuccess(message)
             }.onFailure { e ->
-                // Revert on failure
-                _state.update { it.copy(selectedVerdict = null) }
+                // Revert optimistic update on failure
+                _state.update { it.copy(selectedVerdict = _state.value.selectedVerdict) }
                 snackbarManager.showError(
                     message = e.message ?: "Failed to submit feedback",
                     actionLabel = "Retry",

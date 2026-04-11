@@ -45,7 +45,11 @@ import com.samuelokello.mwenyeji.ui.designsystem.components.card.MwenyejiCard
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 import org.koin.compose.viewmodel.koinViewModel
 
-enum class RouteVerdict { WORKS, DIDNT, OUTDATED }
+enum class RouteVerdict(val firestoreValue: String) {
+    WORKS("CONFIRMED"),
+    DIDNT("DIDNT_WORK"),
+    OUTDATED("OUTDATED")
+}
 
 @Composable
 fun RouteDetailsScreen(
