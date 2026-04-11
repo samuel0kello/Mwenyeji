@@ -22,7 +22,7 @@ android {
         applicationId = "com.samuelokello.mwenyeji"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1004
+        versionCode = 1005
         versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

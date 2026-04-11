@@ -128,4 +128,29 @@ object AppColors {
     val SuccessGreen90  = Color(0xFFC8E6C9)
     val SuccessGreen95  = Color(0xFFE8F5E9)
     val SuccessGreen100 = Color(0xFFFFFFFF)
+
+
+    // Backgrounds
+    val BgPrimary = Color(0xFF090D09)
+    val BgSurface = Color(0xFF0F140F)
+    val BgSurface2 = Color(0xFF141A14)
+
+    // Borders
+    val BorderSubtle = Color(0xFF1C2E1C)
+
+    // Brand greens
+    val GreenPrimary = Color(0xFF2D6A4F)
+    val GreenLight = Color(0xFF52B788)
+    val GreenDim = Color(0xFF1A3D2B)
+
+    // Text
+    val TextPrimary = Color(0xFFEFF4EF)
+    val TextSecondary = Color(0xFF7A937A)
+    val TextTertiary = Color(0xFF3D5C3D)
+
+    // Semantic
+    val AmberWarm = Color(0xFFE9A84C)
+    val AmberDim = Color(0xFF3D2E1A)
+    val DangerRed = Color(0xFFE05C5C)
+    val DangerDim = Color(0xFF3D1A1A)
 }

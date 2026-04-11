@@ -24,6 +24,22 @@ val poppins: FontFamily = FontFamily(
     Font(R.font.poppins_black, weight = FontWeight.Black),
     Font(R.font.poppins_black_italic, weight = FontWeight.Black, style = FontStyle.Italic),
 )
+val SyneFamily = FontFamily(
+    Font(R.font.syne_extrabold, FontWeight.Normal),
+    Font(R.font.syne_bold, FontWeight.Bold),
+    Font(R.font.syne_extrabold, FontWeight.ExtraBold),
+)
+
+val DmSansFamily = FontFamily(
+    Font(R.font.dm_sans, FontWeight.Normal),
+    Font(R.font.dm_sans_medium, FontWeight.Medium),
+)
+
+val JetBrainsFamily = FontFamily(
+    Font(R.font.jetbrains_mono, FontWeight.Normal),
+    Font(R.font.jetbrains_mono_medium, FontWeight.Medium),
+)
+
 
 /**
  * Default font family - uses system default

@@ -4,7 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
-import com.samuelokello.mwenyeji.feature.onboarding.OnBoardingScreen
+import com.samuelokello.mwenyeji.feature.onboarding.OnboardingScreen
 import com.samuelokello.mwenyeji.navigation.navigateToMain
 import kotlinx.serialization.Serializable
 
@@ -16,7 +16,7 @@ fun NavGraphBuilder.onBoarding(
     navController: NavHostController,
 ) {
     composable <OnBoarding>{
-        OnBoardingScreen(
+        OnboardingScreen(
             onFinish = { navController.navigateToMain() }
         )
     }

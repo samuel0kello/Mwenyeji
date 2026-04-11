@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <array name="preloaded_fonts" translatable="false">
+        <item>@font/dm_sans</item>
+        <item>@font/dm_sans_medium</item>
+        <item>@font/jetbrains_mono</item>
+        <item>@font/jetbrains_mono_medium</item>
         <item>@font/poppins_extralight_italic</item>
         <item>@font/poppins_thin_italic</item>
         <item>@font/poppins_black</item>
@@ -18,5 +22,8 @@
         <item>@font/poppins_semibold</item>
         <item>@font/poppins_semibold_italic</item>
         <item>@font/poppins_thin</item>
+        <item>@font/syne</item>
+        <item>@font/syne_bold</item>
+        <item>@font/syne_extrabold</item>
     </array>
 </resources>
