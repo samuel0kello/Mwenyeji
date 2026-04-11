@@ -80,8 +80,8 @@ class FirebaseServiceImpl(
             if (error != null) {
                 close(error); return@addSnapshotListener
             }
-            val dtos = snapshot?.documents?.mapNotNull {
-                it.toObject(RouteDto::class.java)
+            val dtos = snapshot?.documents?.mapNotNull { doc ->
+                doc.toObject(RouteDto::class.java)?.copy(id = doc.id)
             } ?: emptyList()
             trySend(dtos)
         }
@@ -94,7 +94,8 @@ class FirebaseServiceImpl(
                 if (error != null) {
                     close(error); return@addSnapshotListener
                 }
-                trySend(snapshot?.toObject(RouteDto::class.java))
+                val dto = snapshot?.toObject(RouteDto::class.java)?.copy(id = snapshot.id)
+                trySend(dto)
             }
         awaitClose { listener.remove() }
     }

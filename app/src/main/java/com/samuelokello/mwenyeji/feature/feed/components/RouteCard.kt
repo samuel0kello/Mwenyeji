@@ -136,7 +136,7 @@ fun RouteCard(
 
             Spacer(modifier = Modifier.height(2.dp))
 
-            // ── 5. Meta row — confirmed timestamp · uses today ────────────────
+            // 5. Meta row — confirmed timestamp · uses today
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,

@@ -15,8 +15,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,6 +30,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,11 +38,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.samuelokello.mwenyeji.data.models.TimeOfDay
+import com.samuelokello.mwenyeji.feature.contribute.ContributeSheet
 import com.samuelokello.mwenyeji.feature.feed.components.RouteCard
 import com.samuelokello.mwenyeji.ui.designsystem.components.MwenyejiLargeHeaderBar
 import com.samuelokello.mwenyeji.ui.designsystem.components.card.MwenyejiCard
+import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackbarManager
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiAppTheme
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 
@@ -77,6 +85,10 @@ internal fun FeedScreenContent(
 ) {
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
+    var showContributeSheet by rememberSaveable { mutableStateOf(false) }
+    val snackbarManager: SnackbarManager = koinInject()
+
+
 
     Scaffold(
         modifier = modifier,
@@ -102,6 +114,13 @@ internal fun FeedScreenContent(
                 },
             )
         },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showContributeSheet = true }
+            ) {
+                Icon(Icons.Outlined.Add, contentDescription = "Contribute")
+            }
+        }
     ) { paddingValues ->
 
         when {
@@ -228,6 +247,15 @@ internal fun FeedScreenContent(
                 }
             }
         }
+
+        ContributeSheet(
+            visible = showContributeSheet,
+            onDismiss = { showContributeSheet = false },
+            onNavigateToSuccess = {
+                showContributeSheet = false
+                snackbarManager.showSuccess("Guide submitted! Thank you 🙌")
+            },
+        )
     }
 }
 

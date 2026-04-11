@@ -86,8 +86,8 @@ private fun MwenyejiSnackbar(
         )
 
         SnackbarMessageType.ERROR -> Triple(
-            colors.error.copy(alpha = 0.15f),
             colors.error,
+            colors.onErrorContainer,
             Icons.Outlined.ErrorOutline,
         )
 

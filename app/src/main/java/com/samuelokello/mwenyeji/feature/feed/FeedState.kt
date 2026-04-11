@@ -12,6 +12,7 @@ data class FeedState(
     val selectedTimeOfDay: TimeOfDay = TimeOfDay.MORNING_RUSH,
     val searchQuery: String = "",
     val error: String? = null,
+    val showContributeSheet: Boolean = false
 )
 
 // Intent — what the user can do
