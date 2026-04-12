@@ -1,7 +1,10 @@
 package com.samuelokello.mwenyeji
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -26,20 +29,24 @@ fun App(modifier: Modifier = Modifier) {
     MwenyejiAppTheme {
         val navHostController = rememberNavController()
 
-            Scaffold(
-                modifier = Modifier.fillMaxSize(),
-            ) { paddingValues ->
-                Box(
-                    modifier = Modifier
+        Scaffold(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .windowInsetsPadding(WindowInsets.statusBars),
+        ) { paddingValues ->
+            Box(
+                modifier =
+                    Modifier
                         .fillMaxSize()
-                ) {
-                    MwenyejiNavGraph(navController = navHostController)
+            ) {
+                MwenyejiNavGraph(navController = navHostController)
 
-                    MwenyejiSnackbarHost(
-                        manager = snackbarManager,
-                        modifier = Modifier.align(Alignment.TopCenter),
-                    )
-                }
+                MwenyejiSnackbarHost(
+                    manager = snackbarManager,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                )
             }
+        }
     }
 }
