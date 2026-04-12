@@ -61,7 +61,8 @@ internal fun StatusBarProtection(color: Color = MwenyejiTheme.colorScheme.surfac
                     with(LocalDensity.current) {
                         (WindowInsets.statusBars.getTop(this) * 1.2f).toDp()
                     },
-                ).background(
+                )
+                .background(
                     brush =
                         Brush.verticalGradient(
                             colors =
@@ -71,6 +72,6 @@ internal fun StatusBarProtection(color: Color = MwenyejiTheme.colorScheme.surfac
                                     Color.Transparent,
                                 ),
                         ),
-                ).set,
+                ),
     )
 }
