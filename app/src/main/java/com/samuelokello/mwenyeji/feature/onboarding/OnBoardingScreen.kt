@@ -16,7 +16,7 @@ import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 import kotlinx.coroutines.launch
 
 @Composable
-fuOnboardingScreen(onFinish: () -> Unit) {
+fun OnboardingScreen(onFinish: () -> Unit) {
     val pagerState = rememberPagerState(pageCount = { 4 })
     val scope = rememberCoroutineScope()
 
