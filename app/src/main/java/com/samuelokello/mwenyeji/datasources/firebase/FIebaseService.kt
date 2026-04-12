@@ -18,4 +18,8 @@ interface FirebaseService {
     fun getRouteById(id: String): Flow<RouteDto?>
     suspend fun submitRoute(dto: RouteDto): String
     suspend fun confirmRoute(routeId: String, userId: String, verdict: String)
+    suspend fun getUserVerdict(routeId: String, userId: String): String?
+    suspend fun migrateOrphanedConfirmations()
+
+    suspend fun getStableUserId(deviceId: String): String
 }

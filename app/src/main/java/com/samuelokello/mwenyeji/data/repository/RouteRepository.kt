@@ -13,6 +13,7 @@ interface RouteRepository {
     fun getRouteById(id: String): Flow<Route?>
     suspend fun submitRoute(route: Route): Result<String>
     suspend fun confirmRoute(routeId: String, userId: String, verdict: String): Result<Unit>
+    suspend fun getUserVerdict(routeId: String, userId: String): String?
 }
 
 class RouteRepositoryImpl(
@@ -38,4 +39,7 @@ class RouteRepositoryImpl(
     ): Result<Unit> = runCatching {
         firebaseService.confirmRoute(routeId, userId, verdict)
     }
+
+    override suspend fun getUserVerdict(routeId: String, userId: String): String? =
+        firebaseService.getUserVerdict(routeId, userId)
 }
