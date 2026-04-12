@@ -7,8 +7,9 @@ import com.samuelokello.mwenyeji.data.repository.RouteRepository
 import com.samuelokello.mwenyeji.data.repository.RouteRepositoryImpl
 import org.koin.dsl.module
 
-val dataModule = module {
-    single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
-    single<RouteRepository> { RouteRepositoryImpl(get()) }
-    single { DeviceIdProvider(get()) }
-}
+val dataModule =
+    module {
+        single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
+        single<RouteRepository> { RouteRepositoryImpl(get()) }
+        single { DeviceIdProvider(get()) }
+    }

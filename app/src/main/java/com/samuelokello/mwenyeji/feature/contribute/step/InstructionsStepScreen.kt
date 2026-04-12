@@ -47,14 +47,23 @@ fun InstructionsStepScreen(
                 StepInputField(
                     label = "STEP ${index + 1}",
                     value = stepValue,
-                    placeholder = if (index == 0) "e.g., Go to Kencom stage near Hilton..."
-                    else "Continue...",
+                    placeholder =
+                        if (index == 0) {
+                            "e.g., Go to Kencom stage near Hilton..."
+                        } else {
+                            "Continue..."
+                        },
                     onValueChange = { onAction(ContributeActions.StepChanged(index, it)) },
                     errorMessage = if (index == 0) state.errors["steps"] else null,
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = if (index == state.steps.lastIndex) ImeAction.Done
-                        else ImeAction.Next,
-                    ),
+                    keyboardOptions =
+                        KeyboardOptions(
+                            imeAction =
+                                if (index == state.steps.lastIndex) {
+                                    ImeAction.Done
+                                } else {
+                                    ImeAction.Next
+                                },
+                        ),
                     modifier = Modifier.weight(1f),
                 )
 
@@ -84,7 +93,9 @@ fun InstructionsStepScreen(
                 tint = colors.primary,
                 modifier = Modifier.size(16.dp),
             )
-            Spacer(Modifier.height(0.dp).size(6.dp))
+            Spacer(Modifier
+                .height(0.dp)
+                .size(6.dp))
             Text(
                 text = "Add another step",
                 style = typography.labelMedium,

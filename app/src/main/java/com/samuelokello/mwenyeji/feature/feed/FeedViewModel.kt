@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 class FeedViewModel(
     private val routeRepository: RouteRepository,
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(FeedState())
     val state: StateFlow<FeedState> = _state.asStateFlow()
 
@@ -31,11 +30,11 @@ class FeedViewModel(
 
     fun onIntent(intent: FeedIntent) {
         when (intent) {
-            is FeedIntent.SelectTimeOfDay    -> onTimeOfDaySelected(intent.timeOfDay)
+            is FeedIntent.SelectTimeOfDay -> onTimeOfDaySelected(intent.timeOfDay)
             is FeedIntent.SearchQueryChanged -> onSearchQueryChanged(intent.query)
-            is FeedIntent.RouteClicked       -> onRouteClicked(intent.route)
-            is FeedIntent.SeeAllClicked      -> onSeeAllClicked()
-            is FeedIntent.RetryClicked       -> loadRoutes()
+            is FeedIntent.RouteClicked -> onRouteClicked(intent.route)
+            is FeedIntent.SeeAllClicked -> onSeeAllClicked()
+            is FeedIntent.RetryClicked -> loadRoutes()
         }
     }
 
@@ -45,12 +44,10 @@ class FeedViewModel(
                 .getRoutes(_state.value.selectedTimeOfDay)
                 .onStart {
                     _state.update { it.copy(isLoading = true, error = null) }
-                }
-                .catch { e ->
+                }.catch { e ->
                     _state.update { it.copy(isLoading = false, error = e.message) }
                     _effects.send(FeedEffect.ShowError(e.message ?: "Failed to load routes"))
-                }
-                .collect { routes ->
+                }.collect { routes ->
                     _state.update {
                         it.copy(
                             isLoading = false,
@@ -91,10 +88,13 @@ class FeedViewModel(
 
     // Search is client-side — Firestore handles time-of-day filtering
     private fun List<Route>.filterBySearchQuery(query: String): List<Route> =
-        if (query.isBlank()) this
-        else filter { route ->
-            route.from.contains(query, ignoreCase = true) ||
+        if (query.isBlank()) {
+            this
+        } else {
+            filter { route ->
+                route.from.contains(query, ignoreCase = true) ||
                     route.to.contains(query, ignoreCase = true) ||
                     route.via.contains(query, ignoreCase = true)
+            }
         }
 }

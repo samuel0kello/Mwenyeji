@@ -17,19 +17,34 @@ class FirebaseServiceImpl(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
 ) : FirebaseService {
-
     private val routesCollection = firestore.collection("routes")
 
-    override suspend fun loginWithEmailAndPassword(email: String, password: String): String? =
+    override suspend fun loginWithEmailAndPassword(
+        email: String,
+        password: String,
+    ): String? =
         runCatching {
-            auth.signInWithEmailAndPassword(email, password).await()
-                .user?.getIdToken(false)?.await()?.token
+            auth
+                .signInWithEmailAndPassword(email, password)
+                .await()
+                .user
+                ?.getIdToken(false)
+                ?.await()
+                ?.token
         }.getOrNull()
 
-    override suspend fun createUserWithEmailAndPassword(email: String, password: String): String? =
+    override suspend fun createUserWithEmailAndPassword(
+        email: String,
+        password: String,
+    ): String? =
         runCatching {
-            auth.createUserWithEmailAndPassword(email, password).await()
-                .user?.getIdToken(false)?.await()?.token
+            auth
+                .createUserWithEmailAndPassword(email, password)
+                .await()
+                .user
+                ?.getIdToken(false)
+                ?.await()
+                ?.token
         }.getOrNull()
 
     override suspend fun createAccountWithGoogle(
@@ -38,38 +53,52 @@ class FirebaseServiceImpl(
     ): String? =
         runCatching {
             val credential = GoogleAuthProvider.getCredential(googleToken, accessToken)
-            auth.signInWithCredential(credential).await()
-                .user?.getIdToken(false)?.await()?.token
+            auth
+                .signInWithCredential(credential)
+                .await()
+                .user
+                ?.getIdToken(false)
+                ?.await()
+                ?.token
         }.getOrNull()
 
     override suspend fun sendPasswordResetEmail(email: String) {
         runCatching { auth.sendPasswordResetEmail(email).await() }
     }
 
-    override suspend fun confirmPasswordReset(code: String, newPassword: String) {
+    override suspend fun confirmPasswordReset(
+        code: String,
+        newPassword: String,
+    ) {
         runCatching { auth.confirmPasswordReset(code, newPassword).await() }
     }
 
-    override suspend fun getIdToken(): String? = runCatching {
-        auth.currentUser?.getIdToken(false)?.await()?.token
-    }.getOrNull()
+    override suspend fun getIdToken(): String? =
+        runCatching {
+            auth.currentUser
+                ?.getIdToken(false)
+                ?.await()
+                ?.token
+        }.getOrNull()
 
-    override suspend fun signInAnonymously(): String? = runCatching {
-        // If already signed in, return existing UID
-        auth.currentUser?.let { return@runCatching it.uid }
+    override suspend fun signInAnonymously(): String? =
+        runCatching {
+            // If already signed in, return existing UID
+            auth.currentUser?.let { return@runCatching it.uid }
 
-        // Sign in anonymously and store device ID in the user profile
-        val result = auth.signInAnonymously().await()
-        result.user?.uid
-    }.getOrNull()
+            // Sign in anonymously and store device ID in the user profile
+            val result = auth.signInAnonymously().await()
+            result.user?.uid
+        }.getOrNull()
 
     override suspend fun getStableUserId(deviceId: String): String {
         // Check if we already have a UID stored for this device
-        val stored = firestore
-            .collection("device_identities")
-            .document(deviceId)
-            .get()
-            .await()
+        val stored =
+            firestore
+                .collection("device_identities")
+                .document(deviceId)
+                .get()
+                .await()
 
         if (stored.exists()) {
             val uid = stored.getString("uid") ?: return signInAnonymouslyAndStore(deviceId)
@@ -84,14 +113,15 @@ class FirebaseServiceImpl(
         val uid = result.user?.uid ?: throw Exception("Failed to sign in anonymously")
 
         // Store the mapping device → uid
-        firestore.collection("device_identities")
+        firestore
+            .collection("device_identities")
             .document(deviceId)
             .set(
                 mapOf(
                     "uid" to uid,
                     "deviceId" to deviceId,
                     "createdAt" to Timestamp.now(),
-                )
+                ),
             ).await()
 
         return uid
@@ -101,40 +131,49 @@ class FirebaseServiceImpl(
 
     override fun currentUserId(): String? = auth.currentUser?.uid
 
-    override fun getRoutes(timeOfDay: TimeOfDay): Flow<List<RouteDto>> = callbackFlow {
-        val query = if (timeOfDay == TimeOfDay.ANYTIME) {
-            routesCollection
-                .orderBy("confirmedCount", Query.Direction.DESCENDING)
-                .limit(20)
-        } else {
-            routesCollection
-                .whereEqualTo("bestTimeOfDay", timeOfDay.name)
-                .orderBy("confirmedCount", Query.Direction.DESCENDING)
-                .limit(20)
-        }
-        val listener = query.addSnapshotListener { snapshot, error ->
-            if (error != null) {
-                close(error); return@addSnapshotListener
-            }
-            val dtos = snapshot?.documents?.mapNotNull { doc ->
-                doc.toObject(RouteDto::class.java)?.copy(id = doc.id)
-            } ?: emptyList()
-            trySend(dtos)
-        }
-        awaitClose { listener.remove() }
-    }
-
-    override fun getRouteById(id: String): Flow<RouteDto?> = callbackFlow {
-        val listener = routesCollection.document(id)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    close(error); return@addSnapshotListener
+    override fun getRoutes(timeOfDay: TimeOfDay): Flow<List<RouteDto>> =
+        callbackFlow {
+            val query =
+                if (timeOfDay == TimeOfDay.ANYTIME) {
+                    routesCollection
+                        .orderBy("confirmedCount", Query.Direction.DESCENDING)
+                        .limit(20)
+                } else {
+                    routesCollection
+                        .whereEqualTo("bestTimeOfDay", timeOfDay.name)
+                        .orderBy("confirmedCount", Query.Direction.DESCENDING)
+                        .limit(20)
                 }
-                val dto = snapshot?.toObject(RouteDto::class.java)?.copy(id = snapshot.id)
-                trySend(dto)
-            }
-        awaitClose { listener.remove() }
-    }
+            val listener =
+                query.addSnapshotListener { snapshot, error ->
+                    if (error != null) {
+                        close(error)
+                        return@addSnapshotListener
+                    }
+                    val dtos =
+                        snapshot?.documents?.mapNotNull { doc ->
+                            doc.toObject(RouteDto::class.java)?.copy(id = doc.id)
+                        } ?: emptyList()
+                    trySend(dtos)
+                }
+            awaitClose { listener.remove() }
+        }
+
+    override fun getRouteById(id: String): Flow<RouteDto?> =
+        callbackFlow {
+            val listener =
+                routesCollection
+                    .document(id)
+                    .addSnapshotListener { snapshot, error ->
+                        if (error != null) {
+                            close(error)
+                            return@addSnapshotListener
+                        }
+                        val dto = snapshot?.toObject(RouteDto::class.java)?.copy(id = snapshot.id)
+                        trySend(dto)
+                    }
+            awaitClose { listener.remove() }
+        }
 
     override suspend fun submitRoute(dto: RouteDto): String {
         val ref = routesCollection.document()
@@ -142,64 +181,75 @@ class FirebaseServiceImpl(
         return ref.id
     }
 
-    override suspend fun confirmRoute(routeId: String, userId: String, verdict: String) {
+    override suspend fun confirmRoute(
+        routeId: String,
+        userId: String,
+        verdict: String,
+    ) {
         val routeRef = routesCollection.document(routeId)
         val confirmationRef = routeRef.collection("confirmations").document(userId)
 
         // Read existing vote BEFORE transaction (reads inside transactions are limited)
-        val existingSnapshot = runCatching {
-            confirmationRef.get().await()
-        }.getOrNull()
+        val existingSnapshot =
+            runCatching {
+                confirmationRef.get().await()
+            }.getOrNull()
 
-        val previousVerdict = existingSnapshot
-            ?.takeIf { it.exists() }
-            ?.getString("verdict")
+        val previousVerdict =
+            existingSnapshot
+                ?.takeIf { it.exists() }
+                ?.getString("verdict")
 
         // User clicking the same button they already chose — toggle it off
         if (previousVerdict == verdict) {
-            firestore.runTransaction { transaction ->
-                transaction.delete(confirmationRef)
-                val decrementField = verdictToField(verdict)
-                if (decrementField != null) {
-                    transaction.update(routeRef, decrementField, FieldValue.increment(-1))
-                }
-            }.await()
+            firestore
+                .runTransaction { transaction ->
+                    transaction.delete(confirmationRef)
+                    val decrementField = verdictToField(verdict)
+                    if (decrementField != null) {
+                        transaction.update(routeRef, decrementField, FieldValue.increment(-1))
+                    }
+                }.await()
             return
         }
 
         // Normal case — new vote or switching vote
-        firestore.runTransaction { transaction ->
-            transaction.set(
-                confirmationRef,
-                mapOf(
-                    "verdict" to verdict,
-                    "userId" to userId,
-                    "confirmedAt" to Timestamp.now(),
+        firestore
+            .runTransaction { transaction ->
+                transaction.set(
+                    confirmationRef,
+                    mapOf(
+                        "verdict" to verdict,
+                        "userId" to userId,
+                        "confirmedAt" to Timestamp.now(),
+                    ),
                 )
-            )
 
-            // Undo previous verdict if switching
-            previousVerdict?.let {
-                val decrementField = verdictToField(it)
-                if (decrementField != null) {
-                    transaction.update(routeRef, decrementField, FieldValue.increment(-1))
+                // Undo previous verdict if switching
+                previousVerdict?.let {
+                    val decrementField = verdictToField(it)
+                    if (decrementField != null) {
+                        transaction.update(routeRef, decrementField, FieldValue.increment(-1))
+                    }
                 }
-            }
 
-            // Apply new verdict
-            val incrementField = verdictToField(verdict)
-            if (incrementField != null) {
-                transaction.update(routeRef, incrementField, FieldValue.increment(1))
-            }
+                // Apply new verdict
+                val incrementField = verdictToField(verdict)
+                if (incrementField != null) {
+                    transaction.update(routeRef, incrementField, FieldValue.increment(1))
+                }
 
-            if (verdict == "CONFIRMED") {
-                transaction.update(routeRef, "lastConfirmedAt", Timestamp.now())
-            }
-        }.await()
+                if (verdict == "CONFIRMED") {
+                    transaction.update(routeRef, "lastConfirmedAt", Timestamp.now())
+                }
+            }.await()
     }
 
     // Returns the current user's verdict for a route, or null if they haven't voted
-    override suspend fun getUserVerdict(routeId: String, userId: String): String? =
+    override suspend fun getUserVerdict(
+        routeId: String,
+        userId: String,
+    ): String? =
         runCatching {
             routesCollection
                 .document(routeId)
@@ -216,10 +266,11 @@ class FirebaseServiceImpl(
         val routes = routesCollection.get().await()
 
         routes.documents.forEach { routeDoc ->
-            val confirmations = routeDoc.reference
-                .collection("confirmations")
-                .get()
-                .await()
+            val confirmations =
+                routeDoc.reference
+                    .collection("confirmations")
+                    .get()
+                    .await()
 
             var confirmed = 0
             var didntWork = 0
@@ -236,20 +287,22 @@ class FirebaseServiceImpl(
             }
 
             // Overwrite the counts on the route document with real values
-            routeDoc.reference.update(
-                mapOf(
-                    "confirmedCount" to confirmed,
-                    "didntWorkCount" to didntWork,
-                    "outdatedCount" to outdated,
-                )
-            ).await()
+            routeDoc.reference
+                .update(
+                    mapOf(
+                        "confirmedCount" to confirmed,
+                        "didntWorkCount" to didntWork,
+                        "outdatedCount" to outdated,
+                    ),
+                ).await()
         }
     }
 
-    private fun verdictToField(verdict: String): String? = when (verdict) {
-        "CONFIRMED" -> "confirmedCount"
-        "DIDNT_WORK" -> "didntWorkCount"
-        "OUTDATED" -> "outdatedCount"
-        else -> null
-    }
+    private fun verdictToField(verdict: String): String? =
+        when (verdict) {
+            "CONFIRMED" -> "confirmedCount"
+            "DIDNT_WORK" -> "didntWorkCount"
+            "OUTDATED" -> "outdatedCount"
+            else -> null
+        }
 }

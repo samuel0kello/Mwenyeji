@@ -50,16 +50,18 @@ fun Screen1KnowNairobi(
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier =
+            Modifier
+                .fillMaxSize(),
     ) {
         GridBackground(modifier = Modifier.fillMaxSize())
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 28.dp)
-                .padding(top = 60.dp, bottom = 44.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 28.dp)
+                    .padding(top = 60.dp, bottom = 44.dp),
         ) {
             // Skip
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
@@ -67,7 +69,7 @@ fun Screen1KnowNairobi(
                     Text(
                         "Skip",
                         color = MwenyejiTheme.colorScheme.onSecondaryContainer,
-                        style = MwenyejiTheme.typography.bodySmall
+                        style = MwenyejiTheme.typography.bodySmall,
                     )
                 }
             }

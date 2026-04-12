@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 class AllRoutesViewModel(
     private val routeRepository: RouteRepository,
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(AllRoutesState())
     val state: StateFlow<AllRoutesState> = _state.asStateFlow()
 
@@ -45,15 +44,13 @@ class AllRoutesViewModel(
     private fun loadRoutes() {
         viewModelScope.launch {
             routeRepository
-                .getRoutes(TimeOfDay.ANYTIME)   // all routes, no time filter
+                .getRoutes(TimeOfDay.ANYTIME) // all routes, no time filter
                 .onStart {
                     _state.update { it.copy(isLoading = true, error = null) }
-                }
-                .catch { e ->
+                }.catch { e ->
                     _state.update { it.copy(isLoading = false, error = e.message) }
                     _effects.send(AllRoutesEffects.ShowError(e.message ?: "Failed to load routes"))
-                }
-                .collect { routes ->
+                }.collect { routes ->
                     _state.update {
                         it.copy(isLoading = false, routes = routes)
                     }
@@ -62,7 +59,6 @@ class AllRoutesViewModel(
     }
 }
 
-
 data class AllRoutesState(
     val isLoading: Boolean = false,
     val routes: List<Route> = emptyList(),
@@ -70,12 +66,19 @@ data class AllRoutesState(
 )
 
 sealed interface AllRoutesActions {
-    data class RouteClicked(val route: Route) : AllRoutesActions
+    data class RouteClicked(
+        val route: Route,
+    ) : AllRoutesActions
+
     data object RetryClicked : AllRoutesActions
 }
 
-
 sealed interface AllRoutesEffects {
-    data class NavigateToRouteDetail(val route: Route) : AllRoutesEffects
-    data class ShowError(val message: String) : AllRoutesEffects
+    data class NavigateToRouteDetail(
+        val route: Route,
+    ) : AllRoutesEffects
+
+    data class ShowError(
+        val message: String,
+    ) : AllRoutesEffects
 }

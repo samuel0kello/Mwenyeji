@@ -13,8 +13,8 @@ import com.samuelokello.mwenyeji.ui.theme.color.resolveMaterialColorScheme
 import com.samuelokello.mwenyeji.ui.theme.elevation.AppElevation
 import com.samuelokello.mwenyeji.ui.theme.elevation.Elevation
 import com.samuelokello.mwenyeji.ui.theme.shape.AppShapes
-import com.samuelokello.mwenyeji.ui.theme.shape.CornerRadius
 import com.samuelokello.mwenyeji.ui.theme.shape.CornerRadii
+import com.samuelokello.mwenyeji.ui.theme.shape.CornerRadius
 import com.samuelokello.mwenyeji.ui.theme.shape.Shapes
 import com.samuelokello.mwenyeji.ui.theme.shape.toMaterialShapes
 import com.samuelokello.mwenyeji.ui.theme.spacing.AppSizes
@@ -26,16 +26,13 @@ import com.samuelokello.mwenyeji.ui.theme.typography.AppTypography
 import com.samuelokello.mwenyeji.ui.theme.typography.createTypography
 import com.samuelokello.mwenyeji.ui.theme.typography.toMaterialTypography
 
-
 val LocalAppColorScheme = staticCompositionLocalOf { LightColorScheme }
-val LocalAppTypography  = staticCompositionLocalOf { createTypography() }
-val LocalAppShapes      = staticCompositionLocalOf { Shapes }
-val LocalAppSpacing     = staticCompositionLocalOf { Spacing }
-val LocalAppSizes       = staticCompositionLocalOf { Sizes }
-val LocalAppElevation   = staticCompositionLocalOf { Elevation }
-val LocalCornerRadius   = staticCompositionLocalOf { CornerRadii }
-
-
+val LocalAppTypography = staticCompositionLocalOf { createTypography() }
+val LocalAppShapes = staticCompositionLocalOf { Shapes }
+val LocalAppSpacing = staticCompositionLocalOf { Spacing }
+val LocalAppSizes = staticCompositionLocalOf { Sizes }
+val LocalAppElevation = staticCompositionLocalOf { Elevation }
+val LocalCornerRadius = staticCompositionLocalOf { CornerRadii }
 
 object MwenyejiTheme {
     val colorScheme: AppColorScheme
@@ -67,29 +64,28 @@ object MwenyejiTheme {
         get() = LocalCornerRadius.current
 }
 
-
 @Composable
 fun MwenyejiAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    val appColors      = resolveAppColorScheme(darkTheme, dynamicColor)
+    val appColors = resolveAppColorScheme(darkTheme, dynamicColor)
     val materialColors = resolveMaterialColorScheme(darkTheme, dynamicColor)
 
     CompositionLocalProvider(
         LocalAppColorScheme provides appColors,
-        LocalAppTypography  provides createTypography(AppFontFamily),
-        LocalAppShapes      provides Shapes,
-        LocalAppSpacing     provides Spacing,
-        LocalAppSizes       provides Sizes,
-        LocalAppElevation   provides Elevation,
-        LocalCornerRadius   provides CornerRadii,
+        LocalAppTypography provides createTypography(AppFontFamily),
+        LocalAppShapes provides Shapes,
+        LocalAppSpacing provides Spacing,
+        LocalAppSizes provides Sizes,
+        LocalAppElevation provides Elevation,
+        LocalCornerRadius provides CornerRadii,
     ) {
         MaterialTheme(
             colorScheme = materialColors,
-            typography  = createTypography(AppFontFamily).toMaterialTypography(),
-            shapes      = Shapes.toMaterialShapes(),
+            typography = createTypography(AppFontFamily).toMaterialTypography(),
+            shapes = Shapes.toMaterialShapes(),
         ) {
             content()
         }

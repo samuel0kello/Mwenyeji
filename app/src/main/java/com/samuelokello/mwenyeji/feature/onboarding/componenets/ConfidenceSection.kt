@@ -33,14 +33,18 @@ import com.samuelokello.mwenyeji.ui.theme.color.AppColors.TextSecondary
 import com.samuelokello.mwenyeji.ui.theme.color.AppColors.TextTertiary
 
 @Composable
-fun ConfidenceSection(animate: Boolean, modifier: Modifier = Modifier) {
+fun ConfidenceSection(
+    animate: Boolean,
+    modifier: Modifier = Modifier,
+) {
     val barProgress by animateFloatAsState(
         targetValue = if (animate) 0.8f else 0f,
-        animationSpec = tween(
-            durationMillis = 1200,
-            delayMillis = 200,
-            easing = FastOutSlowInEasing,
-        ),
+        animationSpec =
+            tween(
+                durationMillis = 1200,
+                delayMillis = 200,
+                easing = FastOutSlowInEasing,
+            ),
         label = "confidence_bar",
     )
 
@@ -52,29 +56,34 @@ fun ConfidenceSection(animate: Boolean, modifier: Modifier = Modifier) {
         ) {
             // Stacked avatars
             Box(
-                modifier = Modifier
-                    .width(72.dp)
-                    .height(32.dp)
+                modifier =
+                    Modifier
+                        .width(72.dp)
+                        .height(32.dp),
             ) {
                 listOf(
                     Triple(
                         "JM",
                         MwenyejiTheme.colorScheme.primary,
-                        MwenyejiTheme.colorScheme.primaryLight
+                        MwenyejiTheme.colorScheme.primaryLight,
                     ),
                     Triple("AW", Color(0xFF2E1A3D), Color(0xFFB78852)),
                     Triple("BK", Color(0xFF3D1A1A), DangerRed),
                 ).forEachIndexed { i, (initials, bg, fg) ->
                     Box(
-                        modifier = Modifier
-                            .offset(x = (i * 20).dp)
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(bg)
-                            .then(
-                                if (i > 0) Modifier.padding(start = 0.dp)
-                                else Modifier
-                            ),
+                        modifier =
+                            Modifier
+                                .offset(x = (i * 20).dp)
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(bg)
+                                .then(
+                                    if (i > 0) {
+                                        Modifier.padding(start = 0.dp)
+                                    } else {
+                                        Modifier
+                                    },
+                                ),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(initials, style = MwenyejiTheme.typography.bodySmall, color = fg)
@@ -97,7 +106,7 @@ fun ConfidenceSection(animate: Boolean, modifier: Modifier = Modifier) {
                 Text(
                     stringResource(R.string.confidence),
                     style = MwenyejiTheme.typography.labelSmall,
-                    color = TextTertiary
+                    color = TextTertiary,
                 )
                 Text(
                     "${(barProgress * 100).toInt()}%",
@@ -106,18 +115,20 @@ fun ConfidenceSection(animate: Boolean, modifier: Modifier = Modifier) {
                 )
             }
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(3.dp))
-                    .background(MwenyejiTheme.colorScheme.secondary),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(MwenyejiTheme.colorScheme.secondary),
             ) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth(barProgress)
-                        .fillMaxHeight()
-                        .clip(RoundedCornerShape(3.dp))
-                        .background(MwenyejiTheme.colorScheme.primary),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth(barProgress)
+                            .fillMaxHeight()
+                            .clip(RoundedCornerShape(3.dp))
+                            .background(MwenyejiTheme.colorScheme.primary),
                 )
             }
         }

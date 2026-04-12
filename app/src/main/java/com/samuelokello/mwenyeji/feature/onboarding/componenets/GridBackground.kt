@@ -19,11 +19,12 @@ fun GridBackground(modifier: Modifier = Modifier) {
     val pulse by infiniteTransition.animateFloat(
         initialValue = 0.08f,
         targetValue = 0.18f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(3000, easing = EaseInOutSine),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "pulse"
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(3000, easing = EaseInOutSine),
+                repeatMode = RepeatMode.Reverse,
+            ),
+        label = "pulse",
     )
     val colors = MwenyejiTheme.colorScheme
 
@@ -52,8 +53,10 @@ fun GridBackground(modifier: Modifier = Modifier) {
 
         // intersection dots
         listOf(
-            Offset(cols[0], rows[0]), Offset(cols[1], rows[1]),
-            Offset(cols[2], rows[1]), Offset(cols[0], rows[2]),
+            Offset(cols[0], rows[0]),
+            Offset(cols[1], rows[1]),
+            Offset(cols[2], rows[1]),
+            Offset(cols[0], rows[2]),
             Offset(cols[3], rows[3]),
         ).forEach { offset ->
             drawCircle(dotColor, radius = 4f, center = offset)

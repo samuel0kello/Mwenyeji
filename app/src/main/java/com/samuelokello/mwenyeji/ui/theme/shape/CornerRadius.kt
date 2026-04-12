@@ -18,11 +18,12 @@ data class CornerRadius(
     val extraLarge: Dp,
 )
 
-val CornerRadii = CornerRadius(
-    none = 0.dp,
-    extraSmall = 4.dp,
-    small = 8.dp,
-    medium = 12.dp,
-    large = 16.dp,
-    extraLarge = 28.dp,
-)
+val CornerRadii =
+    CornerRadius(
+        none = 0.dp,
+        extraSmall = 4.dp,
+        small = 8.dp,
+        medium = 12.dp,
+        large = 16.dp,
+        extraLarge = 28.dp,
+    )

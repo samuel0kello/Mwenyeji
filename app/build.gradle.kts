@@ -8,11 +8,12 @@ plugins {
     alias(libs.plugins.firebase.crashlytics)
 }
 
-val localProperties = Properties().apply {
-    rootProject.file("local.properties").takeIf { it.exists() }?.let {
-        load(it.inputStream())
+val localProperties =
+    Properties().apply {
+        rootProject.file("local.properties").takeIf { it.exists() }?.let {
+            load(it.inputStream())
+        }
     }
-}
 
 android {
     namespace = "com.samuelokello.mwenyeji"
@@ -48,7 +49,7 @@ android {
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
 
@@ -60,7 +61,7 @@ android {
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }

@@ -61,35 +61,39 @@ fun LiveFeedCard(
     val liveDotAlpha by infiniteTransition.animateFloat(
         initialValue = 1f,
         targetValue = 0.3f,
-        animationSpec = infiniteRepeatable(
-            tween(800), RepeatMode.Reverse,
-        ),
+        animationSpec =
+            infiniteRepeatable(
+                tween(800),
+                RepeatMode.Reverse,
+            ),
         label = "live_dot",
     )
 
     val colors = MwenyejiTheme.colorScheme
 
-
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(colors.surfaceContainerLow)
-            .border(1.dp, colors.border, RoundedCornerShape(20.dp)),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .background(colors.surfaceContainerLow)
+                .border(1.dp, colors.border, RoundedCornerShape(20.dp)),
     ) {
         // Header
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .clip(CircleShape)
-                    .background(DangerRed.copy(alpha = liveDotAlpha))
+                modifier =
+                    Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(DangerRed.copy(alpha = liveDotAlpha)),
             )
             Text(
                 "LIVE",
@@ -100,38 +104,43 @@ fun LiveFeedCard(
         }
 
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(colors.border)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(colors.border),
         )
 
         // Feed rows
         entries.forEachIndexed { index, entry ->
             AnimatedVisibility(
                 visible = index < visibleCount,
-                enter = slideInHorizontally(
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessMediumLow,
-                    ),
-                    initialOffsetX = { it / 2 },
-                ) + fadeIn(tween(300)),
+                enter =
+                    slideInHorizontally(
+                        animationSpec =
+                            spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessMediumLow,
+                            ),
+                        initialOffsetX = { it / 2 },
+                    ) + fadeIn(tween(300)),
             ) {
                 Column {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
                         // Avatar
                         Box(
-                            modifier = Modifier
-                                .size(34.dp)
-                                .clip(CircleShape)
-                                .background(entry.avatarBg),
+                            modifier =
+                                Modifier
+                                    .size(34.dp)
+                                    .clip(CircleShape)
+                                    .background(entry.avatarBg),
                             contentAlignment = Alignment.Center,
                         ) {
                             Text(
@@ -169,10 +178,11 @@ fun LiveFeedCard(
 
                     if (index < entries.size - 1) {
                         Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(1.dp)
-                                .background(colors.border)
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(1.dp)
+                                    .background(colors.border),
                         )
                     }
                 }

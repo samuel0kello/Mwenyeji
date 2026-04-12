@@ -35,21 +35,38 @@ fun Screen4Community(
     var visibleRows by remember { mutableIntStateOf(0) }
     var showLeader by remember { mutableStateOf(false) }
 
-    val feedEntries = listOf(
-        FeedEntry("JM", "James", "CBD → Rongai", "✅", "2s ago"),
-        FeedEntry(
-            "AW", "Aisha", "Ngong → Westlands", "✅", "5s ago",
-            avatarBg = Color(0xFF2E1A3D), avatarFg = Color(0xFFB78852)
-        ),
-        FeedEntry(
-            "BK", "Brian", "⚠ Tom Mboya stage", "🚩", "8s ago",
-            avatarBg = Color(0xFF3D1A1A), avatarFg = DangerRed, isWarning = true
-        ),
-        FeedEntry(
-            "WN", "Wanjiru", "Karen → CBD", "✅", "12s ago",
-            avatarBg = Color(0xFF1A2E3D), avatarFg = Color(0xFF52A8B7)
-        ),
-    )
+    val feedEntries =
+        listOf(
+            FeedEntry("JM", "James", "CBD → Rongai", "✅", "2s ago"),
+            FeedEntry(
+                "AW",
+                "Aisha",
+                "Ngong → Westlands",
+                "✅",
+                "5s ago",
+                avatarBg = Color(0xFF2E1A3D),
+                avatarFg = Color(0xFFB78852),
+            ),
+            FeedEntry(
+                "BK",
+                "Brian",
+                "⚠ Tom Mboya stage",
+                "🚩",
+                "8s ago",
+                avatarBg = Color(0xFF3D1A1A),
+                avatarFg = DangerRed,
+                isWarning = true,
+            ),
+            FeedEntry(
+                "WN",
+                "Wanjiru",
+                "Karen → CBD",
+                "✅",
+                "12s ago",
+                avatarBg = Color(0xFF1A2E3D),
+                avatarFg = Color(0xFF52A8B7),
+            ),
+        )
 
     LaunchedEffect(currentPage) {
         if (currentPage == 3) {
@@ -65,16 +82,18 @@ fun Screen4Community(
         }
     }
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier =
+            Modifier
+                .fillMaxSize(),
     ) {
         GridBackground(modifier = Modifier.fillMaxSize())
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 28.dp)
-                .padding(top = 60.dp, bottom = 44.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 28.dp)
+                    .padding(top = 60.dp, bottom = 44.dp),
         ) {
             Column(
                 modifier = Modifier.weight(1f),

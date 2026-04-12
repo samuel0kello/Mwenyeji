@@ -3,12 +3,9 @@ package com.samuelokello.mwenyeji.feature.contribute.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.rememberScrollState
@@ -20,7 +17,6 @@ import com.samuelokello.mwenyeji.feature.contribute.ContributeActions
 import com.samuelokello.mwenyeji.feature.contribute.ContributeState
 import com.samuelokello.mwenyeji.feature.contribute.ContributeStep
 import com.samuelokello.mwenyeji.ui.designsystem.components.MwenyejiStepBar
-import com.samuelokello.mwenyeji.ui.designsystem.components.button.MwenyejiButton
 
 /**
  * Shared scaffold layout used by all 4 contribute step screens.
@@ -48,27 +44,28 @@ fun StepScaffold(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .safeContentPadding()
-            .imePadding(),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .safeContentPadding()
+                .imePadding(),
     ) {
-
         // Step header — progress bar + title
         MwenyejiStepBar(
             stepLabel = state.stepLabel,
             title = state.stepTitle,
-            currentStep = state.currentStep + 1,   // 1-based for display
+            currentStep = state.currentStep + 1, // 1-based for display
             totalSteps = ContributeStep.TOTAL,
             onNavigateBack = { onIntent(ContributeActions.PreviousStep) },
         )
 
         // Scrollable form content
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 24.dp),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
             content = content,
         )

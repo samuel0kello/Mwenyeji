@@ -14,7 +14,6 @@ data object ContributeRoute
 fun NavGraphBuilder.contributeNavGraph() {
     navigation<ContributeNavGraph>(startDestination = ContributeRoute) {
         composable<ContributeRoute> {
-
         }
     }
 }

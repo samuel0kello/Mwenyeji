@@ -58,10 +58,11 @@ fun Screen3ShareKnowledge(
         GridBackground(modifier = Modifier.fillMaxSize())
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 28.dp)
-                .padding(top = 60.dp, bottom = 44.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 28.dp)
+                    .padding(top = 60.dp, bottom = 44.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -97,9 +98,10 @@ fun Screen3ShareKnowledge(
 
         // Toast — top right overlay
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 72.dp, end = 20.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(top = 72.dp, end = 20.dp),
             contentAlignment = Alignment.TopEnd,
         ) {
             PointsToast(visible = showToast)

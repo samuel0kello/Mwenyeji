@@ -17,7 +17,6 @@ class ContributeViewModel(
     private val routeRepository: RouteRepository,
     private val authRepository: AuthRepository,
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(ContributeState())
     val state: StateFlow<ContributeState> = _state.asStateFlow()
 
@@ -26,38 +25,76 @@ class ContributeViewModel(
 
     fun onAction(action: ContributeActions) {
         when (action) {
-            is ContributeActions.NextStep -> onNextStep()
-            is ContributeActions.PreviousStep -> onPreviousStep()
-            is ContributeActions.FromChanged -> _state.update {
-                it.copy(
-                    from = action.value,
-                    errors = it.errors - "from"
-                )
+            is ContributeActions.NextStep -> {
+                onNextStep()
             }
 
-            is ContributeActions.ToChanged -> _state.update {
-                it.copy(
-                    to = action.value,
-                    errors = it.errors - "to"
-                )
+            is ContributeActions.PreviousStep -> {
+                onPreviousStep()
             }
 
-            is ContributeActions.ViaChanged -> _state.update { it.copy(via = action.value) }
-            is ContributeActions.FareChanged -> _state.update {
-                it.copy(
-                    fareKsh = action.value,
-                    errors = it.errors - "fare"
-                )
+            is ContributeActions.FromChanged -> {
+                _state.update {
+                    it.copy(
+                        from = action.value,
+                        errors = it.errors - "from",
+                    )
+                }
             }
 
-            is ContributeActions.TimeOfDaySelected -> _state.update { it.copy(bestTimeOfDay = action.timeOfDay) }
-            is ContributeActions.TimingReasonChanged -> _state.update { it.copy(timingReason = action.value) }
-            is ContributeActions.StepChanged -> onStepChanged(action.index, action.value)
-            is ContributeActions.AddStep -> onAddStep()
-            is ContributeActions.RemoveStep -> onRemoveStep(action.index)
-            is ContributeActions.WarningsChanged -> _state.update { it.copy(warnings = action.value) }
-            is ContributeActions.TagToggled -> onTagToggled(action.tag)
-            is ContributeActions.SubmitGuide -> onSubmitGuide()
+            is ContributeActions.ToChanged -> {
+                _state.update {
+                    it.copy(
+                        to = action.value,
+                        errors = it.errors - "to",
+                    )
+                }
+            }
+
+            is ContributeActions.ViaChanged -> {
+                _state.update { it.copy(via = action.value) }
+            }
+
+            is ContributeActions.FareChanged -> {
+                _state.update {
+                    it.copy(
+                        fareKsh = action.value,
+                        errors = it.errors - "fare",
+                    )
+                }
+            }
+
+            is ContributeActions.TimeOfDaySelected -> {
+                _state.update { it.copy(bestTimeOfDay = action.timeOfDay) }
+            }
+
+            is ContributeActions.TimingReasonChanged -> {
+                _state.update { it.copy(timingReason = action.value) }
+            }
+
+            is ContributeActions.StepChanged -> {
+                onStepChanged(action.index, action.value)
+            }
+
+            is ContributeActions.AddStep -> {
+                onAddStep()
+            }
+
+            is ContributeActions.RemoveStep -> {
+                onRemoveStep(action.index)
+            }
+
+            is ContributeActions.WarningsChanged -> {
+                _state.update { it.copy(warnings = action.value) }
+            }
+
+            is ContributeActions.TagToggled -> {
+                onTagToggled(action.tag)
+            }
+
+            is ContributeActions.SubmitGuide -> {
+                onSubmitGuide()
+            }
         }
     }
 
@@ -84,7 +121,10 @@ class ContributeViewModel(
         _state.update { it.copy(currentStep = it.currentStep - 1, errors = emptyMap()) }
     }
 
-    private fun onStepChanged(index: Int, value: String) {
+    private fun onStepChanged(
+        index: Int,
+        value: String,
+    ) {
         val updated = _state.value.steps.toMutableList()
         if (index in updated.indices) {
             updated[index] = value
@@ -104,7 +144,6 @@ class ContributeViewModel(
         }
     }
 
-
     private fun onTagToggled(tag: RouteTag) {
         _state.update { current ->
             val tags = current.selectedTags.toMutableSet()
@@ -113,45 +152,46 @@ class ContributeViewModel(
         }
     }
 
-
     private fun onSubmitGuide() {
         viewModelScope.launch {
             _state.update { it.copy(isSubmitting = true) }
 
-            val route = _state.value.toRoute().copy(
-                contributorId = authRepository.currentUserId ?: "anonymous",
-            )
+            val route =
+                _state.value.toRoute().copy(
+                    contributorId = authRepository.currentUserId ?: "anonymous",
+                )
 
-            routeRepository.submitRoute(route)
+            routeRepository
+                .submitRoute(route)
                 .onSuccess {
                     resetState()
                     _effects.send(ContributeEffect.NavigateToSuccess)
-                }
-                .onFailure { e ->
+                }.onFailure { e ->
                     _state.update { it.copy(isSubmitting = false) }
                     _effects.send(ContributeEffect.ShowError(e.message ?: "Failed to submit guide"))
                 }
         }
     }
 
-
     private fun resetState() {
         _state.value = ContributeState()
     }
-
 
     private fun validateStep(state: ContributeState): Map<String, String> =
         buildMap {
             when (state.currentStep) {
                 ContributeStep.ROUTE -> {
                     if (state.from.isBlank()) put("from", "Where are you boarding from?")
-                    if (state.to.isBlank())   put("to", "Where does this route go?")
-                    if (state.fareKsh.isNotBlank() && state.fareKsh.toDoubleOrNull() == null)
+                    if (state.to.isBlank()) put("to", "Where does this route go?")
+                    if (state.fareKsh.isNotBlank() && state.fareKsh.toDoubleOrNull() == null) {
                         put("fare", "Enter a valid fare amount")
+                    }
                 }
+
                 ContributeStep.INSTRUCTIONS -> {
-                    if (state.steps.none { it.isNotBlank() })
+                    if (state.steps.none { it.isNotBlank() }) {
                         put("steps", "Add at least one step")
+                    }
                 }
             }
         }

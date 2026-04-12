@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
@@ -17,7 +16,6 @@ import com.samuelokello.mwenyeji.feature.contribute.ContributeState
 import com.samuelokello.mwenyeji.ui.designsystem.components.inputFields.MwenyejiInputField
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 
-
 @Composable
 fun RouteStepScreen(
     state: ContributeState,
@@ -25,7 +23,7 @@ fun RouteStepScreen(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
     ) {
         StepInputField(
             label = "FROM",
@@ -57,8 +55,6 @@ fun RouteStepScreen(
         )
     }
 }
-
-
 
 @Composable
 fun StepInputField(

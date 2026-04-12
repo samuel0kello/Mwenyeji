@@ -32,7 +32,7 @@ fun NavGraphBuilder.feedsNavGraph(navController: NavHostController) {
         composable<FeedsRoute> {
             FeedScreen(
                 onNavigateToRouteDetail = { routeId -> navController.navigateToRouteDetails(routeId) },
-                onNavigateToSeeAll = { navController.navigateToAllRoutes()},
+                onNavigateToSeeAll = { navController.navigateToAllRoutes() },
             )
         }
         composable<RouteDetailsRoute> { backStackEntry ->
@@ -45,8 +45,8 @@ fun NavGraphBuilder.feedsNavGraph(navController: NavHostController) {
 
         composable<SeeAllRoutesRoute> {
             AllRoutes(
-                onNavigateToRouteDetail = { navController.navigateToRouteDetails(it)},
-                onNavigateBack = { navController.navigateBack()}
+                onNavigateToRouteDetail = { navController.navigateToRouteDetails(it) },
+                onNavigateBack = { navController.navigateBack() },
             )
         }
     }

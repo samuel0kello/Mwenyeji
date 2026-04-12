@@ -39,39 +39,44 @@ import com.samuelokello.mwenyeji.ui.theme.color.AppColors.TextTertiary
 import com.samuelokello.mwenyeji.ui.theme.typography.JetBrainsFamily
 
 @Composable
-fun LeaderBoard(visible: Boolean, modifier: Modifier = Modifier) {
+fun LeaderBoard(
+    visible: Boolean,
+    modifier: Modifier = Modifier,
+) {
     val infiniteTransition = rememberInfiniteTransition(label = "you_row")
     val youAlpha by infiniteTransition.animateFloat(
         initialValue = 0.4f,
         targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            tween(1800, easing = EaseInOutSine),
-            RepeatMode.Reverse,
-        ),
+        animationSpec =
+            infiniteRepeatable(
+                tween(1800, easing = EaseInOutSine),
+                RepeatMode.Reverse,
+            ),
         label = "you_breathe",
     )
     val colors = MwenyejiTheme.colorScheme
 
-
     AnimatedVisibility(
         visible = visible,
-        enter = slideInVertically(
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessMediumLow,
-            ),
-            initialOffsetY = { it / 2 },
-        ) + fadeIn(tween(400, 200)),
+        enter =
+            slideInVertically(
+                animationSpec =
+                    spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMediumLow,
+                    ),
+                initialOffsetY = { it / 2 },
+            ) + fadeIn(tween(400, 200)),
         modifier = modifier,
     ) {
-
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(20.dp))
-                .background(colors.surfaceContainerLow)
-                .border(1.dp, colors.border, RoundedCornerShape(20.dp))
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(colors.surfaceContainerLow)
+                    .border(1.dp, colors.border, RoundedCornerShape(20.dp))
+                    .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(0.dp),
         ) {
             Row(
@@ -97,10 +102,11 @@ fun LeaderBoard(visible: Boolean, modifier: Modifier = Modifier) {
 
             // You row — breathing animation
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .alpha(youAlpha)
-                    .padding(vertical = 8.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .alpha(youAlpha)
+                        .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
@@ -136,11 +142,17 @@ fun LeaderBoard(visible: Boolean, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun LeaderRow(rank: String, name: String, pts: String, badge: String) {
+private fun LeaderRow(
+    rank: String,
+    name: String,
+    pts: String,
+    badge: String,
+) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {

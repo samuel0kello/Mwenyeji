@@ -52,10 +52,11 @@ fun TypewriterText(
     val cursorAlpha by infiniteTransition.animateFloat(
         initialValue = 1f,
         targetValue = 0f,
-        animationSpec = infiniteRepeatable(
-            tween(500, easing = LinearEasing),
-            RepeatMode.Reverse,
-        ),
+        animationSpec =
+            infiniteRepeatable(
+                tween(500, easing = LinearEasing),
+                RepeatMode.Reverse,
+            ),
         label = stringResource(R.string.cursor_blink),
     )
 
@@ -67,7 +68,7 @@ fun TypewriterText(
                 .width(2.dp)
                 .height(20.dp)
                 .alpha(cursorAlpha)
-                .background(MwenyejiTheme.colorScheme.primary)
+                .background(MwenyejiTheme.colorScheme.primary),
         )
     }
 }

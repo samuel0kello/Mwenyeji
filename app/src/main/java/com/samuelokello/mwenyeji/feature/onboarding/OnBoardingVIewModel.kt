@@ -17,15 +17,13 @@ sealed interface OnboardingNavigationEvent {
 }
 
 class OnboardingViewModel(
-    private val pref: MwenyejiPrefs
+    private val pref: MwenyejiPrefs,
 ) : ViewModel() {
-
     private val _currentPage = MutableStateFlow(0)
     val currentPage: StateFlow<Int> = _currentPage.asStateFlow()
 
     private val _navigationEvent = Channel<OnboardingNavigationEvent>()
     val navigationEvent = _navigationEvent.receiveAsFlow()
-
 
     fun onFinish() {
         viewModelScope.launch {
@@ -39,5 +37,5 @@ data class Page(
     @StringRes val title: Int,
     @StringRes val description: Int,
     @DrawableRes val drawable: Int,
-    val btnText: String
+    val btnText: String,
 )

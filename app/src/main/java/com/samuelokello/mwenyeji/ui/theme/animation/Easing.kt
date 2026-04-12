@@ -11,27 +11,27 @@ object Easing {
      * Standard easing - most common, for normal motion
      */
     val standard: Easing = CubicBezierEasing(0.4f, 0.0f, 0.2f, 1.0f)
-    
+
     /**
      * Emphasized easing - for more pronounced motion
      */
     val emphasized: Easing = CubicBezierEasing(0.2f, 0.0f, 0.0f, 1.0f)
-    
+
     /**
      * Decelerated easing - for elements entering the screen
      */
     val decelerated: Easing = CubicBezierEasing(0.0f, 0.0f, 0.2f, 1.0f)
-    
+
     /**
      * Accelerated easing - for elements leaving the screen
      */
     val accelerated: Easing = CubicBezierEasing(0.4f, 0.0f, 1.0f, 1.0f)
-    
+
     /**
      * Linear easing - constant speed
      */
     val linear: Easing = CubicBezierEasing(0.0f, 0.0f, 1.0f, 1.0f)
-    
+
     /**
      * Legacy easings for backwards compatibility
      */

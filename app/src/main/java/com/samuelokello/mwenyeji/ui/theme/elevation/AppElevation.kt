@@ -18,14 +18,15 @@ data class AppElevation(
     val level5: Dp,
 )
 
-val Elevation = AppElevation(
-    level0 = 0.dp,
-    level1 = 1.dp,
-    level2 = 3.dp,
-    level3 = 6.dp,
-    level4 = 8.dp,
-    level5 = 12.dp,
-)
+val Elevation =
+    AppElevation(
+        level0 = 0.dp,
+        level1 = 1.dp,
+        level2 = 3.dp,
+        level3 = 6.dp,
+        level4 = 8.dp,
+        level5 = 12.dp,
+    )
 
 /**
  * Semantic elevation helpers

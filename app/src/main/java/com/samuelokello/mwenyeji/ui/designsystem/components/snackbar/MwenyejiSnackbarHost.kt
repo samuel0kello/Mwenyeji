@@ -78,39 +78,48 @@ private fun MwenyejiSnackbar(
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
 
-    val (containerColor, contentColor, icon) = when (message.type) {
-        SnackbarMessageType.SUCCESS -> Triple(
-            colors.success,
-            colors.onSuccess,
-            Icons.Outlined.Check,
-        )
+    val (containerColor, contentColor, icon) =
+        when (message.type) {
+            SnackbarMessageType.SUCCESS -> {
+                Triple(
+                    colors.success,
+                    colors.onSuccess,
+                    Icons.Outlined.Check,
+                )
+            }
 
-        SnackbarMessageType.ERROR -> Triple(
-            colors.error,
-            colors.onErrorContainer,
-            Icons.Outlined.ErrorOutline,
-        )
+            SnackbarMessageType.ERROR -> {
+                Triple(
+                    colors.error,
+                    colors.onErrorContainer,
+                    Icons.Outlined.ErrorOutline,
+                )
+            }
 
-        SnackbarMessageType.INFO -> Triple(
-            colors.info,
-            colors.onInfoContainer,
-            Icons.Outlined.Info,
-        )
-    }
+            SnackbarMessageType.INFO -> {
+                Triple(
+                    colors.info,
+                    colors.onInfoContainer,
+                    Icons.Outlined.Info,
+                )
+            }
+        }
 
     Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
         shape = RoundedCornerShape(12.dp),
         color = containerColor,
         tonalElevation = 4.dp,
         shadowElevation = 4.dp,
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {

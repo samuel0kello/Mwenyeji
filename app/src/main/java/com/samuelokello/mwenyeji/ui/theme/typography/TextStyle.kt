@@ -8,7 +8,6 @@ import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
  * Convenient text style helpers for common use cases
  */
 object TextStyles {
-
     // Hero text for landing pages
     val hero: TextStyle
         @Composable

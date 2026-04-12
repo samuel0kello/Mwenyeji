@@ -5,14 +5,16 @@ import android.content.Context
 import android.provider.Settings
 import androidx.core.content.edit
 
-class DeviceIdProvider(private val context: Context) {
-
+class DeviceIdProvider(
+    private val context: Context,
+) {
     @SuppressLint("HardwareIds")
     fun getDeviceId(): String {
-        val androidId = Settings.Secure.getString(
-            context.contentResolver,
-            Settings.Secure.ANDROID_ID,
-        )
+        val androidId =
+            Settings.Secure.getString(
+                context.contentResolver,
+                Settings.Secure.ANDROID_ID,
+            )
 
         return if (androidId.isNullOrBlank() || androidId == "9774d56d682e549c") {
             // Fallback — generate a UUID and store it in SharedPreferences
@@ -27,7 +29,10 @@ class DeviceIdProvider(private val context: Context) {
         val existing = prefs.getString("device_id", null)
         if (existing != null) return existing
 
-        val newId = java.util.UUID.randomUUID().toString()
+        val newId =
+            java.util.UUID
+                .randomUUID()
+                .toString()
         prefs.edit { putString("device_id", newId) }
         return newId
     }

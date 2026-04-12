@@ -5,9 +5,10 @@ import com.samuelokello.mwenyeji.datasources.di.dataSourceModule
 import com.samuelokello.mwenyeji.feature.feed.di.feedModule
 import com.samuelokello.mwenyeji.feature.onboarding.di.onBoardingModule
 
-val mwenyejiModules = listOf(
-    dataSourceModule,
-    dataModule,
-    onBoardingModule,
-    feedModule
-)
+val mwenyejiModules =
+    listOf(
+        dataSourceModule,
+        dataModule,
+        onBoardingModule,
+        feedModule,
+    )

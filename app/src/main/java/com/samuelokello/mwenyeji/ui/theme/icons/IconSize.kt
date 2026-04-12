@@ -16,10 +16,11 @@ data class IconSize(
     val extraLarge: Dp,
 )
 
-val IconSizes = IconSize(
-    tiny = 16.dp,
-    small = 20.dp,
-    medium = 24.dp,
-    large = 32.dp,
-    extraLarge = 48.dp,
-)
+val IconSizes =
+    IconSize(
+        tiny = 16.dp,
+        small = 20.dp,
+        medium = 24.dp,
+        large = 32.dp,
+        extraLarge = 48.dp,
+    )

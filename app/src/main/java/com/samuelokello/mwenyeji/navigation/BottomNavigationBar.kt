@@ -6,12 +6,30 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.*
+import androidx.compose.material3.BottomAppBarDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -49,9 +67,10 @@ fun BottomNavigationBar(
     ) {
         // Left side: Home item
         screens.forEach { item ->
-            val isSelected = currentDestination?.hierarchy?.any {
-                it.hasRoute<FeedsGraph>()
-            } ?: false
+            val isSelected =
+                currentDestination?.hierarchy?.any {
+                    it.hasRoute<FeedsGraph>()
+                } ?: false
 
             AppBottomNavigationBarItem(
                 icon = item.defaultIcon,
@@ -91,22 +110,25 @@ fun AppBottomNavigationBar(
                     color = MwenyejiTheme.colorScheme.border,
                 )
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(65.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(65.dp),
                 ) {
                     // Regular nav items in a row
                     Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .selectableGroup(),
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .selectableGroup(),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         // Left half for nav items
                         Row(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight(),
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
                             verticalAlignment = Alignment.CenterVertically,
                             content = content,
                         )
@@ -118,7 +140,9 @@ fun AppBottomNavigationBar(
                     ContributeFab(
                         isOpen = isContributeSheetOpen,
                         onClick = onContributeTapped,
-                        modifier = Modifier.align(Alignment.CenterEnd).padding(end = 40.dp),
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(end = 40.dp),
                     )
                 }
             }
@@ -139,28 +163,30 @@ private fun ContributeFab(
     )
 
     Box(
-        modifier = modifier
-            .size(48.dp)
-            // Lifts the FAB above the bar visually
-            .offset(y = (-10).dp)
-            .shadow(
-                elevation = 6.dp,
-                shape = RoundedCornerShape(14.dp),
-                ambientColor = MwenyejiTheme.colorScheme.primary,
-                spotColor = MwenyejiTheme.colorScheme.primary,
-            )
-            .clip(RoundedCornerShape(14.dp))
-            .background(MwenyejiTheme.colorScheme.primary)
-            .clickable(onClick = onClick),
+        modifier =
+            modifier
+                .size(48.dp)
+                // Lifts the FAB above the bar visually
+                .offset(y = (-10).dp)
+                .shadow(
+                    elevation = 6.dp,
+                    shape = RoundedCornerShape(14.dp),
+                    ambientColor = MwenyejiTheme.colorScheme.primary,
+                    spotColor = MwenyejiTheme.colorScheme.primary,
+                )
+                .clip(RoundedCornerShape(14.dp))
+                .background(MwenyejiTheme.colorScheme.primary)
+                .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             imageVector = Icons.Default.Add,
             contentDescription = if (isOpen) "Close contribute sheet" else "Contribute a guide",
             tint = MwenyejiTheme.colorScheme.onPrimary,
-            modifier = Modifier
-                .size(24.dp)
-                .graphicsLayer { rotationZ = rotation },
+            modifier =
+                Modifier
+                    .size(24.dp)
+                    .graphicsLayer { rotationZ = rotation },
         )
     }
 }
@@ -180,37 +206,44 @@ fun RowScope.AppBottomNavigationBarItem(
         label = "iconRotation",
     )
     val color by animateColorAsState(
-        targetValue = if (selected) MwenyejiTheme.colorScheme.primary
-        else MwenyejiTheme.colorScheme.outline,
+        targetValue =
+            if (selected) {
+                MwenyejiTheme.colorScheme.primary
+            } else {
+                MwenyejiTheme.colorScheme.outline
+            },
         label = "itemColor",
     )
     val isShowingSelected = rotation > 90f
     val iconRotation = if (isShowingSelected) rotation - 180f else rotation
 
     Column(
-        modifier = modifier
-            .fillMaxHeight()
-            .weight(1f)
-            .clickable(onClick = onClick),
+        modifier =
+            modifier
+                .fillMaxHeight()
+                .weight(1f)
+                .clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
         Box(
-            modifier = Modifier
-                .size(24.dp)
-                .graphicsLayer {
-                    rotationY = rotation
-                    cameraDistance = 8 * density
-                },
+            modifier =
+                Modifier
+                    .size(24.dp)
+                    .graphicsLayer {
+                        rotationY = rotation
+                        cameraDistance = 8 * density
+                    },
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = if (isShowingSelected) selectedIcon else icon,
                 contentDescription = label,
                 tint = color,
-                modifier = Modifier
-                    .size(24.dp)
-                    .graphicsLayer { rotationY = iconRotation },
+                modifier =
+                    Modifier
+                        .size(24.dp)
+                        .graphicsLayer { rotationY = iconRotation },
             )
         }
         Spacer(Modifier.height(4.dp))

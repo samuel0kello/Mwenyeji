@@ -4,7 +4,9 @@ package com.samuelokello.mwenyeji.data.models
  * Time-of-day filter — Step 2 "Best time of day" chips.
  * [displayName] is the human-readable label shown on the chip.
  */
-enum class TimeOfDay(val displayName: String) {
+enum class TimeOfDay(
+    val displayName: String,
+) {
     MORNING_RUSH("Morning rush"),
     MIDDAY("Midday"),
     EVENING_RUSH("Evening rush"),
@@ -16,7 +18,9 @@ enum class TimeOfDay(val displayName: String) {
  * Route tags — Step 4 "Tags (select all that apply)".
  * Multiple can be selected, stored as a Set<RouteTag>.
  */
-enum class RouteTag(val displayName: String) {
+enum class RouteTag(
+    val displayName: String,
+) {
     CHEAP("Cheap"),
     FAST("Fast"),
     LESS_CROWDED("Less crowded"),
@@ -35,7 +39,6 @@ data class RouteStep(
     val order: Int,
     val instruction: String,
 )
-
 
 /**
  * A crowdsourced transit guide contributed by a Mwenyeji user.
@@ -67,24 +70,19 @@ data class RouteStep(
 data class Route(
     // Identity
     val id: String = "",
-
     // Step 1 — Route
     val from: String = "",
     val to: String = "",
     val via: String = "",
     val fareKsh: Double? = null,
-
     // Step 2 — Timing
     val bestTimeOfDay: TimeOfDay = TimeOfDay.ANYTIME,
     val timingReason: String = "",
-
     // Step 3 — Steps
     val steps: List<RouteStep> = emptyList(),
-
     // Step 4 — Warnings & Tags
     val warnings: String = "",
     val tags: Set<RouteTag> = emptySet(),
-
     // Metadata
     val contributorId: String = "",
     val confirmedCount: Int = 0,
@@ -106,12 +104,13 @@ data class Route(
      * Used to drive the green/amber/red confidence dot on route cards.
      */
     val confidence: RouteConfidence
-        get() = when {
-            confirmedCount >= 5 && outdatedCount == 0       -> RouteConfidence.HIGH
-            confirmedCount >= 1 && outdatedCount <= 1       -> RouteConfidence.MEDIUM
-            outdatedCount > confirmedCount                  -> RouteConfidence.STALE
-            else                                            -> RouteConfidence.UNVERIFIED
-        }
+        get() =
+            when {
+                confirmedCount >= 5 && outdatedCount == 0 -> RouteConfidence.HIGH
+                confirmedCount >= 1 && outdatedCount <= 1 -> RouteConfidence.MEDIUM
+                outdatedCount > confirmedCount -> RouteConfidence.STALE
+                else -> RouteConfidence.UNVERIFIED
+            }
 
     /** True if the route has no steps yet (incomplete submission). */
     val hasSteps: Boolean get() = steps.isNotEmpty()
@@ -125,8 +124,8 @@ data class Route(
  * Drives the coloured dot on route cards.
  */
 enum class RouteConfidence {
-    HIGH,        // green dot  — many confirmations, no outdated flags
-    MEDIUM,      // amber dot  — some confirmations or minor concerns
-    STALE,       // red dot    — more outdated flags than confirmations
-    UNVERIFIED,  // grey dot   — no community feedback yet
+    HIGH, // green dot  — many confirmations, no outdated flags
+    MEDIUM, // amber dot  — some confirmations or minor concerns
+    STALE, // red dot    — more outdated flags than confirmations
+    UNVERIFIED, // grey dot   — no community feedback yet
 }

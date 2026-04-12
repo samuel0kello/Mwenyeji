@@ -40,10 +40,19 @@ fun ContributeScreen(
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
             when (effect) {
-                is ContributeEffect.NavigateBack      -> onNavigateBack()
-                is ContributeEffect.NavigateToSuccess -> onNavigateToSuccess()
-                is ContributeEffect.ShowError         -> { /* TODO: show snackbar */ }
-                is ContributeEffect.ShowFieldError    -> { /* handled per-step via state.errors */ }
+                is ContributeEffect.NavigateBack -> {
+                    onNavigateBack()
+                }
+
+                is ContributeEffect.NavigateToSuccess -> {
+                    onNavigateToSuccess()
+                }
+
+                is ContributeEffect.ShowError -> { /* TODO: show snackbar */
+                }
+
+                is ContributeEffect.ShowFieldError -> { /* handled per-step via state.errors */
+                }
             }
         }
     }
@@ -75,22 +84,33 @@ fun ContributeScreenContent(
         modifier = modifier.fillMaxSize(),
     ) { step ->
         when (step) {
-            ContributeStep.ROUTE -> RouteStepScreen(
-                state = state,
-                onAction = onAction,
-            )
-            ContributeStep.TIMING -> TimingStepScreen(
-                state = state,
-                onAction = onAction,
-            )
-            ContributeStep.INSTRUCTIONS -> InstructionsStepScreen(
-                state = state,
-                onAction = onAction,
-            )
-            ContributeStep.WARNINGS -> WarningsStepScreen(
-                state = state,
-                onAction = onAction,
-            )
+            ContributeStep.ROUTE -> {
+                RouteStepScreen(
+                    state = state,
+                    onAction = onAction,
+                )
+            }
+
+            ContributeStep.TIMING -> {
+                TimingStepScreen(
+                    state = state,
+                    onAction = onAction,
+                )
+            }
+
+            ContributeStep.INSTRUCTIONS -> {
+                InstructionsStepScreen(
+                    state = state,
+                    onAction = onAction,
+                )
+            }
+
+            ContributeStep.WARNINGS -> {
+                WarningsStepScreen(
+                    state = state,
+                    onAction = onAction,
+                )
+            }
         }
     }
 }
