@@ -43,8 +43,7 @@ fun App(modifier: Modifier = Modifier, snackbarManager: SnackbarManager) {
                             with(LocalDensity.current) {
                                 WindowInsets.statusBars.getTop(this).toDp()
                             },
-                        )
-                        .background(MwenyejiTheme.colorScheme.surface)
+                        ).background(MwenyejiTheme.colorScheme.surface)
                         .align(Alignment.TopStart),
             )
         }

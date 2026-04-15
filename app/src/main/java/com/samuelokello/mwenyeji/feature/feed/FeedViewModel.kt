@@ -123,8 +123,8 @@ class FeedViewModel(
             val trimmedQuery = query.trim()
             filter { route ->
                 route.from.contains(trimmedQuery, ignoreCase = true) ||
-                        route.to.contains(trimmedQuery, ignoreCase = true) ||
-                        route.via.contains(trimmedQuery, ignoreCase = true)
+                    route.to.contains(trimmedQuery, ignoreCase = true) ||
+                    route.via.contains(trimmedQuery, ignoreCase = true)
             }
         }
 
