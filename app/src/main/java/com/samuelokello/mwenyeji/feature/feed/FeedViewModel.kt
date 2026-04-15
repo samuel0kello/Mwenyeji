@@ -133,12 +133,13 @@ class FeedViewModel(
         val lng = _state.value.userLng ?: return
 
         _state.update { current ->
-            val sorted = current.routes.sortedBy { route ->
-                haversineDistance(lat, lng, route.fromLat ?: 0.0, route.fromLng ?: 0.0)
-            }
+            val sorted =
+                current.routes.sortedBy { route ->
+                    haversineDistance(lat, lng, route.fromLat ?: 0.0, route.fromLng ?: 0.0)
+                }
             current.copy(
                 routes = sorted,
-                filteredRoutes = sorted.filterBySearchQuery(current.searchQuery)
+                filteredRoutes = sorted.filterBySearchQuery(current.searchQuery),
             )
         }
     }

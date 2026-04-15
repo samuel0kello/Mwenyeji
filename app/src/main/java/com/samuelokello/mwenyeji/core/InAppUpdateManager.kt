@@ -11,27 +11,29 @@ import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.android.play.core.ktx.isFlexibleUpdateAllowed
 
-class InAppUpdateManager(context: Context) {
-
+class InAppUpdateManager(
+    context: Context,
+) {
     private val appUpdateManager = AppUpdateManagerFactory.create(context)
 
-    private val listener = InstallStateUpdatedListener { state ->
-        if (state.installStatus() == InstallStatus.DOWNLOADED) {
-            onUpdateDownloaded?.invoke()
+    private val listener =
+        InstallStateUpdatedListener { state ->
+            if (state.installStatus() == InstallStatus.DOWNLOADED) {
+                onUpdateDownloaded?.invoke()
+            }
         }
-    }
 
     var onUpdateDownloaded: (() -> Unit)? = null
 
     fun checkForUpdate(launcher: ActivityResultLauncher<IntentSenderRequest>) {
         appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->
-            if (info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
-                && info.isFlexibleUpdateAllowed
+            if (info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
+                info.isFlexibleUpdateAllowed
             ) {
                 appUpdateManager.startUpdateFlowForResult(
                     info,
                     launcher,
-                    AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build()
+                    AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build(),
                 )
             }
         }

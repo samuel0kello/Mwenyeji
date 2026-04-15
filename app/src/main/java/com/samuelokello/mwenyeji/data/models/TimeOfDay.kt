@@ -106,12 +106,13 @@ data class Route(
             fromLat != null && fromLng != null && toLat != null && toLng != null
 
     val confidence: RouteConfidence
-        get() = when {
-            confirmedCount >= 5 && outdatedCount == 0 -> RouteConfidence.HIGH
-            confirmedCount >= 1 && outdatedCount <= 1 -> RouteConfidence.MEDIUM
-            outdatedCount > confirmedCount -> RouteConfidence.STALE
-            else -> RouteConfidence.UNVERIFIED
-        }
+        get() =
+            when {
+                confirmedCount >= 5 && outdatedCount == 0 -> RouteConfidence.HIGH
+                confirmedCount >= 1 && outdatedCount <= 1 -> RouteConfidence.MEDIUM
+                outdatedCount > confirmedCount -> RouteConfidence.STALE
+                else -> RouteConfidence.UNVERIFIED
+            }
 
     val hasSteps: Boolean get() = steps.isNotEmpty()
     val formattedFare: String? get() = fareKsh?.let { "Ksh ${it.toInt()}" }
