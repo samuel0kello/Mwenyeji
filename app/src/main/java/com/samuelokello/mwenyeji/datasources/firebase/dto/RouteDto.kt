@@ -13,11 +13,18 @@ data class RouteDto(
     val to: String = "",
     val via: String = "",
     val fareKsh: Double? = null,
+    // Coordinates
+    val fromLat: Double? = null,
+    val fromLng: Double? = null,
+    val toLat: Double? = null,
+    val toLng: Double? = null,
+    // Route identity
+    val routeNumber: String? = null,
+    val saccos: List<String> = emptyList(),
     val bestTimeOfDay: String = "ANYTIME",
     val timingReason: String = "",
     val steps: List<Map<String, Any>> = emptyList(),
     val warnings: String = "",
-    // Stored as List<String> in Firestore
     val tags: List<String> = emptyList(),
     val contributorId: String = "",
     val confirmedCount: Int = 0,

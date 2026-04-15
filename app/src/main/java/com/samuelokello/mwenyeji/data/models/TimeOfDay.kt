@@ -75,6 +75,14 @@ data class Route(
     val to: String = "",
     val via: String = "",
     val fareKsh: Double? = null,
+    // Coordinates — captured from map search
+    val fromLat: Double? = null,
+    val fromLng: Double? = null,
+    val toLat: Double? = null,
+    val toLng: Double? = null,
+    // Route identity
+    val routeNumber: String? = null,
+    val saccos: List<String> = emptyList(),
     // Step 2 — Timing
     val bestTimeOfDay: TimeOfDay = TimeOfDay.ANYTIME,
     val timingReason: String = "",
@@ -91,31 +99,21 @@ data class Route(
     val lastConfirmedAt: Long? = null,
     val createdAt: Long = System.currentTimeMillis(),
 ) {
-    // Derived helpers
-
-    /** Display title shown on route cards e.g. "CBD → Westlands". */
     val title: String get() = "$from → $to"
-
-    /** True if the route has at least one community confirmation. */
     val isConfirmed: Boolean get() = confirmedCount > 0
-
-    /**
-     * Confidence level based on recent confirmations vs negative signals.
-     * Used to drive the green/amber/red confidence dot on route cards.
-     */
-    val confidence: RouteConfidence
+    val hasCoordinates: Boolean
         get() =
-            when {
-                confirmedCount >= 5 && outdatedCount == 0 -> RouteConfidence.HIGH
-                confirmedCount >= 1 && outdatedCount <= 1 -> RouteConfidence.MEDIUM
-                outdatedCount > confirmedCount -> RouteConfidence.STALE
-                else -> RouteConfidence.UNVERIFIED
-            }
+            fromLat != null && fromLng != null && toLat != null && toLng != null
 
-    /** True if the route has no steps yet (incomplete submission). */
+    val confidence: RouteConfidence
+        get() = when {
+            confirmedCount >= 5 && outdatedCount == 0 -> RouteConfidence.HIGH
+            confirmedCount >= 1 && outdatedCount <= 1 -> RouteConfidence.MEDIUM
+            outdatedCount > confirmedCount -> RouteConfidence.STALE
+            else -> RouteConfidence.UNVERIFIED
+        }
+
     val hasSteps: Boolean get() = steps.isNotEmpty()
-
-    /** Formatted fare string e.g. "Ksh 50" or null if no fare set. */
     val formattedFare: String? get() = fareKsh?.let { "Ksh ${it.toInt()}" }
 }
 

@@ -120,10 +120,11 @@ class FeedViewModel(
         if (query.isBlank()) {
             this
         } else {
+            val trimmedQuery = query.trim()
             filter { route ->
-                route.from.contains(query, ignoreCase = true) ||
-                    route.to.contains(query, ignoreCase = true) ||
-                    route.via.contains(query, ignoreCase = true)
+                route.from.contains(trimmedQuery, ignoreCase = true) ||
+                        route.to.contains(trimmedQuery, ignoreCase = true) ||
+                        route.via.contains(trimmedQuery, ignoreCase = true)
             }
         }
 
@@ -131,15 +132,15 @@ class FeedViewModel(
         val lat = _state.value.userLat ?: return
         val lng = _state.value.userLng ?: return
 
-//        _state.update { current ->
-//            val sorted = current.routes.sortedBy { route ->
-//                haversineDistance(lat, lng, route.fromLat ?: 0.0, route.fromLng ?: 0.0)
-//            }
-//            current.copy(
-//                routes = sorted,
-//                filteredRoutes = sorted.filterBySearchQuery(current.searchQuery)
-//            )
-//        }
+        _state.update { current ->
+            val sorted = current.routes.sortedBy { route ->
+                haversineDistance(lat, lng, route.fromLat ?: 0.0, route.fromLng ?: 0.0)
+            }
+            current.copy(
+                routes = sorted,
+                filteredRoutes = sorted.filterBySearchQuery(current.searchQuery)
+            )
+        }
     }
 
     // Haversine formula — straight-line distance between two coordinates in km
