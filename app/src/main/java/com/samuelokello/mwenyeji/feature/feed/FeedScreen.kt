@@ -1,6 +1,5 @@
 package com.samuelokello.mwenyeji.feature.feed
 
-
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -38,7 +37,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.samuelokello.mwenyeji.data.models.TimeOfDay
-import com.samuelokello.mwenyeji.feature.contribute.ContributeSheet
 import com.samuelokello.mwenyeji.feature.feed.components.RouteCard
 import com.samuelokello.mwenyeji.ui.designsystem.components.MwenyejiLargeHeaderBar
 import com.samuelokello.mwenyeji.ui.designsystem.components.card.MwenyejiCard
@@ -48,13 +46,13 @@ import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
-
 @Composable
 fun FeedScreen(
     onNavigateToRouteDetail: (String) -> Unit,
     onNavigateToSeeAll: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: FeedViewModel = koinViewModel(),
+    onNavigateToContribute: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -62,33 +60,47 @@ fun FeedScreen(
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
             when (effect) {
-                is FeedEffect.NavigateToRouteDetail -> onNavigateToRouteDetail(effect.route.id)
-                is FeedEffect.NavigateToSeeAll      -> onNavigateToSeeAll()
-                is FeedEffect.ShowError             -> { /* show snackbar if needed */ }
+                is FeedEffect.NavigateToRouteDetail -> {
+                    onNavigateToRouteDetail(effect.route.id)
+                }
+
+                is FeedEffect.NavigateToSeeAll -> {
+                    onNavigateToSeeAll()
+                }
+
+                is FeedEffect.ShowError -> { // show snackbar if needed
+                }
+
+                FeedEffect.GetLocation -> {
+                    TODO()
+                }
+
+                FeedEffect.RequestLocationPermission -> {
+                    TODO()
+                }
             }
         }
     }
 
     FeedScreenContent(
         state = state,
-        onIntent = viewModel::onIntent,
+        onIntent = viewModel::onAction,
+        onNavigateToContribute = onNavigateToContribute,
         modifier = modifier,
     )
 }
 
-
 @Composable
 internal fun FeedScreenContent(
     state: FeedState,
-    onIntent: (FeedIntent) -> Unit,
+    onIntent: (FeedAction) -> Unit,
+    onNavigateToContribute: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
     var showContributeSheet by rememberSaveable { mutableStateOf(false) }
     val snackbarManager: SnackbarManager = koinInject()
-
-
 
     Scaffold(
         modifier = modifier,
@@ -100,7 +112,7 @@ internal fun FeedScreenContent(
                 content = {
                     OutlinedTextField(
                         value = state.searchQuery,
-                        onValueChange = { onIntent(FeedIntent.SearchQueryChanged(it)) },
+                        onValueChange = { onIntent(FeedAction.SearchQueryChanged(it)) },
                         placeholder = {
                             Text(
                                 text = "Search area, stage, destination...",
@@ -116,19 +128,20 @@ internal fun FeedScreenContent(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { showContributeSheet = true }
+                onClick = onNavigateToContribute,
             ) {
                 Icon(Icons.Outlined.Add, contentDescription = "Contribute")
             }
-        }
+        },
     ) { paddingValues ->
 
         when {
             state.isLoading -> {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
                     contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator(color = colors.primary)
@@ -137,9 +150,10 @@ internal fun FeedScreenContent(
 
             state.error != null -> {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -147,7 +161,7 @@ internal fun FeedScreenContent(
                         style = typography.bodyMedium,
                         color = colors.error,
                     )
-                    TextButton(onClick = { onIntent(FeedIntent.RetryClicked) }) {
+                    TextButton(onClick = { onIntent(FeedAction.RetryClicked) }) {
                         Text("Retry", color = colors.primary)
                     }
                 }
@@ -155,13 +169,13 @@ internal fun FeedScreenContent(
 
             else -> {
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     contentPadding = PaddingValues(bottom = 24.dp),
                 ) {
-
                     // Time of day filter chips
                     item(key = "time_filters") {
                         LazyRow(
@@ -177,7 +191,7 @@ internal fun FeedScreenContent(
                                     title = timeOfDay.displayName,
                                     selected = state.selectedTimeOfDay == timeOfDay,
                                     onSelected = {
-                                        onIntent(FeedIntent.SelectTimeOfDay(timeOfDay))
+                                        onIntent(FeedAction.SelectTimeOfDay(timeOfDay))
                                     },
                                 )
                             }
@@ -191,9 +205,10 @@ internal fun FeedScreenContent(
                     // Section header
                     item(key = "section_header") {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 4.dp),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
@@ -203,7 +218,7 @@ internal fun FeedScreenContent(
                                 modifier = Modifier.weight(1f),
                             )
                             TextButton(
-                                onClick = { onIntent(FeedIntent.SeeAllClicked) },
+                                onClick = { onIntent(FeedAction.SeeAllClicked) },
                                 contentPadding = PaddingValues(0.dp),
                             ) {
                                 Text(
@@ -219,9 +234,10 @@ internal fun FeedScreenContent(
                     if (state.filteredRoutes.isEmpty()) {
                         item(key = "empty_state") {
                             Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 48.dp),
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 48.dp),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Text(
@@ -239,7 +255,7 @@ internal fun FeedScreenContent(
                         ) { route ->
                             RouteCard(
                                 route = route,
-                                onClick = { onIntent(FeedIntent.RouteClicked(route)) },
+                                onClick = { onIntent(FeedAction.RouteClicked(route)) },
                                 modifier = Modifier.padding(horizontal = 16.dp),
                             )
                         }
@@ -247,42 +263,27 @@ internal fun FeedScreenContent(
                 }
             }
         }
-
-        ContributeSheet(
-            visible = showContributeSheet,
-            onDismiss = { showContributeSheet = false },
-            onNavigateToSuccess = {
-                showContributeSheet = false
-                snackbarManager.showSuccess("Guide submitted! Thank you 🙌")
-            },
-        )
     }
 }
-
 
 @Preview(showBackground = true, backgroundColor = 0xFF0E1210)
 @Composable
 private fun FeedScreenContentPreview() {
     MwenyejiAppTheme {
         FeedScreenContent(
-            state = FeedState(
-                selectedTimeOfDay = TimeOfDay.MORNING_RUSH,
-                filteredRoutes = emptyList(),
-            ),
+            state =
+                FeedState(
+                    selectedTimeOfDay = TimeOfDay.MORNING_RUSH,
+                    filteredRoutes = emptyList(),
+                ),
             onIntent = {},
+            onNavigateToContribute = {},
         )
     }
 }
 
-
-
 @Composable
-fun TimeOfDayChip(
-    title: String,
-    modifier: Modifier = Modifier,
-    selected: Boolean = false,
-    onSelected: (String) -> Unit = {},
-) {
+fun TimeOfDayChip(title: String, modifier: Modifier = Modifier, selected: Boolean = false, onSelected: (String) -> Unit = {}) {
     val colors = MwenyejiTheme.colorScheme
 
     // Animate border and text color transitions
@@ -306,15 +307,17 @@ fun TimeOfDayChip(
         modifier = modifier,
         onClick = { onSelected(title) },
         containerColor = containerColor,
-        border = BorderStroke(
-            width = if (selected) 1.5.dp else 1.dp,
-            color = borderColor,
-        ),
+        border =
+            BorderStroke(
+                width = if (selected) 1.5.dp else 1.dp,
+                color = borderColor,
+            ),
     ) {
         Row(
-            modifier = Modifier
-                .height(44.dp)
-                .padding(horizontal = 16.dp),
+            modifier =
+                Modifier
+                    .height(44.dp)
+                    .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
@@ -327,14 +330,8 @@ fun TimeOfDayChip(
     }
 }
 
-
 @Composable
-fun TimeOfDayChipGroup(
-    options: List<String>,
-    selectedOption: String?,
-    onOptionSelected: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun TimeOfDayChipGroup(options: List<String>, selectedOption: String?, onOptionSelected: (String) -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -350,16 +347,15 @@ fun TimeOfDayChipGroup(
     }
 }
 
-
-
 @Preview(showBackground = true, backgroundColor = 0xFF0E1210)
 @Composable
 private fun TimeOfDayChipPreview() {
     MwenyejiAppTheme {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             TimeOfDayChip(

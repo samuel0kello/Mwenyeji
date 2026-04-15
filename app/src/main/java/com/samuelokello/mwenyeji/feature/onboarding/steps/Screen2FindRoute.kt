@@ -28,11 +28,7 @@ import com.samuelokello.mwenyeji.ui.theme.color.AppColors.TextSecondary
 import kotlinx.coroutines.delay
 
 @Composable
-fun Screen2FindRoute(
-    currentPage: Int,
-    onNext: () -> Unit,
-    onSkip: () -> Unit,
-) {
+fun Screen2FindRoute(currentPage: Int, onNext: () -> Unit, onSkip: () -> Unit) {
     var showSearch by remember { mutableStateOf(false) }
     var showCard1 by remember { mutableStateOf(false) }
     var showCard2 by remember { mutableStateOf(false) }
@@ -51,42 +47,46 @@ fun Screen2FindRoute(
         }
     }
 
-    val results = listOf(
-        RouteResult(
-            from = "CBD",
-            to = "Karen",
-            fare = "Ksh 150",
-            confidence = "Reliable",
-            duration = "45 min",
-            dotColor = GreenLight,
-            isActive = true,
-            steps = listOf(
-                "Board at Kencom, ask for Karen route",
-                "Alight at Galleria roundabout",
+    val results =
+        listOf(
+            RouteResult(
+                from = "CBD",
+                to = "Karen",
+                fare = "Ksh 150",
+                confidence = "Reliable",
+                duration = "45 min",
+                dotColor = GreenLight,
+                isActive = true,
+                steps =
+                    listOf(
+                        "Board at Kencom, ask for Karen route",
+                        "Alight at Galleria roundabout",
+                    ),
             ),
-        ),
-        RouteResult(
-            from = "Ngong Rd",
-            to = "Karen",
-            fare = "Ksh 80",
-            confidence = "Moderate",
-            duration = "38 min",
-            dotColor = AmberWarm,
-            isActive = false,
-        ),
-    )
+            RouteResult(
+                from = "Ngong Rd",
+                to = "Karen",
+                fare = "Ksh 80",
+                confidence = "Moderate",
+                duration = "38 min",
+                dotColor = AmberWarm,
+                isActive = false,
+            ),
+        )
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier =
+            Modifier
+                .fillMaxSize(),
     ) {
         GridBackground(modifier = Modifier.fillMaxSize())
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 28.dp)
-                .padding(top = 60.dp, bottom = 44.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 28.dp)
+                    .padding(top = 60.dp, bottom = 44.dp),
         ) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 androidx.compose.material3.TextButton(onClick = onSkip) {

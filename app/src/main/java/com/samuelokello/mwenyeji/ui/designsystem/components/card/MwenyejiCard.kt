@@ -1,7 +1,6 @@
 package com.samuelokello.mwenyeji.ui.designsystem.components.card
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
@@ -45,10 +44,11 @@ fun MwenyejiCard(
             onClick = onClick,
             modifier = modifier,
             shape = shape,
-            colors = CardDefaults.cardColors(
-                containerColor = containerColor,
-                contentColor   = contentColor,
-            ),
+            colors =
+                CardDefaults.cardColors(
+                    containerColor = containerColor,
+                    contentColor = contentColor,
+                ),
             elevation = CardDefaults.cardElevation(defaultElevation = elevation),
             border = border,
             content = content,
@@ -58,10 +58,11 @@ fun MwenyejiCard(
         Card(
             modifier = modifier,
             shape = shape,
-            colors = CardDefaults.cardColors(
-                containerColor = containerColor,
-                contentColor   = contentColor,
-            ),
+            colors =
+                CardDefaults.cardColors(
+                    containerColor = containerColor,
+                    contentColor = contentColor,
+                ),
             elevation = CardDefaults.cardElevation(defaultElevation = elevation),
             border = border,
             content = content,
@@ -87,10 +88,11 @@ fun MwenyejiOutlinedCard(
         onClick = onClick,
         shape = shape,
         elevation = MwenyejiTheme.elevation.level0,
-        border = BorderStroke(
-            width = MwenyejiTheme.sizes.borderWidth,
-            color = MwenyejiTheme.colorScheme.outline,
-        ),
+        border =
+            BorderStroke(
+                width = MwenyejiTheme.sizes.borderWidth,
+                color = MwenyejiTheme.colorScheme.outline,
+            ),
         containerColor = containerColor,
         contentColor = contentColor,
         content = content,
@@ -117,8 +119,6 @@ fun MwenyejiElevatedCard(
         content = content,
     )
 }
-
-
 
 @Preview(showBackground = true, backgroundColor = 0xFF0E1210)
 @Composable

@@ -21,7 +21,6 @@ class RouteDetailsViewModel(
     private val authRepository: AuthRepository,
     private val snackbarManager: SnackbarManager,
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(RouteDetailsState())
     val state: StateFlow<RouteDetailsState> = _state.asStateFlow()
 
@@ -30,10 +29,18 @@ class RouteDetailsViewModel(
 
     fun onAction(action: RouteDetailsAction) {
         when (action) {
-            is RouteDetailsAction.LoadRoute -> loadRoute(action.routeId)
-            is RouteDetailsAction.VerdictSelected -> onVerdictSelected(action.verdict)
-            is RouteDetailsAction.NavigateBack -> viewModelScope.launch {
-                _effects.send(RouteDetailsEffect.NavigateBack)
+            is RouteDetailsAction.LoadRoute -> {
+                loadRoute(action.routeId)
+            }
+
+            is RouteDetailsAction.VerdictSelected -> {
+                onVerdictSelected(action.verdict)
+            }
+
+            is RouteDetailsAction.NavigateBack -> {
+                viewModelScope.launch {
+                    _effects.send(RouteDetailsEffect.NavigateBack)
+                }
             }
         }
     }
@@ -46,8 +53,7 @@ class RouteDetailsViewModel(
                 .catch { e ->
                     _state.update { it.copy(isLoading = false, error = e.message) }
                     snackbarManager.showError(e.message ?: "Failed to load route")
-                }
-                .collect { route ->
+                }.collect { route ->
                     _state.update { it.copy(isLoading = false, route = route) }
                     // Load user's existing verdict once route is loaded
                     loadUserVerdict(routeId)
@@ -60,9 +66,10 @@ class RouteDetailsViewModel(
         viewModelScope.launch {
             val firestoreVerdict = routeRepository.getUserVerdict(routeId, userId)
             // Map the Firestore string back to the enum
-            val verdict = RouteVerdict.entries.find {
-                it.firestoreValue == firestoreVerdict
-            }
+            val verdict =
+                RouteVerdict.entries.find {
+                    it.firestoreValue == firestoreVerdict
+                }
             _state.update { it.copy(selectedVerdict = verdict) }
         }
     }
@@ -78,31 +85,34 @@ class RouteDetailsViewModel(
         _state.update { it.copy(selectedVerdict = newVerdict) }
 
         viewModelScope.launch {
-            val firestoreVerdict = newVerdict?.firestoreValue
-                ?: _state.value.selectedVerdict?.firestoreValue
-                ?: return@launch
+            val firestoreVerdict =
+                newVerdict?.firestoreValue
+                    ?: _state.value.selectedVerdict?.firestoreValue
+                    ?: return@launch
 
-            routeRepository.confirmRoute(
-                routeId = routeId,
-                userId = userId,
-                verdict = firestoreVerdict, // ← now passes "CONFIRMED" not "WORKS"
-            ).onSuccess {
-                val message = when (newVerdict) {
-                    RouteVerdict.WORKS -> "Thanks for confirming this route works! 👍"
-                    RouteVerdict.DIDNT -> "Thanks for the feedback — we'll note this route had issues."
-                    RouteVerdict.OUTDATED -> "Thanks! We'll flag this route as potentially outdated."
-                    null -> "Feedback removed."
+            routeRepository
+                .confirmRoute(
+                    routeId = routeId,
+                    userId = userId,
+                    verdict = firestoreVerdict, // ← now passes "CONFIRMED" not "WORKS"
+                ).onSuccess {
+                    val message =
+                        when (newVerdict) {
+                            RouteVerdict.WORKS -> "Thanks for confirming this route works! 👍"
+                            RouteVerdict.DIDNT -> "Thanks for the feedback — we'll note this route had issues."
+                            RouteVerdict.OUTDATED -> "Thanks! We'll flag this route as potentially outdated."
+                            null -> "Feedback removed."
+                        }
+                    snackbarManager.showSuccess(message)
+                }.onFailure { e ->
+                    // Revert optimistic update on failure
+                    _state.update { it.copy(selectedVerdict = _state.value.selectedVerdict) }
+                    snackbarManager.showError(
+                        message = e.message ?: "Failed to submit feedback",
+                        actionLabel = "Retry",
+                        onAction = { onVerdictSelected(verdict) },
+                    )
                 }
-                snackbarManager.showSuccess(message)
-            }.onFailure { e ->
-                // Revert optimistic update on failure
-                _state.update { it.copy(selectedVerdict = _state.value.selectedVerdict) }
-                snackbarManager.showError(
-                    message = e.message ?: "Failed to submit feedback",
-                    actionLabel = "Retry",
-                    onAction = { onVerdictSelected(verdict) },
-                )
-            }
         }
     }
 }
@@ -115,8 +125,14 @@ data class RouteDetailsState(
 )
 
 sealed interface RouteDetailsAction {
-    data class LoadRoute(val routeId: String) : RouteDetailsAction
-    data class VerdictSelected(val verdict: RouteVerdict) : RouteDetailsAction
+    data class LoadRoute(
+        val routeId: String,
+    ) : RouteDetailsAction
+
+    data class VerdictSelected(
+        val verdict: RouteVerdict,
+    ) : RouteDetailsAction
+
     data object NavigateBack : RouteDetailsAction
 }
 

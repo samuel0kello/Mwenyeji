@@ -7,9 +7,10 @@ import com.samuelokello.mwenyeji.feature.feed.route.RouteDetailsViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
-val feedModule = module {
-    viewModelOf(::FeedViewModel)
-    viewModelOf(::AllRoutesViewModel)
-    viewModelOf(::RouteDetailsViewModel)
-    viewModelOf(::ContributeViewModel)
-}
+val feedModule =
+    module {
+        viewModelOf(::FeedViewModel)
+        viewModelOf(::AllRoutesViewModel)
+        viewModelOf(::RouteDetailsViewModel)
+        viewModelOf(::ContributeViewModel)
+    }

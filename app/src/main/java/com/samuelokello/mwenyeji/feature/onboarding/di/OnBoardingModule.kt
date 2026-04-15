@@ -5,7 +5,8 @@ import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackbarMan
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
-val onBoardingModule = module {
-    single { SnackbarManager() }
-    viewModelOf(::OnboardingViewModel)
-}
+val onBoardingModule =
+    module {
+        single { SnackbarManager() }
+        viewModelOf(::OnboardingViewModel)
+    }

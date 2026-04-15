@@ -19,11 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 
 @Composable
-fun ProgressDots(
-    total: Int,
-    current: Int,
-    modifier: Modifier = Modifier,
-) {
+fun ProgressDots(total: Int, current: Int, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -33,18 +29,20 @@ fun ProgressDots(
             val isActive = index == current
             val width by animateDpAsState(
                 targetValue = if (isActive) 24.dp else 8.dp,
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessMedium,
-                ),
-                label = "dot_width_$index"
+                animationSpec =
+                    spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMedium,
+                    ),
+                label = "dot_width_$index",
             )
             Box(
-                modifier = Modifier
-                    .height(8.dp)
-                    .width(width)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(if (isActive) MwenyejiTheme.colorScheme.primary else MwenyejiTheme.colorScheme.primaryContainer)
+                modifier =
+                    Modifier
+                        .height(8.dp)
+                        .width(width)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(if (isActive) MwenyejiTheme.colorScheme.primary else MwenyejiTheme.colorScheme.primaryContainer),
             )
         }
     }

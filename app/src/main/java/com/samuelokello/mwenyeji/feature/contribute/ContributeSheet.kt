@@ -60,9 +60,10 @@ fun ContributeSheet(
     val colors = MwenyejiTheme.colorScheme
 
     // Always start Hidden — we animate to FullyExpanded reactively
-    val sheetState = rememberModalBottomSheetState(
-        initialDetent = Hidden,
-    )
+    val sheetState =
+        rememberModalBottomSheetState(
+            initialDetent = Hidden,
+        )
 
     // Drive the sheet purely from `visible` — no LaunchedEffect needed
     sheetState.currentDetent = if (visible) FullyExpanded else Hidden
@@ -70,8 +71,14 @@ fun ContributeSheet(
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
             when (effect) {
-                is ContributeEffect.NavigateBack      -> onDismiss()
-                is ContributeEffect.NavigateToSuccess -> onNavigateToSuccess()
+                is ContributeEffect.NavigateBack -> {
+                    onDismiss()
+                }
+
+                is ContributeEffect.NavigateToSuccess -> {
+                    onNavigateToSuccess()
+                }
+
                 else -> {}
             }
         }
@@ -87,35 +94,39 @@ fun ContributeSheet(
             Modifier.padding(
                 WindowInsets.navigationBars
                     .only(WindowInsetsSides.Horizontal)
-                    .asPaddingValues()
-            )
+                    .asPaddingValues(),
+            ),
         ) {
             Sheet(
-                modifier = modifier
-                    .shadow(4.dp, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                    .background(colors.surface)
-                    .fillMaxWidth(),
+                modifier =
+                    modifier
+                        .shadow(4.dp, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                        .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                        .background(colors.surface)
+                        .fillMaxWidth(),
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                        .imePadding(),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding()
+                            .imePadding(),
                 ) {
                     // drag handle
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 12.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 12.dp),
                         contentAlignment = Alignment.Center,
                     ) {
                         DragIndication(
-                            modifier = Modifier
-                                .width(40.dp)
-                                .height(4.dp)
-                                .clip(RoundedCornerShape(2.dp))
-                                .background(colors.outlineVariant),
+                            modifier =
+                                Modifier
+                                    .width(40.dp)
+                                    .height(4.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(colors.outlineVariant),
                         )
                     }
 
@@ -124,27 +135,53 @@ fun ContributeSheet(
                     AnimatedContent(
                         targetState = state.currentStep,
                         transitionSpec = {
-                            if (targetState > initialState)
+                            if (targetState > initialState) {
                                 slideInHorizontally { it } togetherWith slideOutHorizontally { -it }
-                            else
+                            } else {
                                 slideInHorizontally { -it } togetherWith slideOutHorizontally { it }
+                            }
                         },
                         label = "stepAnimation",
-                        modifier = Modifier
-                            .weight(1f)
-                            .verticalScroll(rememberScrollState()),
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .verticalScroll(rememberScrollState()),
                     ) { step ->
                         Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 20.dp, vertical = 16.dp),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 20.dp, vertical = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(20.dp),
                         ) {
                             when (step) {
-                                ContributeStep.ROUTE        -> RouteStepScreen(state = state, onAction = viewModel::onAction)
-                                ContributeStep.TIMING       -> TimingStepScreen(state = state, onAction = viewModel::onAction)
-                                ContributeStep.INSTRUCTIONS -> InstructionsStepScreen(state = state, onAction = viewModel::onAction)
-                                ContributeStep.WARNINGS     -> WarningsStepScreen(state = state, onAction = viewModel::onAction)
+                                ContributeStep.ROUTE -> {
+                                    RouteStepScreen(
+                                        state = state,
+                                        onAction = viewModel::onAction,
+                                    )
+                                }
+
+                                ContributeStep.TIMING -> {
+                                    TimingStepScreen(
+                                        state = state,
+                                        onAction = viewModel::onAction,
+                                    )
+                                }
+
+                                ContributeStep.INSTRUCTIONS -> {
+                                    InstructionsStepScreen(
+                                        state = state,
+                                        onAction = viewModel::onAction,
+                                    )
+                                }
+
+                                ContributeStep.WARNINGS -> {
+                                    WarningsStepScreen(
+                                        state = state,
+                                        onAction = viewModel::onAction,
+                                    )
+                                }
                             }
                         }
                     }
@@ -152,9 +189,10 @@ fun ContributeSheet(
                     MwenyejiButton(
                         text = if (state.isLastStep) "Submit guide →" else "Continue",
                         onClick = { viewModel.onAction(ContributeActions.NextStep) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 12.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp, vertical = 12.dp),
                     )
                 }
             }
@@ -168,10 +206,11 @@ private fun SheetStepHeader(state: ContributeState) {
     val typography = MwenyejiTheme.typography
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .padding(bottom = 8.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Text(
@@ -185,14 +224,18 @@ private fun SheetStepHeader(state: ContributeState) {
         ) {
             repeat(ContributeStep.TOTAL) { index ->
                 Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(3.dp)
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(
-                            if (index <= state.currentStep) colors.primary
-                            else colors.outlineVariant,
-                        ),
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .height(3.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(
+                                if (index <= state.currentStep) {
+                                    colors.primary
+                                } else {
+                                    colors.outlineVariant
+                                },
+                            ),
                 )
             }
         }

@@ -14,41 +14,35 @@ data class SnackbarMessage(
 )
 
 class SnackbarManager {
-
     private val _currentMessage = MutableStateFlow<SnackbarMessage?>(null)
     val currentMessage: StateFlow<SnackbarMessage?> = _currentMessage.asStateFlow()
 
     fun showSuccess(message: String) {
-        _currentMessage.value = SnackbarMessage(
-            message = message,
-            type = SnackbarMessageType.SUCCESS,
-        )
+        _currentMessage.value =
+            SnackbarMessage(
+                message = message,
+                type = SnackbarMessageType.SUCCESS,
+            )
     }
 
-    fun showError(
-        message: String,
-        actionLabel: String? = "Dismiss",
-        onAction: (() -> Unit)? = null,
-    ) {
-        _currentMessage.value = SnackbarMessage(
-            message = message,
-            type = SnackbarMessageType.ERROR,
-            actionLabel = actionLabel,
-            onAction = onAction,
-        )
+    fun showError(message: String, actionLabel: String? = "Dismiss", onAction: (() -> Unit)? = null) {
+        _currentMessage.value =
+            SnackbarMessage(
+                message = message,
+                type = SnackbarMessageType.ERROR,
+                actionLabel = actionLabel,
+                onAction = onAction,
+            )
     }
 
-    fun showInfo(
-        message: String,
-        actionLabel: String? = null,
-        onAction: (() -> Unit)? = null,
-    ) {
-        _currentMessage.value = SnackbarMessage(
-            message = message,
-            type = SnackbarMessageType.INFO,
-            actionLabel = actionLabel,
-            onAction = onAction,
-        )
+    fun showInfo(message: String, actionLabel: String? = null, onAction: (() -> Unit)? = null) {
+        _currentMessage.value =
+            SnackbarMessage(
+                message = message,
+                type = SnackbarMessageType.INFO,
+                actionLabel = actionLabel,
+                onAction = onAction,
+            )
     }
 
     fun dismiss() {

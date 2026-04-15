@@ -14,7 +14,6 @@ import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
  * All values are composable-only (they read the current composition local).
  */
 object SemanticColors {
-
     // ── Text ──────────────────────────────────────────────────────────────────
 
     /** Primary body text and headings. */

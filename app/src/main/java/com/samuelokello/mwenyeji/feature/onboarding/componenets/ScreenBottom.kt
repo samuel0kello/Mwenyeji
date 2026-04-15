@@ -27,33 +27,35 @@ fun ScreenBottom(
         Text(
             label,
             style = MwenyejiTheme.typography.labelSmall,
-            color = MwenyejiTheme.colorScheme.primaryLight
+            color = MwenyejiTheme.colorScheme.primaryLight,
         )
         Spacer(Modifier.height(8.dp))
         Text(
             title,
             style = MwenyejiTheme.typography.headlineMedium,
-            color = MwenyejiTheme.colorScheme.onPrimaryContainer
+            color = MwenyejiTheme.colorScheme.onPrimaryContainer,
         )
         Spacer(Modifier.height(8.dp))
         Text(
             subtitle,
             style = MwenyejiTheme.typography.bodyLarge,
-            color = MwenyejiTheme.colorScheme.secondary
+            color = MwenyejiTheme.colorScheme.secondary,
         )
         Spacer(Modifier.height(20.dp))
         ProgressDots(total = 4, current = page)
         Spacer(Modifier.height(20.dp))
         Button(
             onClick = onNext,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(if (isFinal) 60.dp else 56.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(if (isFinal) 60.dp else 56.dp),
             shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MwenyejiTheme.colorScheme.primary,
-                contentColor = MwenyejiTheme.colorScheme.onPrimary
-            ),
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = MwenyejiTheme.colorScheme.primary,
+                    contentColor = MwenyejiTheme.colorScheme.onPrimary,
+                ),
         ) {
             Text(
                 "$btnText →",

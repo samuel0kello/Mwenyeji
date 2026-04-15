@@ -16,19 +16,17 @@ import com.samuelokello.mwenyeji.feature.feed.components.RouteCard
 import com.samuelokello.mwenyeji.ui.designsystem.components.MwenyejiTopBar
 import org.koin.compose.viewmodel.koinViewModel
 
-
 @Composable
-fun AllRoutes(
-    viewmodel: AllRoutesViewModel = koinViewModel(),
-    onNavigateToRouteDetail: (id: String) -> Unit,
-    onNavigateBack: () -> Unit
-) {
+fun AllRoutes(viewmodel: AllRoutesViewModel = koinViewModel(), onNavigateToRouteDetail: (id: String) -> Unit, onNavigateBack: () -> Unit) {
     val state by viewmodel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewmodel.effects.collect { effects ->
-            when(effects) {
-                is AllRoutesEffects.NavigateToRouteDetail -> onNavigateToRouteDetail(effects.route.id)
+            when (effects) {
+                is AllRoutesEffects.NavigateToRouteDetail -> {
+                    onNavigateToRouteDetail(effects.route.id)
+                }
+
                 is AllRoutesEffects.ShowError -> {}
             }
         }
@@ -37,11 +35,9 @@ fun AllRoutes(
     AllRoutesContent(
         state = state,
         onAction = viewmodel::onAction,
-        onNavigateBack=onNavigateBack
+        onNavigateBack = onNavigateBack,
     )
-
 }
-
 
 @Composable
 fun AllRoutesContent(
@@ -54,13 +50,14 @@ fun AllRoutesContent(
         topBar = {
             MwenyejiTopBar(
                 title = "",
-                onNavigateBack = onNavigateBack
+                onNavigateBack = onNavigateBack,
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
-            modifier = Modifier
-                .padding(paddingValues)
+            modifier =
+                Modifier
+                    .padding(paddingValues),
         ) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))
@@ -69,7 +66,7 @@ fun AllRoutesContent(
                 RouteCard(
                     route = route,
                     onClick = { onAction(AllRoutesActions.RouteClicked(route)) },
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    modifier = Modifier.padding(horizontal = 16.dp),
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }

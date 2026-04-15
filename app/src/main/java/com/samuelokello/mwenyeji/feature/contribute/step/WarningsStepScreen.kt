@@ -21,11 +21,7 @@ import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun WarningsStepScreen(
-    state: ContributeState,
-    onAction: (ContributeActions) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun WarningsStepScreen(state: ContributeState, onAction: (ContributeActions) -> Unit, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
 
@@ -50,9 +46,11 @@ fun WarningsStepScreen(
                         color = colors.onSurfaceVariant,
                     )
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 100.dp),  // multiline feel ,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 100.dp),
+                // multiline feel ,
                 singleLine = false,
             )
         }

@@ -27,21 +27,25 @@ import com.samuelokello.mwenyeji.ui.theme.color.AppColors.GreenLight
 fun PointsToast(visible: Boolean, modifier: Modifier = Modifier) {
     AnimatedVisibility(
         visible = visible,
-        enter = slideInHorizontally(
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessMedium,
-            ),
-            initialOffsetX = { it },
-        ) + fadeIn(),
+        enter =
+            slideInHorizontally(
+                animationSpec =
+                    spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMedium,
+                    ),
+                initialOffsetX = { it },
+            ) +
+                fadeIn(),
         exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut(),
         modifier = modifier,
     ) {
         Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(14.dp))
-                .background(GreenLight)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier =
+                Modifier
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(GreenLight)
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {

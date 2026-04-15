@@ -35,22 +35,26 @@ fun ContribCard(visible: Boolean, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
     AnimatedVisibility(
         visible = visible,
-        enter = slideInVertically(
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessMediumLow,
-            ),
-            initialOffsetY = { it / 3 },
-        ) + fadeIn(tween(400)),
+        enter =
+            slideInVertically(
+                animationSpec =
+                    spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMediumLow,
+                    ),
+                initialOffsetY = { it / 3 },
+            ) +
+                fadeIn(tween(400)),
         modifier = modifier,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(20.dp))
-                .background(colors.surfaceContainerLow)
-                .border(1.dp, colors.border, RoundedCornerShape(20.dp))
-                .padding(20.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(colors.surfaceContainerLow)
+                    .border(1.dp, colors.border, RoundedCornerShape(20.dp))
+                    .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
@@ -90,14 +94,14 @@ private fun FieldRow(key: String, value: String) {
             modifier = Modifier.width(36.dp),
         )
         Row(
-            modifier = Modifier
-                .weight(1f)
-                .clip(RoundedCornerShape(8.dp))
-                .background(
-                    MwenyejiTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.5f)
-                )
-                .border(1.dp, MwenyejiTheme.colorScheme.border, RoundedCornerShape(8.dp))
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(
+                        MwenyejiTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.5f),
+                    ).border(1.dp, MwenyejiTheme.colorScheme.border, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
         ) {
             Text(
                 value,
@@ -112,15 +116,15 @@ private fun FieldRow(key: String, value: String) {
 @Composable
 private fun Chip(label: String, selected: Boolean) {
     Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(if (selected) MwenyejiTheme.colorScheme.surfaceContainer else MwenyejiTheme.colorScheme.surfaceContainerLow)
-            .border(
-                1.dp,
-                if (selected) MwenyejiTheme.colorScheme.primary else MwenyejiTheme.colorScheme.border,
-                RoundedCornerShape(20.dp),
-            )
-            .padding(horizontal = 12.dp, vertical = 7.dp),
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(20.dp))
+                .background(if (selected) MwenyejiTheme.colorScheme.surfaceContainer else MwenyejiTheme.colorScheme.surfaceContainerLow)
+                .border(
+                    1.dp,
+                    if (selected) MwenyejiTheme.colorScheme.primary else MwenyejiTheme.colorScheme.border,
+                    RoundedCornerShape(20.dp),
+                ).padding(horizontal = 12.dp, vertical = 7.dp),
     ) {
         Text(
             label,

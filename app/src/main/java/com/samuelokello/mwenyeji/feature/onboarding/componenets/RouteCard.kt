@@ -40,32 +40,37 @@ fun RouteCard(visible: Boolean, modifier: Modifier = Modifier) {
     val glowAlpha by infiniteTransition.animateFloat(
         initialValue = 0.15f,
         targetValue = 0.4f,
-        animationSpec = infiniteRepeatable(
-            tween(2500, easing = EaseInOutSine),
-            RepeatMode.Reverse,
-        ),
+        animationSpec =
+            infiniteRepeatable(
+                tween(2500, easing = EaseInOutSine),
+                RepeatMode.Reverse,
+            ),
         label = "glow_alpha",
     )
     val colors = MwenyejiTheme.colorScheme
 
     AnimatedVisibility(
         visible = visible,
-        enter = slideInVertically(
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessMediumLow,
-            ),
-            initialOffsetY = { it / 2 }
-        ) + fadeIn(tween(400)),
+        enter =
+            slideInVertically(
+                animationSpec =
+                    spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMediumLow,
+                    ),
+                initialOffsetY = { it / 2 },
+            ) +
+                fadeIn(tween(400)),
         modifier = modifier,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(20.dp))
-                .background(colors.surfaceContainerLow)
-                .border(1.dp, colors.border, RoundedCornerShape(20.dp))
-                .padding(20.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(colors.surfaceContainerLow)
+                    .border(1.dp, colors.border, RoundedCornerShape(20.dp))
+                    .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text(
@@ -85,15 +90,15 @@ fun RouteCard(visible: Boolean, modifier: Modifier = Modifier) {
             }
             Spacer(Modifier.height(10.dp))
             Row(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(colors.primary.copy(alpha = 0.8f))
-                    .border(
-                        1.dp,
-                        colors.surfaceContainerLowest.copy(alpha = glowAlpha),
-                        RoundedCornerShape(8.dp)
-                    )
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                modifier =
+                    Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(colors.primary.copy(alpha = 0.8f))
+                        .border(
+                            1.dp,
+                            colors.surfaceContainerLowest.copy(alpha = glowAlpha),
+                            RoundedCornerShape(8.dp),
+                        ).padding(horizontal = 10.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {

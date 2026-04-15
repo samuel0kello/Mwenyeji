@@ -21,13 +21,14 @@ data class AppSpacing(
     val xxxLarge: Dp,
 )
 
-val Spacing = AppSpacing(
-    none = 0.dp,
-    extraSmall = 4.dp,
-    small = 8.dp,
-    medium = 16.dp,
-    large = 24.dp,
-    extraLarge = 32.dp,
-    xxLarge = 48.dp,
-    xxxLarge = 64.dp,
-)
+val Spacing =
+    AppSpacing(
+        none = 0.dp,
+        extraSmall = 4.dp,
+        small = 8.dp,
+        medium = 16.dp,
+        large = 24.dp,
+        extraLarge = 32.dp,
+        xxLarge = 48.dp,
+        xxxLarge = 64.dp,
+    )

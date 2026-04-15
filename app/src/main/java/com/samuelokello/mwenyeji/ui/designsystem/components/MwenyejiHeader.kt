@@ -33,13 +33,11 @@ import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiAppTheme
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 
-
 data class AppBarAction(
     val icon: ImageVector,
     val contentDescription: String,
     val onClick: () -> Unit,
 )
-
 
 /**
  * Standard Mwenyeji top bar.
@@ -81,12 +79,13 @@ fun MwenyejiTopBar(
                     AppBarIconButton(action = action)
                 }
             },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor         = backgroundColor,
-                titleContentColor      = colors.onSurface,
-                navigationIconContentColor = colors.onSurface,
-                actionIconContentColor = colors.onSurface,
-            ),
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = backgroundColor,
+                    titleContentColor = colors.onSurface,
+                    navigationIconContentColor = colors.onSurface,
+                    actionIconContentColor = colors.onSurface,
+                ),
         )
 
         if (showDivider) {
@@ -97,8 +96,6 @@ fun MwenyejiTopBar(
         }
     }
 }
-
-
 
 /**
  * Two-line app bar with title and subtitle.
@@ -127,9 +124,10 @@ fun MwenyejiHeaderBar(
         TopAppBar(
             title = {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = 8.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(end = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     Text(
@@ -154,12 +152,13 @@ fun MwenyejiHeaderBar(
                     AppBarIconButton(action = action)
                 }
             },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor             = backgroundColor,
-                titleContentColor          = colors.onSurface,
-                navigationIconContentColor = colors.onSurface,
-                actionIconContentColor     = colors.onSurface,
-            ),
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = backgroundColor,
+                    titleContentColor = colors.onSurface,
+                    navigationIconContentColor = colors.onSurface,
+                    actionIconContentColor = colors.onSurface,
+                ),
         )
 
         if (showDivider) {
@@ -167,8 +166,6 @@ fun MwenyejiHeaderBar(
         }
     }
 }
-
-
 
 /**
  * Large app bar with title, subtitle, and a composable content slot below.
@@ -195,17 +192,19 @@ fun MwenyejiLargeHeaderBar(
     val colors = MwenyejiTheme.colorScheme
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(backgroundColor),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(backgroundColor),
         verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
         TopAppBar(
             title = {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = 8.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(end = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     Text(
@@ -230,19 +229,21 @@ fun MwenyejiLargeHeaderBar(
                     AppBarIconButton(action = action)
                 }
             },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor             = backgroundColor,
-                titleContentColor          = colors.onSurface,
-                navigationIconContentColor = colors.onSurface,
-                actionIconContentColor     = colors.onSurface,
-            ),
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = backgroundColor,
+                    titleContentColor = colors.onSurface,
+                    navigationIconContentColor = colors.onSurface,
+                    actionIconContentColor = colors.onSurface,
+                ),
         )
 
         // Content slot — search field, chips, etc.
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, bottom = bottomPadding),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, bottom = bottomPadding),
         ) {
             content()
         }
@@ -252,8 +253,6 @@ fun MwenyejiLargeHeaderBar(
         }
     }
 }
-
-
 
 /**
  * Route detail top bar.
@@ -280,9 +279,10 @@ fun MwenyejiRouteBar(
     val colors = MwenyejiTheme.colorScheme
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(backgroundColor),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(backgroundColor),
         verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
         TopAppBar(
@@ -325,18 +325,20 @@ fun MwenyejiRouteBar(
                     AppBarIconButton(action = action)
                 }
             },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor             = backgroundColor,
-                titleContentColor          = colors.onSurface,
-                navigationIconContentColor = colors.onSurface,
-                actionIconContentColor     = colors.onSurface,
-            ),
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = backgroundColor,
+                    titleContentColor = colors.onSurface,
+                    navigationIconContentColor = colors.onSurface,
+                    actionIconContentColor = colors.onSurface,
+                ),
         )
 
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, bottom = bottomPadding),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, bottom = bottomPadding),
         ) {
             content()
         }
@@ -346,7 +348,6 @@ fun MwenyejiRouteBar(
         }
     }
 }
-
 
 /**
  * Step progress top bar for multi-step flows.
@@ -371,10 +372,11 @@ fun MwenyejiStepBar(
     val colors = MwenyejiTheme.colorScheme
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(backgroundColor)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(backgroundColor)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         // Back arrow + step label in one row
@@ -399,14 +401,20 @@ fun MwenyejiStepBar(
             repeat(totalSteps) { index ->
                 val isComplete = index < currentStep
                 Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .size(height = 3.dp, width = 0.dp)
-                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(2.dp))
-                        .background(
-                            if (isComplete) colors.primary
-                            else colors.outlineVariant
-                        ),
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .size(height = 3.dp, width = 0.dp)
+                            .clip(
+                                androidx.compose.foundation.shape
+                                    .RoundedCornerShape(2.dp),
+                            ).background(
+                                if (isComplete) {
+                                    colors.primary
+                                } else {
+                                    colors.outlineVariant
+                                },
+                            ),
                 )
             }
         }
@@ -420,20 +428,16 @@ fun MwenyejiStepBar(
     }
 }
 
-
-
 @Composable
-private fun BackButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun BackButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier
-            .padding(start = 8.dp)
-            .size(36.dp)
-            .clip(CircleShape)
-            .background(MwenyejiTheme.colorScheme.surfaceContainerHigh)
-            .clickable(role = Role.Button, onClick = onClick),
+        modifier =
+            modifier
+                .padding(start = 8.dp)
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(MwenyejiTheme.colorScheme.surfaceContainerHigh)
+                .clickable(role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
@@ -446,17 +450,15 @@ private fun BackButton(
 }
 
 @Composable
-private fun AppBarIconButton(
-    action: AppBarAction,
-    modifier: Modifier = Modifier,
-) {
+private fun AppBarIconButton(action: AppBarAction, modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier
-            .padding(end = 8.dp)
-            .size(36.dp)
-            .clip(CircleShape)
-            .background(MwenyejiTheme.colorScheme.surfaceContainerHigh)
-            .clickable(role = Role.Button, onClick = action.onClick),
+        modifier =
+            modifier
+                .padding(end = 8.dp)
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(MwenyejiTheme.colorScheme.surfaceContainerHigh)
+                .clickable(role = Role.Button, onClick = action.onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
@@ -467,7 +469,6 @@ private fun AppBarIconButton(
         )
     }
 }
-
 
 // Previews
 @Preview(showBackground = true, backgroundColor = 0xFF0E1210)
@@ -514,7 +515,7 @@ private fun LargeHeaderBarPreview() {
 @Preview(showBackground = true, backgroundColor = 0xFF0E1210)
 @Composable
 private fun RouteBarPreview() {
-    MwenyejiAppTheme{
+    MwenyejiAppTheme {
         MwenyejiRouteBar(
             from = "CBD",
             to = "Westlands",

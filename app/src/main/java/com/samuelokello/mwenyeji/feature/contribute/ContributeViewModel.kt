@@ -2,10 +2,17 @@ package com.samuelokello.mwenyeji.feature.contribute
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.samuelokello.mwenyeji.data.helpers.DataResult
+import com.samuelokello.mwenyeji.data.models.GeoPoint
 import com.samuelokello.mwenyeji.data.models.RouteTag
+import com.samuelokello.mwenyeji.data.models.SearchRequest
+import com.samuelokello.mwenyeji.data.models.SearchResult
 import com.samuelokello.mwenyeji.data.repository.AuthRepository
 import com.samuelokello.mwenyeji.data.repository.RouteRepository
+import com.samuelokello.mwenyeji.data.repository.SearchRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,48 +23,142 @@ import kotlinx.coroutines.launch
 class ContributeViewModel(
     private val routeRepository: RouteRepository,
     private val authRepository: AuthRepository,
+    private val searchRepository: SearchRepository,
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(ContributeState())
     val state: StateFlow<ContributeState> = _state.asStateFlow()
 
     private val _effects = Channel<ContributeEffect>(Channel.BUFFERED)
     val effects = _effects.receiveAsFlow()
 
+    private var fromGeocodeJob: Job? = null
+    private var toGeocodeJob: Job? = null
+
     fun onAction(action: ContributeActions) {
         when (action) {
-            is ContributeActions.NextStep -> onNextStep()
-            is ContributeActions.PreviousStep -> onPreviousStep()
-            is ContributeActions.FromChanged -> _state.update {
-                it.copy(
-                    from = action.value,
-                    errors = it.errors - "from"
+            is ContributeActions.NextStep -> {
+                onNextStep()
+            }
+
+            is ContributeActions.PreviousStep -> {
+                onPreviousStep()
+            }
+
+            is ContributeActions.ViaChanged -> {
+                _state.update { it.copy(via = action.value) }
+            }
+
+            is ContributeActions.FareChanged -> {
+                _state.update {
+                    it.copy(
+                        fareKsh = action.value,
+                        errors = it.errors - "fare",
+                    )
+                }
+            }
+
+            is ContributeActions.TimeOfDaySelected -> {
+                _state.update { it.copy(bestTimeOfDay = action.timeOfDay) }
+            }
+
+            is ContributeActions.TimingReasonChanged -> {
+                _state.update { it.copy(timingReason = action.value) }
+            }
+
+            is ContributeActions.StepChanged -> {
+                onStepChanged(action.index, action.value)
+            }
+
+            is ContributeActions.AddStep -> {
+                onAddStep()
+            }
+
+            is ContributeActions.RemoveStep -> {
+                onRemoveStep(action.index)
+            }
+
+            is ContributeActions.WarningsChanged -> {
+                _state.update { it.copy(warnings = action.value) }
+            }
+
+            is ContributeActions.TagToggled -> {
+                onTagToggled(action.tag)
+            }
+
+            is ContributeActions.SubmitGuide -> {
+                onSubmitGuide()
+            }
+
+            is ContributeActions.FromChanged -> {
+                _state.update { it.copy(from = action.value, fromSuggestions = emptyList()) }
+                debounceSearch(action.value, isFrom = true)
+            }
+
+            is ContributeActions.ToChanged -> {
+                _state.update { it.copy(to = action.value, toSuggestions = emptyList()) }
+                debounceSearch(action.value, isFrom = false)
+            }
+
+            is ContributeActions.FromSuggestionSelected -> {
+                selectSuggestion(
+                    action.result,
+                    isFrom = true,
                 )
             }
 
-            is ContributeActions.ToChanged -> _state.update {
-                it.copy(
-                    to = action.value,
-                    errors = it.errors - "to"
+            is ContributeActions.ToSuggestionSelected -> {
+                selectSuggestion(
+                    action.result,
+                    isFrom = false,
                 )
             }
 
-            is ContributeActions.ViaChanged -> _state.update { it.copy(via = action.value) }
-            is ContributeActions.FareChanged -> _state.update {
-                it.copy(
-                    fareKsh = action.value,
-                    errors = it.errors - "fare"
-                )
+            is ContributeActions.FromPinDragged -> {
+                _state.update {
+                    it.copy(
+                        fromGeoPoint =
+                            it.fromGeoPoint?.copy(
+                                lat = action.lat,
+                                lng = action.lng,
+                            ),
+                    )
+                }
             }
 
-            is ContributeActions.TimeOfDaySelected -> _state.update { it.copy(bestTimeOfDay = action.timeOfDay) }
-            is ContributeActions.TimingReasonChanged -> _state.update { it.copy(timingReason = action.value) }
-            is ContributeActions.StepChanged -> onStepChanged(action.index, action.value)
-            is ContributeActions.AddStep -> onAddStep()
-            is ContributeActions.RemoveStep -> onRemoveStep(action.index)
-            is ContributeActions.WarningsChanged -> _state.update { it.copy(warnings = action.value) }
-            is ContributeActions.TagToggled -> onTagToggled(action.tag)
-            is ContributeActions.SubmitGuide -> onSubmitGuide()
+            is ContributeActions.ToPinDragged -> {
+                _state.update {
+                    it.copy(
+                        toGeoPoint =
+                            it.toGeoPoint?.copy(
+                                lat = action.lat,
+                                lng = action.lng,
+                            ),
+                    )
+                }
+            }
+
+            is ContributeActions.RouteNumberChanged -> {
+                _state.update { it.copy(routeNumber = action.value) }
+            }
+
+            is ContributeActions.SaccoChanged -> {
+                _state.update {
+                    val updated = it.saccos.toMutableList()
+                    updated[action.index] = action.value
+                    it.copy(saccos = updated)
+                }
+            }
+
+            is ContributeActions.AddSacco -> {
+                _state.update { it.copy(saccos = it.saccos + "") }
+            }
+
+            is ContributeActions.RemoveSacco -> {
+                _state.update {
+                    if (it.saccos.size <= 1) return@update it // keep at least one
+                    it.copy(saccos = it.saccos.filterIndexed { i, _ -> i != action.index })
+                }
+            }
         }
     }
 
@@ -104,7 +205,6 @@ class ContributeViewModel(
         }
     }
 
-
     private fun onTagToggled(tag: RouteTag) {
         _state.update { current ->
             val tags = current.selectedTags.toMutableSet()
@@ -113,45 +213,118 @@ class ContributeViewModel(
         }
     }
 
-
     private fun onSubmitGuide() {
         viewModelScope.launch {
             _state.update { it.copy(isSubmitting = true) }
 
-            val route = _state.value.toRoute().copy(
-                contributorId = authRepository.currentUserId ?: "anonymous",
-            )
+            val route =
+                _state.value.toRoute().copy(
+                    contributorId = authRepository.currentUserId ?: "anonymous",
+                )
 
-            routeRepository.submitRoute(route)
+            routeRepository
+                .submitRoute(route)
                 .onSuccess {
                     resetState()
                     _effects.send(ContributeEffect.NavigateToSuccess)
-                }
-                .onFailure { e ->
+                }.onFailure { e ->
                     _state.update { it.copy(isSubmitting = false) }
                     _effects.send(ContributeEffect.ShowError(e.message ?: "Failed to submit guide"))
                 }
         }
     }
 
-
     private fun resetState() {
         _state.value = ContributeState()
     }
 
+    private fun debounceSearch(query: String, isFrom: Boolean) {
+        if (query.length < 2) return
+        val request = SearchRequest(query)
+
+        if (isFrom) {
+            fromGeocodeJob?.cancel()
+            fromGeocodeJob =
+                viewModelScope.launch {
+                    delay(400)
+                    when (val result = searchRepository.search(request)) {
+                        is DataResult.Success -> {
+                            _state.update {
+                                it.copy(fromSuggestions = result.data)
+                            }
+                        }
+
+                        is DataResult.Error -> {
+                            _state.update {
+                                it.copy(fromSuggestions = emptyList())
+                            }
+                        }
+                    }
+                }
+        } else {
+            toGeocodeJob?.cancel()
+            toGeocodeJob =
+                viewModelScope.launch {
+                    delay(400)
+                    when (val result = searchRepository.search(request)) {
+                        is DataResult.Success -> {
+                            _state.update {
+                                it.copy(toSuggestions = result.data)
+                            }
+                        }
+
+                        is DataResult.Error -> {
+                            _state.update {
+                                it.copy(toSuggestions = emptyList())
+                            }
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun selectSuggestion(result: SearchResult, isFrom: Boolean) {
+        val point =
+            GeoPoint(
+                lat = result.lat ?: return,
+                lng = result.lng ?: return,
+                displayName = result.fullAddress ?: result.name,
+            )
+
+        if (isFrom) {
+            _state.update {
+                it.copy(
+                    from = result.name,
+                    fromGeoPoint = point,
+                    fromSuggestions = emptyList(),
+                )
+            }
+        } else {
+            _state.update {
+                it.copy(
+                    to = result.name,
+                    toGeoPoint = point,
+                    toSuggestions = emptyList(),
+                )
+            }
+        }
+    }
 
     private fun validateStep(state: ContributeState): Map<String, String> =
         buildMap {
             when (state.currentStep) {
                 ContributeStep.ROUTE -> {
                     if (state.from.isBlank()) put("from", "Where are you boarding from?")
-                    if (state.to.isBlank())   put("to", "Where does this route go?")
-                    if (state.fareKsh.isNotBlank() && state.fareKsh.toDoubleOrNull() == null)
+                    if (state.to.isBlank()) put("to", "Where does this route go?")
+                    if (state.fareKsh.isNotBlank() && state.fareKsh.toDoubleOrNull() == null) {
                         put("fare", "Enter a valid fare amount")
+                    }
                 }
+
                 ContributeStep.INSTRUCTIONS -> {
-                    if (state.steps.none { it.isNotBlank() })
+                    if (state.steps.none { it.isNotBlank() }) {
                         put("steps", "Add at least one step")
+                    }
                 }
             }
         }

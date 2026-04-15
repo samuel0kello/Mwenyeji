@@ -31,22 +31,26 @@ fun SearchCard(visible: Boolean, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
     AnimatedVisibility(
         visible = visible,
-        enter = slideInVertically(
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessMediumLow,
-            ),
-            initialOffsetY = { -it / 2 },
-        ) + fadeIn(),
+        enter =
+            slideInVertically(
+                animationSpec =
+                    spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMediumLow,
+                    ),
+                initialOffsetY = { -it / 2 },
+            ) +
+                fadeIn(),
         modifier = modifier,
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(colors.surfaceContainerLow)
-                .border(1.dp, colors.border, RoundedCornerShape(14.dp))
-                .padding(14.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(colors.surfaceContainerLow)
+                    .border(1.dp, colors.border, RoundedCornerShape(14.dp))
+                    .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {

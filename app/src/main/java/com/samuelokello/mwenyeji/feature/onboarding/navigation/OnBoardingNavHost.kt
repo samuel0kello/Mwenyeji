@@ -8,16 +8,13 @@ import com.samuelokello.mwenyeji.feature.onboarding.OnboardingScreen
 import com.samuelokello.mwenyeji.navigation.navigateToMain
 import kotlinx.serialization.Serializable
 
-
 @Serializable
 data object OnBoarding
 
-fun NavGraphBuilder.onBoarding(
-    navController: NavHostController,
-) {
-    composable <OnBoarding>{
+fun NavGraphBuilder.onBoarding(navController: NavHostController) {
+    composable<OnBoarding> {
         OnboardingScreen(
-            onFinish = { navController.navigateToMain() }
+            onFinish = { navController.navigateToMain() },
         )
     }
 }

@@ -44,35 +44,33 @@ data class RouteResult(
 )
 
 @Composable
-fun ResultRouteCard(
-    result: RouteResult,
-    visible: Boolean,
-    delayMillis: Int = 0,
-    modifier: Modifier = Modifier,
-) {
+fun ResultRouteCard(result: RouteResult, visible: Boolean, delayMillis: Int = 0, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
     AnimatedVisibility(
         visible = visible,
-        enter = slideInHorizontally(
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessMediumLow,
-            ),
-            initialOffsetX = { it },
-        ) + fadeIn(tween(400, delayMillis)),
+        enter =
+            slideInHorizontally(
+                animationSpec =
+                    spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMediumLow,
+                    ),
+                initialOffsetX = { it },
+            ) +
+                fadeIn(tween(400, delayMillis)),
         modifier = modifier,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(colors.surfaceContainerLow)
-                .border(
-                    width = 1.dp,
-                    color = if (result.isActive) colors.primary else colors.background,
-                    shape = RoundedCornerShape(16.dp),
-                )
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(colors.surfaceContainerLow)
+                    .border(
+                        width = 1.dp,
+                        color = if (result.isActive) colors.primary else colors.background,
+                        shape = RoundedCornerShape(16.dp),
+                    ).padding(16.dp),
         ) {
             // Top row
             Row(
@@ -102,10 +100,11 @@ fun ResultRouteCard(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(result.dotColor)
+                    modifier =
+                        Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(result.dotColor),
                 )
                 Text(
                     "${result.confidence} · ${result.duration}",
@@ -118,10 +117,11 @@ fun ResultRouteCard(
             if (result.isActive && result.steps.isNotEmpty()) {
                 Spacer(Modifier.height(12.dp))
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(colors.border)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(colors.border),
                 )
                 Spacer(Modifier.height(12.dp))
                 result.steps.forEachIndexed { index, step ->
@@ -130,10 +130,11 @@ fun ResultRouteCard(
                         modifier = Modifier.padding(bottom = if (index < result.steps.size - 1) 8.dp else 0.dp),
                     ) {
                         Box(
-                            modifier = Modifier
-                                .size(20.dp)
-                                .clip(CircleShape)
-                                .background(colors.primary),
+                            modifier =
+                                Modifier
+                                    .size(20.dp)
+                                    .clip(CircleShape)
+                                    .background(colors.primary),
                             contentAlignment = Alignment.Center,
                         ) {
                             Text(

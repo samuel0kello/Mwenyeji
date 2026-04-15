@@ -45,10 +45,12 @@ import com.samuelokello.mwenyeji.ui.designsystem.components.card.MwenyejiCard
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 import org.koin.compose.viewmodel.koinViewModel
 
-enum class RouteVerdict(val firestoreValue: String) {
+enum class RouteVerdict(
+    val firestoreValue: String,
+) {
     WORKS("CONFIRMED"),
     DIDNT("DIDNT_WORK"),
-    OUTDATED("OUTDATED")
+    OUTDATED("OUTDATED"),
 }
 
 @Composable
@@ -149,9 +151,10 @@ fun RouteDetailsScreenContent(
         },
     ) { paddingValues ->
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
         ) {
             if (route.timingReason.isNotBlank()) {
                 item(key = "hint") {
@@ -193,16 +196,18 @@ private fun RouteDetailBottomBar(
 ) {
     val colors = MwenyejiTheme.colorScheme
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(colors.surface)
-            .navigationBarsPadding(),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(colors.surface)
+                .navigationBarsPadding(),
     ) {
         HorizontalDivider(color = colors.border, thickness = 1.dp)
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
@@ -220,9 +225,10 @@ private fun RouteDetailBottomBar(
         }
         HorizontalDivider(color = colors.border, thickness = 1.dp)
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             FeedbackButton(
@@ -266,18 +272,24 @@ private fun FeedbackButton(
     MwenyejiCard(
         modifier = modifier,
         onClick = onClick,
-        containerColor = if (isSelected) accentColor.copy(alpha = 0.12f)
-        else colors.surfaceContainerHigh,
-        border = BorderStroke(
-            width = if (isSelected) 1.5.dp else 1.dp,
-            color = if (isSelected) accentColor else colors.border,
-        ),
+        containerColor =
+            if (isSelected) {
+                accentColor.copy(alpha = 0.12f)
+            } else {
+                colors.surfaceContainerHigh
+            },
+        border =
+            BorderStroke(
+                width = if (isSelected) 1.5.dp else 1.dp,
+                color = if (isSelected) accentColor else colors.border,
+            ),
         elevation = MwenyejiTheme.elevation.level0,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
@@ -309,20 +321,21 @@ fun RouteHint(reason: String, modifier: Modifier = Modifier) {
         containerColor = colors.surfaceContainer,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text(
                 text = "WORKS BEST WHEN",
                 style = MwenyejiTheme.typography.labelSmall,
-                color = colors.primary
+                color = colors.primary,
             )
             Text(
                 text = reason,
                 style = MwenyejiTheme.typography.bodyMedium,
-                color = colors.onSurface
+                color = colors.onSurface,
             )
         }
     }
@@ -334,12 +347,12 @@ fun HowToNavigate(steps: List<RouteStep>, modifier: Modifier = Modifier) {
         Text(
             text = "HOW TO DO IT",
             style = MwenyejiTheme.typography.labelSmall,
-            color = MwenyejiTheme.colorScheme.onSurfaceVariant
+            color = MwenyejiTheme.colorScheme.onSurfaceVariant,
         )
         steps.forEach { step ->
             Step(
                 stepNumber = "${step.order}",
-                stepDescription = step.instruction
+                stepDescription = step.instruction,
             )
         }
     }
@@ -351,26 +364,27 @@ fun Step(stepNumber: String, stepDescription: String, modifier: Modifier = Modif
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.Top
+        verticalAlignment = Alignment.Top,
     ) {
         Box(
-            modifier = Modifier
-                .size(28.dp)
-                .background(color = colors.primary, shape = CircleShape),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .size(28.dp)
+                    .background(color = colors.primary, shape = CircleShape),
+            contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = stepNumber,
                 style = MwenyejiTheme.typography.labelMedium,
                 color = colors.onPrimary,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
         }
         Text(
             text = stepDescription,
             style = MwenyejiTheme.typography.bodyMedium,
             color = colors.onSurface,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
     }
 }
@@ -385,38 +399,38 @@ fun Warning(warning: String, modifier: Modifier = Modifier) {
         containerColor = colors.warningContainer.copy(alpha = 0.15f),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Warning,
                     contentDescription = null,
                     tint = colors.warning,
-                    modifier = Modifier.size(14.dp)
+                    modifier = Modifier.size(14.dp),
                 )
                 Text(
                     text = "LOCAL WARNINGS",
                     style = MwenyejiTheme.typography.labelSmall,
-                    color = colors.warning
+                    color = colors.warning,
                 )
             }
             warning.lines().filter { it.isNotBlank() }.forEach { line ->
                 Text(
                     text = "• $line",
                     style = MwenyejiTheme.typography.bodyMedium,
-                    color = colors.onWarningContainer
+                    color = colors.onWarningContainer,
                 )
             }
         }
     }
 }
-
 
 private fun Long.toRelativeTime(): String {
     val diff = System.currentTimeMillis() - this

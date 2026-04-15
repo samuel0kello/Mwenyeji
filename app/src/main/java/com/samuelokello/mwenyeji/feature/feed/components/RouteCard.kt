@@ -38,31 +38,28 @@ import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun RouteCard(
-    route: Route,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun RouteCard(route: Route, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
 
     MwenyejiCard(
         modifier = modifier.fillMaxWidth(),
         onClick = onClick,
-        border = BorderStroke(
-            width = 1.dp,
-            color = colors.border,
-        ),
+        border =
+            BorderStroke(
+                width = 1.dp,
+                color = colors.border,
+            ),
         elevation = MwenyejiTheme.elevation.level0,
         containerColor = colors.surfaceContainer,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-
             //  Title row
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -102,7 +99,7 @@ fun RouteCard(
                 color = colors.primary,
             )
 
-            //Description — first step preview
+            // Description — first step preview
             if (route.steps.isNotEmpty()) {
                 Text(
                     text = route.steps.first().instruction,
@@ -174,22 +171,21 @@ fun RouteCard(
  * Green = HIGH, Amber = MEDIUM, Red = STALE, Grey = UNVERIFIED.
  */
 @Composable
-private fun ConfidenceDot(
-    confidence: RouteConfidence,
-    modifier: Modifier = Modifier,
-) {
+private fun ConfidenceDot(confidence: RouteConfidence, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
-    val color = when (confidence) {
-        RouteConfidence.HIGH       -> colors.success
-        RouteConfidence.MEDIUM     -> colors.warning
-        RouteConfidence.STALE      -> colors.error
-        RouteConfidence.UNVERIFIED -> colors.outlineVariant
-    }
+    val color =
+        when (confidence) {
+            RouteConfidence.HIGH -> colors.success
+            RouteConfidence.MEDIUM -> colors.warning
+            RouteConfidence.STALE -> colors.error
+            RouteConfidence.UNVERIFIED -> colors.outlineVariant
+        }
     Box(
-        modifier = modifier
-            .size(10.dp)
-            .clip(CircleShape)
-            .background(color),
+        modifier =
+            modifier
+                .size(10.dp)
+                .clip(CircleShape)
+                .background(color),
     )
 }
 
@@ -200,34 +196,37 @@ private fun ConfidenceDot(
  *                  the "fast" / "Cheap" chips
  */
 @Composable
-internal fun RouteTagChip(
-    label: String,
-    modifier: Modifier = Modifier,
-    isPrimary: Boolean = false,
-) {
+internal fun RouteTagChip(label: String, modifier: Modifier = Modifier, isPrimary: Boolean = false) {
     val colors = MwenyejiTheme.colorScheme
 
     Box(
-        modifier = modifier
-            .clip(MwenyejiTheme.shapes.extraSmall)
-            .background(
-                if (isPrimary) colors.primaryContainer
-                else colors.surfaceContainerHigh,
-            )
-            .padding(horizontal = 10.dp, vertical = 4.dp),
+        modifier =
+            modifier
+                .clip(MwenyejiTheme.shapes.extraSmall)
+                .background(
+                    if (isPrimary) {
+                        colors.primaryContainer
+                    } else {
+                        colors.surfaceContainerHigh
+                    },
+                ).padding(horizontal = 10.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = label,
             style = MwenyejiTheme.typography.labelSmall,
-            color = if (isPrimary) colors.onPrimaryContainer
-                    else colors.onSurfaceVariant,
+            color =
+                if (isPrimary) {
+                    colors.onPrimaryContainer
+                } else {
+                    colors.onSurfaceVariant
+                },
         )
     }
 }
 
 /**
- * Converts epoch millis to a short relative time string.
+ * Converts epoch millis to a SHORT relative time string.
  * e.g. 7_200_000L → "2h ago", 86_400_000L → "1d ago"
  *
  * For production use consider using [android.text.format.DateUtils.getRelativeTimeSpanString].
@@ -235,41 +234,46 @@ internal fun RouteTagChip(
 private fun Long.toRelativeTime(): String {
     val diff = System.currentTimeMillis() - this
     val minutes = diff / 60_000
-    val hours   = diff / 3_600_000
-    val days    = diff / 86_400_000
+    val hours = diff / 3_600_000
+    val days = diff / 86_400_000
     return when {
-        minutes < 1  -> "just now"
+        minutes < 1 -> "just now"
         minutes < 60 -> "${minutes}m ago"
-        hours   < 24 -> "${hours}h ago"
-        else         -> "${days}d ago"
+        hours < 24 -> "${hours}h ago"
+        else -> "${days}d ago"
     }
 }
-
 
 @Preview(showBackground = true, backgroundColor = 0xFF0E1210)
 @Composable
 private fun RouteCardPreview() {
     MwenyejiAppTheme {
         RouteCard(
-            route = Route(
-                from = "CBD",
-                to = "Westlands",
-                via = "via Uhuru Highway",
-                fareKsh = 50.0,
-                bestTimeOfDay = TimeOfDay.MORNING_RUSH,
-                steps = listOf(
-                    RouteStep(
-                        order = 1,
-                        instruction = "Board at Kencom, avoid Archives matatus during rush. Quick connection at Westlands roundabout.",
-                    ),
-                ),
-                tags = setOf(RouteTag.FAST),
-                confirmedCount = 47,
-                lastConfirmedAt = System.currentTimeMillis() - 7_200_000L,
+            route =
+                Route(
+                    from = "CBD",
+                    to = "Westlands",
+                    via = "via Uhuru Highway",
+                    fareKsh = 50.0,
+                    bestTimeOfDay = TimeOfDay.MORNING_RUSH,
+                    steps =
+                        listOf(
+                            RouteStep(
+                                order = 1,
+                                instruction =
+                                    "Board at Kencom, avoid Archives matatus during rush." +
+                                        " Quick connection at Westlands roundabout.",
+                            ),
+                        ),
+                    tags = setOf(RouteTag.FAST),
+                    confirmedCount = 47,
+                    lastConfirmedAt = System.currentTimeMillis() - 7_200_000L,
 //                confidence = RouteConfidence.HIGH,
-            ),
+                ),
             onClick = {},
-            modifier = androidx.compose.ui.Modifier.padding(16.dp),
+            modifier =
+                androidx.compose.ui.Modifier
+                    .padding(16.dp),
         )
     }
 }

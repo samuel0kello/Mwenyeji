@@ -21,23 +21,26 @@ data class AppShapes(
     val extraLarge: CornerBasedShape,
     val full: Shape,
 )
+
 /**
  * Default shape configuration
  */
-val Shapes = AppShapes(
-    none = RoundedCornerShape(0.dp),
-    extraSmall = RoundedCornerShape(4.dp),
-    small = RoundedCornerShape(8.dp),
-    medium = RoundedCornerShape(12.dp),
-    large = RoundedCornerShape(16.dp),
-    extraLarge = RoundedCornerShape(28.dp),
-    full = RoundedCornerShape(50),
-)
+val Shapes =
+    AppShapes(
+        none = RoundedCornerShape(0.dp),
+        extraSmall = RoundedCornerShape(4.dp),
+        small = RoundedCornerShape(8.dp),
+        medium = RoundedCornerShape(12.dp),
+        large = RoundedCornerShape(16.dp),
+        extraLarge = RoundedCornerShape(28.dp),
+        full = RoundedCornerShape(50),
+    )
 
-fun AppShapes.toMaterialShapes(): Shapes = Shapes(
-    extraSmall = extraSmall,
-    small      = small,
-    medium     = medium,
-    large      = large,
-    extraLarge = extraLarge,
-)
+fun AppShapes.toMaterialShapes(): Shapes =
+    Shapes(
+        extraSmall = extraSmall,
+        small = small,
+        medium = medium,
+        large = large,
+        extraLarge = extraLarge,
+    )

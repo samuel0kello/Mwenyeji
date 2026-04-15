@@ -10,6 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.samuelokello.mwenyeji.feature.contribute.components.StepScaffold
 import com.samuelokello.mwenyeji.feature.contribute.step.InstructionsStepScreen
 import com.samuelokello.mwenyeji.feature.contribute.step.RouteStepScreen
 import com.samuelokello.mwenyeji.feature.contribute.step.TimingStepScreen
@@ -40,10 +41,19 @@ fun ContributeScreen(
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
             when (effect) {
-                is ContributeEffect.NavigateBack      -> onNavigateBack()
-                is ContributeEffect.NavigateToSuccess -> onNavigateToSuccess()
-                is ContributeEffect.ShowError         -> { /* TODO: show snackbar */ }
-                is ContributeEffect.ShowFieldError    -> { /* handled per-step via state.errors */ }
+                is ContributeEffect.NavigateBack -> {
+                    onNavigateBack()
+                }
+
+                is ContributeEffect.NavigateToSuccess -> {
+                    onNavigateToSuccess()
+                }
+
+                is ContributeEffect.ShowError -> { // TODO: show snackbar
+                }
+
+                is ContributeEffect.ShowFieldError -> { // handled per-step via state.errors
+                }
             }
         }
     }
@@ -56,41 +66,53 @@ fun ContributeScreen(
 }
 
 @Composable
-fun ContributeScreenContent(
-    state: ContributeState,
-    onAction: (ContributeActions) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    // Slide animation: forward = slide left, backward = slide right
-    AnimatedContent(
-        targetState = state.currentStep,
-        transitionSpec = {
-            if (targetState > initialState) {
-                slideInHorizontally { it } togetherWith slideOutHorizontally { -it }
-            } else {
-                slideInHorizontally { -it } togetherWith slideOutHorizontally { it }
+fun ContributeScreenContent(state: ContributeState, onAction: (ContributeActions) -> Unit, modifier: Modifier = Modifier) {
+    StepScaffold(
+        state = state,
+        onAction = onAction,
+        buttonLabel = if (state.isLastStep) "Share guide" else "Continue",
+    ) {
+        AnimatedContent(
+            targetState = state.currentStep,
+            transitionSpec = {
+                if (targetState > initialState) {
+                    slideInHorizontally { it } togetherWith slideOutHorizontally { -it }
+                } else {
+                    slideInHorizontally { -it } togetherWith slideOutHorizontally { it }
+                }
+            },
+            label = "contributeStepAnimation",
+            modifier = modifier.fillMaxSize(),
+        ) { step ->
+            when (step) {
+                ContributeStep.ROUTE -> {
+                    RouteStepScreen(
+                        state = state,
+                        onAction = onAction,
+                    )
+                }
+
+                ContributeStep.TIMING -> {
+                    TimingStepScreen(
+                        state = state,
+                        onAction = onAction,
+                    )
+                }
+
+                ContributeStep.INSTRUCTIONS -> {
+                    InstructionsStepScreen(
+                        state = state,
+                        onAction = onAction,
+                    )
+                }
+
+                ContributeStep.WARNINGS -> {
+                    WarningsStepScreen(
+                        state = state,
+                        onAction = onAction,
+                    )
+                }
             }
-        },
-        label = "contributeStepAnimation",
-        modifier = modifier.fillMaxSize(),
-    ) { step ->
-        when (step) {
-            ContributeStep.ROUTE -> RouteStepScreen(
-                state = state,
-                onAction = onAction,
-            )
-            ContributeStep.TIMING -> TimingStepScreen(
-                state = state,
-                onAction = onAction,
-            )
-            ContributeStep.INSTRUCTIONS -> InstructionsStepScreen(
-                state = state,
-                onAction = onAction,
-            )
-            ContributeStep.WARNINGS -> WarningsStepScreen(
-                state = state,
-                onAction = onAction,
-            )
         }
     }
 }

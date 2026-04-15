@@ -22,11 +22,7 @@ import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TimingStepScreen(
-    state: ContributeState,
-    onAction: (ContributeActions) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun TimingStepScreen(state: ContributeState, onAction: (ContributeActions) -> Unit, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
 
@@ -42,9 +38,10 @@ fun TimingStepScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         FlowRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 0.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 0.dp),
             maxItemsInEachRow = 2,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -55,9 +52,10 @@ fun TimingStepScreen(
                     title = timeOfDay.displayName,
                     selected = state.bestTimeOfDay == timeOfDay,
                     onSelected = {
-                        val selected = TimeOfDay.entries.first {
-                            it.displayName == timeOfDay.displayName
-                        }
+                        val selected =
+                            TimeOfDay.entries.first {
+                                it.displayName == timeOfDay.displayName
+                            }
                         onAction(ContributeActions.TimeOfDaySelected(selected))
                     },
                     modifier = Modifier,
@@ -77,14 +75,12 @@ fun TimingStepScreen(
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
-fun TimmingPrev(){
+fun TimmingPrev() {
     TimingStepScreen(
-        state = ContributeState(
-
-        ),
+        state =
+            ContributeState(),
         onAction = {},
     )
 }

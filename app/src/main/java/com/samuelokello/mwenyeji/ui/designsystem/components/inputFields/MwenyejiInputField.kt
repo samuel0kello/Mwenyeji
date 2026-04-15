@@ -3,13 +3,11 @@ package com.samuelokello.mwenyeji.ui.designsystem.components.inputFields
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
@@ -45,27 +43,24 @@ fun MwenyejiInputField(
         keyboardActions = keyboardActions,
         keyboardOptions = keyboardOptions,
         singleLine = singleLine,
-        colors = OutlinedTextFieldDefaults.colors(
-            // 1. Container Colors (The dark grey box)
-            focusedContainerColor = MwenyejiTheme.colorScheme.surfaceContainer,
-            unfocusedContainerColor = MwenyejiTheme.colorScheme.surfaceContainer,
-
-            // 2. Text Colors
-            focusedTextColor = MwenyejiTheme.colorScheme.onSurfaceVariant,
-            unfocusedTextColor = MwenyejiTheme.colorScheme.onSurface,
-
-            // 3. Border Colors (Making them transparent to look like "Filled" cards)
-            focusedBorderColor = Color.Transparent,
-            unfocusedBorderColor = Color.Transparent,
-
-            // 4. Cursor Color (Matching your blue/primary accent in the image)
-            cursorColor = MwenyejiTheme.colorScheme.primary,
-
-            // 5. Placeholder/Label Colors
-            unfocusedLabelColor = MwenyejiTheme.colorScheme.primary,
-            focusedLabelColor = MwenyejiTheme.colorScheme.primary,
-        ),
-        modifier = modifier.fillMaxWidth()
+        colors =
+            OutlinedTextFieldDefaults.colors(
+                // 1. Container Colors (The dark grey box)
+                focusedContainerColor = MwenyejiTheme.colorScheme.surfaceContainer,
+                unfocusedContainerColor = MwenyejiTheme.colorScheme.surfaceContainer,
+                // 2. Text Colors
+                focusedTextColor = MwenyejiTheme.colorScheme.onSurfaceVariant,
+                unfocusedTextColor = MwenyejiTheme.colorScheme.onSurface,
+                // 3. Border Colors (Making them transparent to look like "Filled" cards)
+                focusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = Color.Transparent,
+                // 4. Cursor Color (Matching your blue/primary accent in the image)
+                cursorColor = MwenyejiTheme.colorScheme.primary,
+                // 5. Placeholder/Label Colors
+                unfocusedLabelColor = MwenyejiTheme.colorScheme.primary,
+                focusedLabelColor = MwenyejiTheme.colorScheme.primary,
+            ),
+        modifier = modifier.fillMaxWidth(),
     )
 }
 
@@ -74,6 +69,6 @@ fun MwenyejiInputField(
 fun MwenyejiInputFieldPrev(modifier: Modifier = Modifier) {
     MwenyejiInputField(
         value = "Test value",
-        onValueChange = {}
+        onValueChange = {},
     )
 }

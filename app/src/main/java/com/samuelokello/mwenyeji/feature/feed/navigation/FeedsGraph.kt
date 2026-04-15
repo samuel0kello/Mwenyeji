@@ -5,6 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.samuelokello.mwenyeji.feature.contribute.navigation.navigateToContribute
 import com.samuelokello.mwenyeji.feature.feed.FeedScreen
 import com.samuelokello.mwenyeji.feature.feed.route.AllRoutes
 import com.samuelokello.mwenyeji.feature.feed.route.RouteDetailsScreen
@@ -32,7 +33,8 @@ fun NavGraphBuilder.feedsNavGraph(navController: NavHostController) {
         composable<FeedsRoute> {
             FeedScreen(
                 onNavigateToRouteDetail = { routeId -> navController.navigateToRouteDetails(routeId) },
-                onNavigateToSeeAll = { navController.navigateToAllRoutes()},
+                onNavigateToSeeAll = { navController.navigateToAllRoutes() },
+                onNavigateToContribute = { navController.navigateToContribute() },
             )
         }
         composable<RouteDetailsRoute> { backStackEntry ->
@@ -45,8 +47,8 @@ fun NavGraphBuilder.feedsNavGraph(navController: NavHostController) {
 
         composable<SeeAllRoutesRoute> {
             AllRoutes(
-                onNavigateToRouteDetail = { navController.navigateToRouteDetails(it)},
-                onNavigateBack = { navController.navigateBack()}
+                onNavigateToRouteDetail = { navController.navigateToRouteDetails(it) },
+                onNavigateBack = { navController.navigateBack() },
             )
         }
     }

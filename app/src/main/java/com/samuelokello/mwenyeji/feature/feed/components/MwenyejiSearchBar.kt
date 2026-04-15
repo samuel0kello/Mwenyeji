@@ -20,6 +20,6 @@ fun MwenywjiSearchBar(modifier: Modifier = Modifier) {
         visualTransformation = TODO(),
         keyboardOptions = TODO(),
         keyboardActions = TODO(),
-        singleLine = TODO()
+        singleLine = TODO(),
     )
 }
