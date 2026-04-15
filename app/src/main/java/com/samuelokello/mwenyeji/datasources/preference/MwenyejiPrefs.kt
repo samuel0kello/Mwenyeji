@@ -22,8 +22,7 @@ class MwenyejiPrefsImpl(
         context.dataStore.edit { it[KEY_ONBOARDING_COMPLETE] = isComplete }
     }
 
-    override fun isOnBoardingComplete(): Flow<Boolean> =
-        context.dataStore.data.map { it[KEY_ONBOARDING_COMPLETE] ?: false }
+    override fun isOnBoardingComplete(): Flow<Boolean> = context.dataStore.data.map { it[KEY_ONBOARDING_COMPLETE] ?: false }
 
     companion object {
         private val KEY_ONBOARDING_COMPLETE = booleanPreferencesKey("onboarding_complete")

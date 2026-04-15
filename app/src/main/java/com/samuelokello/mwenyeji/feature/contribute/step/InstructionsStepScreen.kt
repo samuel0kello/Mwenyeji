@@ -25,11 +25,7 @@ import com.samuelokello.mwenyeji.feature.contribute.ContributeState
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 
 @Composable
-fun InstructionsStepScreen(
-    state: ContributeState,
-    onAction: (ContributeActions) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun InstructionsStepScreen(state: ContributeState, onAction: (ContributeActions) -> Unit, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
 
@@ -93,9 +89,11 @@ fun InstructionsStepScreen(
                 tint = colors.primary,
                 modifier = Modifier.size(16.dp),
             )
-            Spacer(Modifier
-                .height(0.dp)
-                .size(6.dp))
+            Spacer(
+                Modifier
+                    .height(0.dp)
+                    .size(6.dp),
+            )
             Text(
                 text = "Add another step",
                 style = typography.labelMedium,

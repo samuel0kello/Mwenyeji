@@ -27,10 +27,7 @@ import com.samuelokello.mwenyeji.feature.onboarding.componenets.TypewriterText
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 
 @Composable
-fun SearchCard(
-    visible: Boolean,
-    modifier: Modifier = Modifier,
-) {
+fun SearchCard(visible: Boolean, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
     AnimatedVisibility(
         visible = visible,
@@ -42,7 +39,8 @@ fun SearchCard(
                         stiffness = Spring.StiffnessMediumLow,
                     ),
                 initialOffsetY = { -it / 2 },
-            ) + fadeIn(),
+            ) +
+                fadeIn(),
         modifier = modifier,
     ) {
         Row(

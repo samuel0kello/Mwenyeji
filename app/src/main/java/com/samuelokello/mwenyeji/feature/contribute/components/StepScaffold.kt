@@ -17,6 +17,7 @@ import com.samuelokello.mwenyeji.feature.contribute.ContributeActions
 import com.samuelokello.mwenyeji.feature.contribute.ContributeState
 import com.samuelokello.mwenyeji.feature.contribute.ContributeStep
 import com.samuelokello.mwenyeji.ui.designsystem.components.MwenyejiStepBar
+import com.samuelokello.mwenyeji.ui.designsystem.components.button.MwenyejiButton
 
 /**
  * Shared scaffold layout used by all 4 contribute step screens.
@@ -31,14 +32,14 @@ import com.samuelokello.mwenyeji.ui.designsystem.components.MwenyejiStepBar
  * its own fields — no need to repeat the header/button boilerplate.
  *
  * @param state         Shared contribute state for header info.
- * @param onIntent      Shared intent handler.
+ * @param onAction      Shared intent handler.
  * @param buttonLabel   Label on the primary CTA button.
  * @param content       Step-specific form fields.
  */
 @Composable
 fun StepScaffold(
     state: ContributeState,
-    onIntent: (ContributeActions) -> Unit,
+    onAction: (ContributeActions) -> Unit,
     modifier: Modifier = Modifier,
     buttonLabel: String = "Continue",
     content: @Composable ColumnScope.() -> Unit,
@@ -56,7 +57,7 @@ fun StepScaffold(
             title = state.stepTitle,
             currentStep = state.currentStep + 1, // 1-based for display
             totalSteps = ContributeStep.TOTAL,
-            onNavigateBack = { onIntent(ContributeActions.PreviousStep) },
+            onNavigateBack = { onAction(ContributeActions.PreviousStep) },
         )
 
         // Scrollable form content
@@ -71,21 +72,19 @@ fun StepScaffold(
         )
 
         // Pinned CTA button
-//        MwenyejiButton(
-//            text = buttonLabel,
-//            onClick = { onAction(ContributeActions.NextStep) },
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(horizontal = 16.dp, vertical = 12.dp),
-//        )
+        MwenyejiButton(
+            text = buttonLabel,
+            onClick = { onAction(ContributeActions.NextStep) },
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+        )
     }
 }
 
 @Composable
-fun StepContent(
-    modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit,
-) {
+fun StepContent(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp),

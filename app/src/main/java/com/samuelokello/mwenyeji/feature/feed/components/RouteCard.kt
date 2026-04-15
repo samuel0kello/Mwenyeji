@@ -38,11 +38,7 @@ import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun RouteCard(
-    route: Route,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun RouteCard(route: Route, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
 
@@ -175,10 +171,7 @@ fun RouteCard(
  * Green = HIGH, Amber = MEDIUM, Red = STALE, Grey = UNVERIFIED.
  */
 @Composable
-private fun ConfidenceDot(
-    confidence: RouteConfidence,
-    modifier: Modifier = Modifier,
-) {
+private fun ConfidenceDot(confidence: RouteConfidence, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
     val color =
         when (confidence) {
@@ -203,11 +196,7 @@ private fun ConfidenceDot(
  *                  the "fast" / "Cheap" chips
  */
 @Composable
-internal fun RouteTagChip(
-    label: String,
-    modifier: Modifier = Modifier,
-    isPrimary: Boolean = false,
-) {
+internal fun RouteTagChip(label: String, modifier: Modifier = Modifier, isPrimary: Boolean = false) {
     val colors = MwenyejiTheme.colorScheme
 
     Box(
@@ -220,8 +209,7 @@ internal fun RouteTagChip(
                     } else {
                         colors.surfaceContainerHigh
                     },
-                )
-                .padding(horizontal = 10.dp, vertical = 4.dp),
+                ).padding(horizontal = 10.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -238,7 +226,7 @@ internal fun RouteTagChip(
 }
 
 /**
- * Converts epoch millis to a short relative time string.
+ * Converts epoch millis to a SHORT relative time string.
  * e.g. 7_200_000L → "2h ago", 86_400_000L → "1d ago"
  *
  * For production use consider using [android.text.format.DateUtils.getRelativeTimeSpanString].
@@ -272,7 +260,9 @@ private fun RouteCardPreview() {
                         listOf(
                             RouteStep(
                                 order = 1,
-                                instruction = "Board at Kencom, avoid Archives matatus during rush. Quick connection at Westlands roundabout.",
+                                instruction =
+                                    "Board at Kencom, avoid Archives matatus during rush." +
+                                        " Quick connection at Westlands roundabout.",
                             ),
                         ),
                     tags = setOf(RouteTag.FAST),

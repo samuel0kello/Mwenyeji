@@ -312,10 +312,7 @@ private fun FeedbackButton(
 // ── Section composables ───────────────────────────────────────────────────────
 
 @Composable
-fun RouteHint(
-    reason: String,
-    modifier: Modifier = Modifier,
-) {
+fun RouteHint(reason: String, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
     MwenyejiCard(
         modifier = modifier.fillMaxWidth(),
@@ -345,10 +342,7 @@ fun RouteHint(
 }
 
 @Composable
-fun HowToNavigate(
-    steps: List<RouteStep>,
-    modifier: Modifier = Modifier,
-) {
+fun HowToNavigate(steps: List<RouteStep>, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text(
             text = "HOW TO DO IT",
@@ -365,11 +359,7 @@ fun HowToNavigate(
 }
 
 @Composable
-fun Step(
-    stepNumber: String,
-    stepDescription: String,
-    modifier: Modifier = Modifier,
-) {
+fun Step(stepNumber: String, stepDescription: String, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -400,10 +390,7 @@ fun Step(
 }
 
 @Composable
-fun Warning(
-    warning: String,
-    modifier: Modifier = Modifier,
-) {
+fun Warning(warning: String, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
     MwenyejiCard(
         modifier = modifier.fillMaxWidth(),

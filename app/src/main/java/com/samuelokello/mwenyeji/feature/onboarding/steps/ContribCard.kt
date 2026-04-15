@@ -31,10 +31,7 @@ import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 import com.samuelokello.mwenyeji.ui.theme.typography.JetBrainsFamily
 
 @Composable
-fun ContribCard(
-    visible: Boolean,
-    modifier: Modifier = Modifier,
-) {
+fun ContribCard(visible: Boolean, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
     AnimatedVisibility(
         visible = visible,
@@ -46,7 +43,8 @@ fun ContribCard(
                         stiffness = Spring.StiffnessMediumLow,
                     ),
                 initialOffsetY = { it / 3 },
-            ) + fadeIn(tween(400)),
+            ) +
+                fadeIn(tween(400)),
         modifier = modifier,
     ) {
         Column(
@@ -84,10 +82,7 @@ fun ContribCard(
 }
 
 @Composable
-private fun FieldRow(
-    key: String,
-    value: String,
-) {
+private fun FieldRow(key: String, value: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -105,8 +100,7 @@ private fun FieldRow(
                     .clip(RoundedCornerShape(8.dp))
                     .background(
                         MwenyejiTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.5f),
-                    )
-                    .border(1.dp, MwenyejiTheme.colorScheme.border, RoundedCornerShape(8.dp))
+                    ).border(1.dp, MwenyejiTheme.colorScheme.border, RoundedCornerShape(8.dp))
                     .padding(horizontal = 12.dp, vertical = 8.dp),
         ) {
             Text(
@@ -120,10 +114,7 @@ private fun FieldRow(
 }
 
 @Composable
-private fun Chip(
-    label: String,
-    selected: Boolean,
-) {
+private fun Chip(label: String, selected: Boolean) {
     Box(
         modifier =
             Modifier
@@ -133,8 +124,7 @@ private fun Chip(
                     1.dp,
                     if (selected) MwenyejiTheme.colorScheme.primary else MwenyejiTheme.colorScheme.border,
                     RoundedCornerShape(20.dp),
-                )
-                .padding(horizontal = 12.dp, vertical = 7.dp),
+                ).padding(horizontal = 12.dp, vertical = 7.dp),
     ) {
         Text(
             label,

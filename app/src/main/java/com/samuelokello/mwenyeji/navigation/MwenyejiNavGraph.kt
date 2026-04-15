@@ -11,6 +11,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.navigation
 import com.samuelokello.mwenyeji.datasources.preference.MwenyejiPrefs
+import com.samuelokello.mwenyeji.feature.contribute.navigation.contributeNavGraph
 import com.samuelokello.mwenyeji.feature.feed.navigation.FeedsGraph
 import com.samuelokello.mwenyeji.feature.feed.navigation.feedsNavGraph
 import com.samuelokello.mwenyeji.feature.onboarding.navigation.OnBoarding
@@ -44,6 +45,7 @@ fun NavGraphBuilder.mainGraph(navController: NavHostController) {
     navigation<Main>(startDestination = FeedsGraph) {
         feedsNavGraph(navController)
         // ← contributeNavGraph removed — sheet is shown from App.kt
+        contributeNavGraph(navController)
     }
 }
 

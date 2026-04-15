@@ -31,13 +31,7 @@ import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 import kotlinx.coroutines.delay
 
 @Composable
-fun TypewriterText(
-    text: String,
-    style: TextStyle,
-    color: Color,
-    modifier: Modifier = Modifier,
-    delayPerChar: Long = 60L,
-) {
+fun TypewriterText(text: String, style: TextStyle, color: Color, modifier: Modifier = Modifier, delayPerChar: Long = 60L) {
     var displayed by remember(text) { mutableStateOf("") }
 
     LaunchedEffect(text) {

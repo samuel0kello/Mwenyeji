@@ -17,11 +17,7 @@ import com.samuelokello.mwenyeji.ui.designsystem.components.MwenyejiTopBar
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun AllRoutes(
-    viewmodel: AllRoutesViewModel = koinViewModel(),
-    onNavigateToRouteDetail: (id: String) -> Unit,
-    onNavigateBack: () -> Unit,
-) {
+fun AllRoutes(viewmodel: AllRoutesViewModel = koinViewModel(), onNavigateToRouteDetail: (id: String) -> Unit, onNavigateBack: () -> Unit) {
     val state by viewmodel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {

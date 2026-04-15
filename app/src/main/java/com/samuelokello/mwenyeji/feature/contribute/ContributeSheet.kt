@@ -155,20 +155,33 @@ fun ContributeSheet(
                             verticalArrangement = Arrangement.spacedBy(20.dp),
                         ) {
                             when (step) {
-                                ContributeStep.ROUTE -> RouteStepScreen(
-                                    state = state,
-                                    onAction = viewModel::onAction
-                                )
+                                ContributeStep.ROUTE -> {
+                                    RouteStepScreen(
+                                        state = state,
+                                        onAction = viewModel::onAction,
+                                    )
+                                }
 
-                                ContributeStep.TIMING -> TimingStepScreen(
-                                    state = state,
-                                    onAction = viewModel::onAction
-                                )
-                                ContributeStep.INSTRUCTIONS -> InstructionsStepScreen(state = state, onAction = viewModel::onAction)
-                                ContributeStep.WARNINGS -> WarningsStepScreen(
-                                    state = state,
-                                    onAction = viewModel::onAction
-                                )
+                                ContributeStep.TIMING -> {
+                                    TimingStepScreen(
+                                        state = state,
+                                        onAction = viewModel::onAction,
+                                    )
+                                }
+
+                                ContributeStep.INSTRUCTIONS -> {
+                                    InstructionsStepScreen(
+                                        state = state,
+                                        onAction = viewModel::onAction,
+                                    )
+                                }
+
+                                ContributeStep.WARNINGS -> {
+                                    WarningsStepScreen(
+                                        state = state,
+                                        onAction = viewModel::onAction,
+                                    )
+                                }
                             }
                         }
                     }

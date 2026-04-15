@@ -48,11 +48,7 @@ import com.samuelokello.mwenyeji.feature.feed.navigation.FeedsGraph
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 
 @Composable
-fun BottomNavigationBar(
-    navController: NavHostController,
-    onContributeTapped: () -> Unit,
-    isContributeSheetOpen: Boolean = false,
-) {
+fun BottomNavigationBar(navController: NavHostController, onContributeTapped: () -> Unit, isContributeSheetOpen: Boolean = false) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     val show = navController.shouldShowBottomBar()
@@ -140,9 +136,10 @@ fun AppBottomNavigationBar(
                     ContributeFab(
                         isOpen = isContributeSheetOpen,
                         onClick = onContributeTapped,
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .padding(end = 40.dp),
+                        modifier =
+                            Modifier
+                                .align(Alignment.CenterEnd)
+                                .padding(end = 40.dp),
                     )
                 }
             }
@@ -151,11 +148,7 @@ fun AppBottomNavigationBar(
 }
 
 @Composable
-private fun ContributeFab(
-    isOpen: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun ContributeFab(isOpen: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val rotation by animateFloatAsState(
         targetValue = if (isOpen) 45f else 0f,
         animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
@@ -173,8 +166,7 @@ private fun ContributeFab(
                     shape = RoundedCornerShape(14.dp),
                     ambientColor = MwenyejiTheme.colorScheme.primary,
                     spotColor = MwenyejiTheme.colorScheme.primary,
-                )
-                .clip(RoundedCornerShape(14.dp))
+                ).clip(RoundedCornerShape(14.dp))
                 .background(MwenyejiTheme.colorScheme.primary)
                 .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,

@@ -10,13 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 /**
- * Maps [AppColorScheme] to a Material 3 [ColorScheme].
+ * Maps [MwenyejiColorScheme] to a Material 3 [ColorScheme].
  *
  * All surface container roles are now populated — the previous version left
  * surfaceContainerLowest…surfaceContainerHighest unmapped (they defaulted to
  * Material defaults instead of our custom tones).
  */
-fun AppColorScheme.toMaterialColorScheme(darkTheme: Boolean): ColorScheme =
+fun MwenyejiColorScheme.toMaterialColorScheme(darkTheme: Boolean): ColorScheme =
     if (darkTheme) {
         darkColorScheme(
             primary = primary,
@@ -111,10 +111,7 @@ fun AppColorScheme.toMaterialColorScheme(darkTheme: Boolean): ColorScheme =
  * Usage: call from [MwenyejiAppTheme] when [dynamicColor] = true.
  */
 @Composable
-fun resolveMaterialColorScheme(
-    darkTheme: Boolean,
-    dynamicColor: Boolean,
-): ColorScheme =
+fun resolveMaterialColorScheme(darkTheme: Boolean, dynamicColor: Boolean): ColorScheme =
     when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
@@ -135,7 +132,7 @@ fun resolveMaterialColorScheme(
     }
 
 /**
- * Builds the [AppColorScheme] companion that adds our extra semantic/custom
+ * Builds the [MwenyejiColorScheme] companion that adds our extra semantic/custom
  * roles on top of whatever Material scheme is active.
  *
  * When dynamic color is active we keep our semantic palette (success/info/
@@ -145,10 +142,7 @@ fun resolveMaterialColorScheme(
  * On API < 31 this just returns [DarkColorScheme] or [LightColorScheme] as-is.
  */
 @Composable
-fun resolveAppColorScheme(
-    darkTheme: Boolean,
-    dynamicColor: Boolean,
-): AppColorScheme {
+fun resolveAppColorScheme(darkTheme: Boolean, dynamicColor: Boolean): MwenyejiColorScheme {
     if (!dynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
         return if (darkTheme) DarkColorScheme else LightColorScheme
     }

@@ -28,10 +28,7 @@ import com.samuelokello.mwenyeji.ui.theme.color.AppColors.DangerRed
 import kotlinx.coroutines.delay
 
 @Composable
-fun Screen4Community(
-    currentPage: Int,
-    onFinish: () -> Unit,
-) {
+fun Screen4Community(currentPage: Int, onFinish: () -> Unit) {
     var visibleRows by remember { mutableIntStateOf(0) }
     var showLeader by remember { mutableStateOf(false) }
 

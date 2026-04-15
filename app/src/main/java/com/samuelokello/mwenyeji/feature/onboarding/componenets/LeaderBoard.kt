@@ -39,10 +39,7 @@ import com.samuelokello.mwenyeji.ui.theme.color.AppColors.TextTertiary
 import com.samuelokello.mwenyeji.ui.theme.typography.JetBrainsFamily
 
 @Composable
-fun LeaderBoard(
-    visible: Boolean,
-    modifier: Modifier = Modifier,
-) {
+fun LeaderBoard(visible: Boolean, modifier: Modifier = Modifier) {
     val infiniteTransition = rememberInfiniteTransition(label = "you_row")
     val youAlpha by infiniteTransition.animateFloat(
         initialValue = 0.4f,
@@ -66,7 +63,8 @@ fun LeaderBoard(
                         stiffness = Spring.StiffnessMediumLow,
                     ),
                 initialOffsetY = { it / 2 },
-            ) + fadeIn(tween(400, 200)),
+            ) +
+                fadeIn(tween(400, 200)),
         modifier = modifier,
     ) {
         Column(
@@ -142,12 +140,7 @@ fun LeaderBoard(
 }
 
 @Composable
-private fun LeaderRow(
-    rank: String,
-    name: String,
-    pts: String,
-    badge: String,
-) {
+private fun LeaderRow(rank: String, name: String, pts: String, badge: String) {
     Row(
         modifier =
             Modifier

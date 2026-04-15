@@ -17,7 +17,7 @@ package com.samuelokello.mwenyeji.ui.theme.color
  *   surface roles → Neutral6–Neutral30 tonal ramp (green-tinted near-blacks)
  */
 val DarkColorScheme =
-    AppColorScheme(
+    MwenyejiColorScheme(
         // ── Primary ───────────────────────────────────────────────────────────────
         // M3 rule: primary in dark = ~tonal 80. Green80 = #9BD4B1.
         primary = AppColors.Green80, // #9BD4B1

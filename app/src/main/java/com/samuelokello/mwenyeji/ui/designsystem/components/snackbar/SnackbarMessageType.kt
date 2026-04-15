@@ -25,11 +25,7 @@ class SnackbarManager {
             )
     }
 
-    fun showError(
-        message: String,
-        actionLabel: String? = "Dismiss",
-        onAction: (() -> Unit)? = null,
-    ) {
+    fun showError(message: String, actionLabel: String? = "Dismiss", onAction: (() -> Unit)? = null) {
         _currentMessage.value =
             SnackbarMessage(
                 message = message,
@@ -39,11 +35,7 @@ class SnackbarManager {
             )
     }
 
-    fun showInfo(
-        message: String,
-        actionLabel: String? = null,
-        onAction: (() -> Unit)? = null,
-    ) {
+    fun showInfo(message: String, actionLabel: String? = null, onAction: (() -> Unit)? = null) {
         _currentMessage.value =
             SnackbarMessage(
                 message = message,

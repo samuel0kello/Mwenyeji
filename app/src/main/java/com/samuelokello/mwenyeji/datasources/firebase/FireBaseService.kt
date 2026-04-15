@@ -13,16 +13,47 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
+interface FirebaseService {
+    suspend fun loginWithEmailAndPassword(email: String, password: String): String?
+
+    suspend fun createUserWithEmailAndPassword(email: String, password: String): String?
+
+    suspend fun createAccountWithGoogle(googleToken: String, accessToken: String? = null): String?
+
+    suspend fun sendPasswordResetEmail(email: String)
+
+    suspend fun confirmPasswordReset(code: String, newPassword: String)
+
+    suspend fun getIdToken(): String?
+
+    suspend fun signInAnonymously(): String?
+
+    fun isAnonymous(): Boolean
+
+    fun currentUserId(): String?
+
+    fun getRoutes(timeOfDay: TimeOfDay): Flow<List<RouteDto>>
+
+    fun getRouteById(id: String): Flow<RouteDto?>
+
+    suspend fun submitRoute(dto: RouteDto): String
+
+    suspend fun confirmRoute(routeId: String, userId: String, verdict: String)
+
+    suspend fun getUserVerdict(routeId: String, userId: String): String?
+
+    suspend fun migrateOrphanedConfirmations()
+
+    suspend fun getStableUserId(deviceId: String): String
+}
+
 class FirebaseServiceImpl(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
 ) : FirebaseService {
     private val routesCollection = firestore.collection("routes")
 
-    override suspend fun loginWithEmailAndPassword(
-        email: String,
-        password: String,
-    ): String? =
+    override suspend fun loginWithEmailAndPassword(email: String, password: String): String? =
         runCatching {
             auth
                 .signInWithEmailAndPassword(email, password)
@@ -33,10 +64,7 @@ class FirebaseServiceImpl(
                 ?.token
         }.getOrNull()
 
-    override suspend fun createUserWithEmailAndPassword(
-        email: String,
-        password: String,
-    ): String? =
+    override suspend fun createUserWithEmailAndPassword(email: String, password: String): String? =
         runCatching {
             auth
                 .createUserWithEmailAndPassword(email, password)
@@ -47,10 +75,7 @@ class FirebaseServiceImpl(
                 ?.token
         }.getOrNull()
 
-    override suspend fun createAccountWithGoogle(
-        googleToken: String,
-        accessToken: String?,
-    ): String? =
+    override suspend fun createAccountWithGoogle(googleToken: String, accessToken: String?): String? =
         runCatching {
             val credential = GoogleAuthProvider.getCredential(googleToken, accessToken)
             auth
@@ -66,10 +91,7 @@ class FirebaseServiceImpl(
         runCatching { auth.sendPasswordResetEmail(email).await() }
     }
 
-    override suspend fun confirmPasswordReset(
-        code: String,
-        newPassword: String,
-    ) {
+    override suspend fun confirmPasswordReset(code: String, newPassword: String) {
         runCatching { auth.confirmPasswordReset(code, newPassword).await() }
     }
 
@@ -86,7 +108,7 @@ class FirebaseServiceImpl(
             // If already signed in, return existing UID
             auth.currentUser?.let { return@runCatching it.uid }
 
-            // Sign in anonymously and store device ID in the user profile
+            // Sign in anonymously and store device ID in the user Profile
             val result = auth.signInAnonymously().await()
             result.user?.uid
         }.getOrNull()
@@ -181,11 +203,7 @@ class FirebaseServiceImpl(
         return ref.id
     }
 
-    override suspend fun confirmRoute(
-        routeId: String,
-        userId: String,
-        verdict: String,
-    ) {
+    override suspend fun confirmRoute(routeId: String, userId: String, verdict: String) {
         val routeRef = routesCollection.document(routeId)
         val confirmationRef = routeRef.collection("confirmations").document(userId)
 
@@ -246,10 +264,7 @@ class FirebaseServiceImpl(
     }
 
     // Returns the current user's verdict for a route, or null if they haven't voted
-    override suspend fun getUserVerdict(
-        routeId: String,
-        userId: String,
-    ): String? =
+    override suspend fun getUserVerdict(routeId: String, userId: String): String? =
         runCatching {
             routesCollection
                 .document(routeId)

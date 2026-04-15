@@ -8,24 +8,30 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import com.samuelokello.mwenyeji.datasources.preference.MwenyejiPrefs
 import com.samuelokello.mwenyeji.feature.onboarding.steps.Screen1KnowNairobi
 import com.samuelokello.mwenyeji.feature.onboarding.steps.Screen2FindRoute
 import com.samuelokello.mwenyeji.feature.onboarding.steps.Screen3ShareKnowledge
 import com.samuelokello.mwenyeji.feature.onboarding.steps.Screen4Community
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 @Composable
 fun OnboardingScreen(onFinish: () -> Unit) {
     val pagerState = rememberPagerState(pageCount = { 4 })
     val scope = rememberCoroutineScope()
+    val prefs: MwenyejiPrefs = koinInject<MwenyejiPrefs>()
 
     fun next() {
         scope.launch {
             if (pagerState.currentPage < 3) {
                 pagerState.animateScrollToPage(pagerState.currentPage + 1)
             } else {
-                onFinish()
+                scope.launch {
+                    prefs.setOnBoardingComplete(true)
+                    onFinish()
+                }
             }
         }
     }

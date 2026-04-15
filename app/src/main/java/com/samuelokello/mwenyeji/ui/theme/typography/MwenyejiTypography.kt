@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.sp
  * Based on Material Design 3 type scale
  */
 @Immutable
-data class AppTypography(
+data class MwenyejiTypography(
     // Display - largest text on screen
     val displayLarge: TextStyle,
     val displayMedium: TextStyle,
@@ -20,7 +20,7 @@ data class AppTypography(
     val headlineLarge: TextStyle,
     val headlineMedium: TextStyle,
     val headlineSmall: TextStyle,
-    // Title - medium-emphasis text
+    // Title - MEDIUM-emphasis text
     val titleLarge: TextStyle,
     val titleMedium: TextStyle,
     val titleSmall: TextStyle,
@@ -37,8 +37,8 @@ data class AppTypography(
 /**
  * Creates the default typography scale
  */
-fun createTypography(fontFamily: androidx.compose.ui.text.font.FontFamily = poppins): AppTypography =
-    AppTypography(
+fun createTypography(fontFamily: androidx.compose.ui.text.font.FontFamily = poppins): MwenyejiTypography =
+    MwenyejiTypography(
         // Display
         displayLarge =
             TextStyle(
@@ -166,7 +166,7 @@ fun createTypography(fontFamily: androidx.compose.ui.text.font.FontFamily = popp
             ),
     )
 
-fun AppTypography.toMaterialTypography(): Typography =
+fun MwenyejiTypography.toMaterialTypography(): Typography =
     Typography(
         displayLarge = displayLarge,
         displayMedium = displayMedium,

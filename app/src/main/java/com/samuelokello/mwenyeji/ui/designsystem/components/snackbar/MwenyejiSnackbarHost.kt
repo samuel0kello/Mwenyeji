@@ -35,11 +35,7 @@ import kotlinx.coroutines.delay
  * Auto-dismisses after [autoDismissMs] unless it has an action button.
  */
 @Composable
-fun MwenyejiSnackbarHost(
-    manager: SnackbarManager,
-    modifier: Modifier = Modifier,
-    autoDismissMs: Long = 3000L,
-) {
+fun MwenyejiSnackbarHost(manager: SnackbarManager, modifier: Modifier = Modifier, autoDismissMs: Long = 3000L) {
     val message by manager.currentMessage.collectAsStateWithLifecycle()
 
     LaunchedEffect(message) {
@@ -69,12 +65,7 @@ fun MwenyejiSnackbarHost(
 }
 
 @Composable
-private fun MwenyejiSnackbar(
-    message: SnackbarMessage,
-    onAction: () -> Unit,
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun MwenyejiSnackbar(message: SnackbarMessage, onAction: () -> Unit, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
 

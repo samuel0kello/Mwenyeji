@@ -15,16 +15,9 @@ interface RouteRepository {
 
     suspend fun submitRoute(route: Route): Result<String>
 
-    suspend fun confirmRoute(
-        routeId: String,
-        userId: String,
-        verdict: String,
-    ): Result<Unit>
+    suspend fun confirmRoute(routeId: String, userId: String, verdict: String): Result<Unit>
 
-    suspend fun getUserVerdict(
-        routeId: String,
-        userId: String,
-    ): String?
+    suspend fun getUserVerdict(routeId: String, userId: String): String?
 }
 
 class RouteRepositoryImpl(
@@ -35,25 +28,17 @@ class RouteRepositoryImpl(
             dtos.map { it.toDomain() }
         }
 
-    override fun getRouteById(id: String): Flow<Route?> =
-        firebaseService.getRouteById(id).map { it?.toDomain() }
+    override fun getRouteById(id: String): Flow<Route?> = firebaseService.getRouteById(id).map { it?.toDomain() }
 
     override suspend fun submitRoute(route: Route): Result<String> =
         runCatching {
             firebaseService.submitRoute(route.toDto())
         }
 
-    override suspend fun confirmRoute(
-        routeId: String,
-        userId: String,
-        verdict: String,
-    ): Result<Unit> =
+    override suspend fun confirmRoute(routeId: String, userId: String, verdict: String): Result<Unit> =
         runCatching {
             firebaseService.confirmRoute(routeId, userId, verdict)
         }
 
-    override suspend fun getUserVerdict(
-        routeId: String,
-        userId: String,
-    ): String? = firebaseService.getUserVerdict(routeId, userId)
+    override suspend fun getUserVerdict(routeId: String, userId: String): String? = firebaseService.getUserVerdict(routeId, userId)
 }

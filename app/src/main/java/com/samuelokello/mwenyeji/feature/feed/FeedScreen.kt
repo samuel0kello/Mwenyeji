@@ -37,7 +37,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.samuelokello.mwenyeji.data.models.TimeOfDay
-import com.samuelokello.mwenyeji.feature.contribute.ContributeSheet
 import com.samuelokello.mwenyeji.feature.feed.components.RouteCard
 import com.samuelokello.mwenyeji.ui.designsystem.components.MwenyejiLargeHeaderBar
 import com.samuelokello.mwenyeji.ui.designsystem.components.card.MwenyejiCard
@@ -53,6 +52,7 @@ fun FeedScreen(
     onNavigateToSeeAll: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: FeedViewModel = koinViewModel(),
+    onNavigateToContribute: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -68,7 +68,15 @@ fun FeedScreen(
                     onNavigateToSeeAll()
                 }
 
-                is FeedEffect.ShowError -> { /* show snackbar if needed */
+                is FeedEffect.ShowError -> { // show snackbar if needed
+                }
+
+                FeedEffect.GetLocation -> {
+                    TODO()
+                }
+
+                FeedEffect.RequestLocationPermission -> {
+                    TODO()
                 }
             }
         }
@@ -76,7 +84,8 @@ fun FeedScreen(
 
     FeedScreenContent(
         state = state,
-        onIntent = viewModel::onIntent,
+        onIntent = viewModel::onAction,
+        onNavigateToContribute = onNavigateToContribute,
         modifier = modifier,
     )
 }
@@ -84,7 +93,8 @@ fun FeedScreen(
 @Composable
 internal fun FeedScreenContent(
     state: FeedState,
-    onIntent: (FeedIntent) -> Unit,
+    onIntent: (FeedAction) -> Unit,
+    onNavigateToContribute: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = MwenyejiTheme.colorScheme
@@ -102,7 +112,7 @@ internal fun FeedScreenContent(
                 content = {
                     OutlinedTextField(
                         value = state.searchQuery,
-                        onValueChange = { onIntent(FeedIntent.SearchQueryChanged(it)) },
+                        onValueChange = { onIntent(FeedAction.SearchQueryChanged(it)) },
                         placeholder = {
                             Text(
                                 text = "Search area, stage, destination...",
@@ -118,7 +128,7 @@ internal fun FeedScreenContent(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { showContributeSheet = true },
+                onClick = onNavigateToContribute,
             ) {
                 Icon(Icons.Outlined.Add, contentDescription = "Contribute")
             }
@@ -151,7 +161,7 @@ internal fun FeedScreenContent(
                         style = typography.bodyMedium,
                         color = colors.error,
                     )
-                    TextButton(onClick = { onIntent(FeedIntent.RetryClicked) }) {
+                    TextButton(onClick = { onIntent(FeedAction.RetryClicked) }) {
                         Text("Retry", color = colors.primary)
                     }
                 }
@@ -181,7 +191,7 @@ internal fun FeedScreenContent(
                                     title = timeOfDay.displayName,
                                     selected = state.selectedTimeOfDay == timeOfDay,
                                     onSelected = {
-                                        onIntent(FeedIntent.SelectTimeOfDay(timeOfDay))
+                                        onIntent(FeedAction.SelectTimeOfDay(timeOfDay))
                                     },
                                 )
                             }
@@ -208,7 +218,7 @@ internal fun FeedScreenContent(
                                 modifier = Modifier.weight(1f),
                             )
                             TextButton(
-                                onClick = { onIntent(FeedIntent.SeeAllClicked) },
+                                onClick = { onIntent(FeedAction.SeeAllClicked) },
                                 contentPadding = PaddingValues(0.dp),
                             ) {
                                 Text(
@@ -245,7 +255,7 @@ internal fun FeedScreenContent(
                         ) { route ->
                             RouteCard(
                                 route = route,
-                                onClick = { onIntent(FeedIntent.RouteClicked(route)) },
+                                onClick = { onIntent(FeedAction.RouteClicked(route)) },
                                 modifier = Modifier.padding(horizontal = 16.dp),
                             )
                         }
@@ -253,15 +263,6 @@ internal fun FeedScreenContent(
                 }
             }
         }
-
-        ContributeSheet(
-            visible = showContributeSheet,
-            onDismiss = { showContributeSheet = false },
-            onNavigateToSuccess = {
-                showContributeSheet = false
-                snackbarManager.showSuccess("Guide submitted! Thank you 🙌")
-            },
-        )
     }
 }
 
@@ -276,17 +277,13 @@ private fun FeedScreenContentPreview() {
                     filteredRoutes = emptyList(),
                 ),
             onIntent = {},
+            onNavigateToContribute = {},
         )
     }
 }
 
 @Composable
-fun TimeOfDayChip(
-    title: String,
-    modifier: Modifier = Modifier,
-    selected: Boolean = false,
-    onSelected: (String) -> Unit = {},
-) {
+fun TimeOfDayChip(title: String, modifier: Modifier = Modifier, selected: Boolean = false, onSelected: (String) -> Unit = {}) {
     val colors = MwenyejiTheme.colorScheme
 
     // Animate border and text color transitions
@@ -334,12 +331,7 @@ fun TimeOfDayChip(
 }
 
 @Composable
-fun TimeOfDayChipGroup(
-    options: List<String>,
-    selectedOption: String?,
-    onOptionSelected: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun TimeOfDayChipGroup(options: List<String>, selectedOption: String?, onOptionSelected: (String) -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),

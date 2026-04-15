@@ -35,10 +35,7 @@ import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 import com.samuelokello.mwenyeji.ui.theme.typography.JetBrainsFamily
 
 @Composable
-fun RouteCard(
-    visible: Boolean,
-    modifier: Modifier = Modifier,
-) {
+fun RouteCard(visible: Boolean, modifier: Modifier = Modifier) {
     val infiniteTransition = rememberInfiniteTransition(label = "badge")
     val glowAlpha by infiniteTransition.animateFloat(
         initialValue = 0.15f,
@@ -62,7 +59,8 @@ fun RouteCard(
                         stiffness = Spring.StiffnessMediumLow,
                     ),
                 initialOffsetY = { it / 2 },
-            ) + fadeIn(tween(400)),
+            ) +
+                fadeIn(tween(400)),
         modifier = modifier,
     ) {
         Column(
@@ -100,8 +98,7 @@ fun RouteCard(
                             1.dp,
                             colors.surfaceContainerLowest.copy(alpha = glowAlpha),
                             RoundedCornerShape(8.dp),
-                        )
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                        ).padding(horizontal = 10.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -117,10 +114,7 @@ fun RouteCard(
 }
 
 @Composable
-private fun MetaItem(
-    label: String,
-    value: String,
-) {
+private fun MetaItem(label: String, value: String) {
     val colors = MwenyejiTheme.colorScheme
 
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {

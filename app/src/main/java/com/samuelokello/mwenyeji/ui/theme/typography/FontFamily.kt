@@ -13,7 +13,7 @@ val poppins: FontFamily =
         Font(
             R.font.poppins_extralight_italic,
             weight = FontWeight.ExtraLight,
-            style = FontStyle.Italic
+            style = FontStyle.Italic,
         ),
         Font(R.font.poppins_light, weight = FontWeight.Light),
         Font(R.font.poppins_light_italic, weight = FontWeight.Light, style = FontStyle.Italic),
@@ -24,7 +24,7 @@ val poppins: FontFamily =
         Font(
             R.font.poppins_semibold_italic,
             weight = FontWeight.SemiBold,
-            style = FontStyle.Italic
+            style = FontStyle.Italic,
         ),
         Font(R.font.poppins_bold, weight = FontWeight.Bold),
         Font(R.font.poppins_bold_italic, weight = FontWeight.Bold, style = FontStyle.Italic),
@@ -32,7 +32,7 @@ val poppins: FontFamily =
         Font(
             R.font.poppins_extrabold_italic,
             weight = FontWeight.ExtraBold,
-            style = FontStyle.Italic
+            style = FontStyle.Italic,
         ),
         Font(R.font.poppins_black, weight = FontWeight.Black),
         Font(R.font.poppins_black_italic, weight = FontWeight.Black, style = FontStyle.Italic),

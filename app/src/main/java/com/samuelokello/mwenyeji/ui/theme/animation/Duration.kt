@@ -6,28 +6,28 @@ package com.samuelokello.mwenyeji.ui.theme.animation
  */
 object Duration {
     // Quick animations for small UI changes
-    const val instant = 0
-    const val fast = 100
-    const val quick = 150
+    const val INSTANT = 0
+    const val FAST = 100
+    const val QUICK = 150
 
     // Standard animations for most UI transitions
-    const val short = 200
-    const val medium = 300
-    const val normal = 400
+    const val SHORT = 200
+    const val MEDIUM = 300
+    const val NORMAL = 400
 
     // Longer animations for complex transitions
-    const val long = 500
-    const val slow = 700
-    const val verySlow = 1000
+    const val LONG = 500
+    const val SLOW = 700
+    const val VERY_SLOW = 1000
 
     // Specific use cases
-    const val ripple = 200
-    const val buttonPress = 100
-    const val pageTransition = 300
-    const val dialogEnter = 300
-    const val dialogExit = 200
-    const val bottomSheetEnter = 300
-    const val bottomSheetExit = 200
-    const val fadeIn = 150
-    const val fadeOut = 75
+    const val RIPPLE = 200
+    const val BUTTONPRESS = 100
+    const val PAGE_TRANSITION = 300
+    const val DIALOG_ENTER = 300
+    const val DIALOG_EXIT = 200
+    const val BOTTOM_SHEET_ENTER = 300
+    const val BOTTOM_SHEET_EXIT = 200
+    const val FADE_IN = 150
+    const val FADE_OUT = 75
 }

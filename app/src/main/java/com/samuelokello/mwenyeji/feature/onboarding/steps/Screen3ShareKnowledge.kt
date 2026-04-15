@@ -29,11 +29,7 @@ import com.samuelokello.mwenyeji.ui.theme.color.AppColors.TextSecondary
 import kotlinx.coroutines.delay
 
 @Composable
-fun Screen3ShareKnowledge(
-    currentPage: Int,
-    onNext: () -> Unit,
-    onSkip: () -> Unit,
-) {
+fun Screen3ShareKnowledge(currentPage: Int, onNext: () -> Unit, onSkip: () -> Unit) {
     var showCard by remember { mutableStateOf(false) }
     var showToast by remember { mutableStateOf(false) }
     var animateBar by remember { mutableStateOf(false) }

@@ -1,8 +1,10 @@
 package com.samuelokello.mwenyeji.feature.contribute
 
+import com.samuelokello.mwenyeji.data.models.GeoPoint
 import com.samuelokello.mwenyeji.data.models.Route
 import com.samuelokello.mwenyeji.data.models.RouteStep
 import com.samuelokello.mwenyeji.data.models.RouteTag
+import com.samuelokello.mwenyeji.data.models.SearchResult
 import com.samuelokello.mwenyeji.data.models.TimeOfDay
 
 // Step index constants
@@ -29,7 +31,16 @@ data class ContributeState(
     val selectedTags: Set<RouteTag> = emptySet(),
     val isSubmitting: Boolean = false,
     val isSubmitted: Boolean = false,
+    val routeNumber: String = "",
+    val saccos: List<String> = listOf(""),
     val errors: Map<String, String> = emptyMap(),
+    val fromGeoPoint: GeoPoint? = null,
+    val toGeoPoint: GeoPoint? = null,
+    val fromQuery: String = "",
+    val toQuery: String = "",
+    // suggestions shown in dropdown as user types
+    val fromSuggestions: List<SearchResult> = emptyList(),
+    val toSuggestions: List<SearchResult> = emptyList(),
 ) {
     // helpers
 
@@ -141,7 +152,40 @@ sealed interface ContributeActions {
         val tag: RouteTag,
     ) : ContributeActions
 
+    data class RouteNumberChanged(
+        val value: String,
+    ) : ContributeActions
+
+    data class SaccoChanged(
+        val index: Int,
+        val value: String,
+    ) : ContributeActions
+
+    data object AddSacco : ContributeActions
+
+    data class RemoveSacco(
+        val index: Int,
+    ) : ContributeActions
+
     data object SubmitGuide : ContributeActions
+
+    data class FromSuggestionSelected(
+        val result: SearchResult,
+    ) : ContributeActions
+
+    data class ToSuggestionSelected(
+        val result: SearchResult,
+    ) : ContributeActions
+
+    data class FromPinDragged(
+        val lat: Double,
+        val lng: Double,
+    ) : ContributeActions
+
+    data class ToPinDragged(
+        val lat: Double,
+        val lng: Double,
+    ) : ContributeActions
 }
 
 sealed interface ContributeEffect {

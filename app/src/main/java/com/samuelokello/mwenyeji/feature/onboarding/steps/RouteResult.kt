@@ -44,12 +44,7 @@ data class RouteResult(
 )
 
 @Composable
-fun ResultRouteCard(
-    result: RouteResult,
-    visible: Boolean,
-    delayMillis: Int = 0,
-    modifier: Modifier = Modifier,
-) {
+fun ResultRouteCard(result: RouteResult, visible: Boolean, delayMillis: Int = 0, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
     AnimatedVisibility(
         visible = visible,
@@ -61,7 +56,8 @@ fun ResultRouteCard(
                         stiffness = Spring.StiffnessMediumLow,
                     ),
                 initialOffsetX = { it },
-            ) + fadeIn(tween(400, delayMillis)),
+            ) +
+                fadeIn(tween(400, delayMillis)),
         modifier = modifier,
     ) {
         Column(
@@ -74,8 +70,7 @@ fun ResultRouteCard(
                         width = 1.dp,
                         color = if (result.isActive) colors.primary else colors.background,
                         shape = RoundedCornerShape(16.dp),
-                    )
-                    .padding(16.dp),
+                    ).padding(16.dp),
         ) {
             // Top row
             Row(

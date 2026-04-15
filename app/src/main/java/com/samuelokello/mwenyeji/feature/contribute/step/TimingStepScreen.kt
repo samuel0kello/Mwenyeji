@@ -22,11 +22,7 @@ import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TimingStepScreen(
-    state: ContributeState,
-    onAction: (ContributeActions) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun TimingStepScreen(state: ContributeState, onAction: (ContributeActions) -> Unit, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
 

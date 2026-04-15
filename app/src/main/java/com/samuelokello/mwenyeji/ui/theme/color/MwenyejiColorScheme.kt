@@ -7,7 +7,7 @@ import androidx.compose.ui.graphics.Color
  * Mwenyeji custom color scheme.
  */
 @Immutable
-data class AppColorScheme(
+data class MwenyejiColorScheme(
     // ── Primary ──────────────────────────────────────────────────────────────
     val primary: Color,
     val primaryLight: Color, // hover / lighter tonal stop

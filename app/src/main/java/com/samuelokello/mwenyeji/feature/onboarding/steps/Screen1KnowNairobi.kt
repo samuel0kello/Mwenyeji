@@ -29,11 +29,7 @@ import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 import kotlinx.coroutines.delay
 
 @Composable
-fun Screen1KnowNairobi(
-    currentPage: Int,
-    onNext: () -> Unit,
-    onSkip: () -> Unit,
-) {
+fun Screen1KnowNairobi(currentPage: Int, onNext: () -> Unit, onSkip: () -> Unit) {
     var showNotif by remember { mutableStateOf(false) }
     var showCard by remember { mutableStateOf(false) }
 

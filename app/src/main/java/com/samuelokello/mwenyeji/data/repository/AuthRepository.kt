@@ -11,15 +11,9 @@ interface AuthRepository {
 
     suspend fun ensureSignedIn(): String? // ← add this
 
-    suspend fun login(
-        email: String,
-        password: String,
-    ): String?
+    suspend fun login(email: String, password: String): String?
 
-    suspend fun signup(
-        email: String,
-        password: String,
-    ): String?
+    suspend fun signup(email: String, password: String): String?
 
     suspend fun signInWithGoogle(googleToken: String): String?
 
@@ -44,18 +38,11 @@ class AuthRepositoryImpl(
         return firebaseService.getStableUserId(deviceId)
     }
 
-    override suspend fun login(
-        email: String,
-        password: String,
-    ): String? = firebaseService.loginWithEmailAndPassword(email, password)
+    override suspend fun login(email: String, password: String): String? = firebaseService.loginWithEmailAndPassword(email, password)
 
-    override suspend fun signup(
-        email: String,
-        password: String,
-    ): String? = firebaseService.createUserWithEmailAndPassword(email, password)
+    override suspend fun signup(email: String, password: String): String? = firebaseService.createUserWithEmailAndPassword(email, password)
 
-    override suspend fun signInWithGoogle(googleToken: String): String? =
-        firebaseService.createAccountWithGoogle(googleToken)
+    override suspend fun signInWithGoogle(googleToken: String): String? = firebaseService.createAccountWithGoogle(googleToken)
 
     override fun logout() {
         com.google.firebase.auth.FirebaseAuth

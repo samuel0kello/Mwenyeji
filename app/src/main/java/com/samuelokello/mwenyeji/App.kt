@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -26,52 +27,31 @@ import org.koin.compose.koinInject
 @Composable
 fun App(modifier: Modifier = Modifier) {
     val snackbarManager: SnackbarManager = koinInject()
+    val navHostController = rememberNavController()
 
-    MwenyejiAppTheme {
-        val navHostController = rememberNavController()
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+    ) { paddingValues ->
+        Box(modifier = modifier.fillMaxSize()) {
+            MwenyejiNavGraph(navController = navHostController)
 
-        Scaffold(
-            modifier =
-                Modifier
-                    .fillMaxSize(),
-        ) { paddingValues ->
-            Box(
+            MwenyejiSnackbarHost(
+                manager = snackbarManager,
+                modifier = modifier.align(Alignment.TopCenter),
+            )
+
+            Spacer(
                 modifier =
-                    Modifier
-                        .fillMaxSize(),
-            ) {
-                MwenyejiNavGraph(navController = navHostController)
-
-                MwenyejiSnackbarHost(
-                    manager = snackbarManager,
-                    modifier = Modifier.align(Alignment.TopCenter),
-                )
-            }
+                    modifier
+                        .fillMaxWidth()
+                        .height(
+                            with(LocalDensity.current) {
+                                WindowInsets.statusBars.getTop(this).toDp()
+                            },
+                        ).background(MwenyejiTheme.colorScheme.surface)
+                        .align(Alignment.TopStart),
+            )
         }
     }
-}
-
-@Composable
-internal fun StatusBarProtection(color: Color = MwenyejiTheme.colorScheme.surfaceContainer) {
-    Spacer(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(
-                    with(LocalDensity.current) {
-                        (WindowInsets.statusBars.getTop(this) * 1.2f).toDp()
-                    },
-                )
-                .background(
-                    brush =
-                        Brush.verticalGradient(
-                            colors =
-                                listOf(
-                                    color.copy(alpha = 1f),
-                                    color.copy(alpha = 1f),
-                                    Color.Transparent,
-                                ),
-                        ),
-                ),
-    )
 }

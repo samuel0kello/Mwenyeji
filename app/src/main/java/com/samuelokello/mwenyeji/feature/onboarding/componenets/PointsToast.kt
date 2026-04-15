@@ -24,10 +24,7 @@ import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 import com.samuelokello.mwenyeji.ui.theme.color.AppColors.GreenLight
 
 @Composable
-fun PointsToast(
-    visible: Boolean,
-    modifier: Modifier = Modifier,
-) {
+fun PointsToast(visible: Boolean, modifier: Modifier = Modifier) {
     AnimatedVisibility(
         visible = visible,
         enter =
@@ -38,7 +35,8 @@ fun PointsToast(
                         stiffness = Spring.StiffnessMedium,
                     ),
                 initialOffsetX = { it },
-            ) + fadeIn(),
+            ) +
+                fadeIn(),
         exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut(),
         modifier = modifier,
     ) {

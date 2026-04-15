@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room)
 }
 
 val localProperties =
@@ -23,9 +25,26 @@ android {
         applicationId = "com.samuelokello.mwenyeji"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1006
+        versionCode = 1007
         versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField(
+            "String",
+            "MAPBOX_ACCESS_TOKEN",
+            "\"${localProperties.getProperty("MAPBOX_ACCESS_TOKEN") ?: ""}\"",
+        )
+
+        resValue(
+            "string",
+            "mapbox_access_token",
+            localProperties.getProperty("MAPBOX_ACCESS_TOKEN") ?: "",
+        )
+        buildConfigField(
+            "String",
+            "MAPBOX_DOWNLOADS_TOKEN",
+            "\"${localProperties.getProperty("MAPBOX_DOWNLOADS_TOKEN") ?: ""}\"",
+        )
     }
 
     signingConfigs {
@@ -73,6 +92,12 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
+        resValues = true
+    }
+
+    room {
+        schemaDirectory("$projectDir/schemas")
     }
 }
 
@@ -101,10 +126,9 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
 
+//    koin
     implementation(platform(libs.koin.bom))
-    implementation(libs.koin.android)
-    implementation(libs.koin.compose)
-    implementation(libs.koin.compose.viewmodel)
+    implementation(libs.bundles.koin)
 
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.composable.core)
@@ -119,4 +143,17 @@ dependencies {
     implementation(libs.firebase.crashlytics)
 
     implementation(libs.play.services.basement)
+
+    implementation(libs.android.ndk27)
+    implementation(libs.maps.compose.ndk27)
+    implementation(libs.autofill.ndk27)
+    implementation(libs.discover.ndk27)
+    implementation(libs.place.autocomplete.ndk27)
+    implementation(libs.offline.ndk27)
+    implementation(libs.mapbox.search.android.ndk27)
+    implementation(libs.mapbox.search.android.ui.ndk27)
+
+    // ktor
+    implementation(libs.bundles.ktor)
+    implementation(libs.ktor.client.android)
 }

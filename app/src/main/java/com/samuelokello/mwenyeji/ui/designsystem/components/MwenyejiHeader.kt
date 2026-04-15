@@ -408,8 +408,7 @@ fun MwenyejiStepBar(
                             .clip(
                                 androidx.compose.foundation.shape
                                     .RoundedCornerShape(2.dp),
-                            )
-                            .background(
+                            ).background(
                                 if (isComplete) {
                                     colors.primary
                                 } else {
@@ -430,10 +429,7 @@ fun MwenyejiStepBar(
 }
 
 @Composable
-private fun BackButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun BackButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Box(
         modifier =
             modifier
@@ -454,10 +450,7 @@ private fun BackButton(
 }
 
 @Composable
-private fun AppBarIconButton(
-    action: AppBarAction,
-    modifier: Modifier = Modifier,
-) {
+private fun AppBarIconButton(action: AppBarAction, modifier: Modifier = Modifier) {
     Box(
         modifier =
             modifier

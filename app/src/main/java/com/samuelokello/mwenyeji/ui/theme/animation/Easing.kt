@@ -8,7 +8,7 @@ import androidx.compose.animation.core.Easing
  */
 object Easing {
     /**
-     * Standard easing - most common, for normal motion
+     * Standard easing - most common, for NORMAL motion
      */
     val standard: Easing = CubicBezierEasing(0.4f, 0.0f, 0.2f, 1.0f)
 

@@ -13,14 +13,14 @@ fun NavHostController.shouldShowBottomBar(): Boolean {
     val destination = currentBackStackEntry?.destination ?: return false
     return destination.hierarchy.any { dest ->
         dest.hasRoute<FeedsRoute>() ||
-                dest.hasRoute<ContributeNavGraph>()
+            dest.hasRoute<ContributeNavGraph>()
     } &&
-            destination.hierarchy.none { dest ->
-                dest.hasRoute<RouteDetailsRoute>() ||
+        destination.hierarchy.none { dest ->
+            dest.hasRoute<RouteDetailsRoute>() ||
                 dest.hasRoute<SeeAllRoutesRoute>()
 //                ||
 //                dest.hasRoute<ContributeRoute>()
-            }
+        }
 }
 
 fun NavHostController.navigateBack() {

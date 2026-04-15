@@ -52,11 +52,7 @@ data class FeedEntry(
 )
 
 @Composable
-fun LiveFeedCard(
-    entries: List<FeedEntry>,
-    visibleCount: Int,
-    modifier: Modifier = Modifier,
-) {
+fun LiveFeedCard(entries: List<FeedEntry>, visibleCount: Int, modifier: Modifier = Modifier) {
     val infiniteTransition = rememberInfiniteTransition(label = "live")
     val liveDotAlpha by infiniteTransition.animateFloat(
         initialValue = 1f,
@@ -123,7 +119,8 @@ fun LiveFeedCard(
                                 stiffness = Spring.StiffnessMediumLow,
                             ),
                         initialOffsetX = { it / 2 },
-                    ) + fadeIn(tween(300)),
+                    ) +
+                        fadeIn(tween(300)),
             ) {
                 Column {
                     Row(

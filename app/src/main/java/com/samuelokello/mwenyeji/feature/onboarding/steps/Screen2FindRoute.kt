@@ -28,11 +28,7 @@ import com.samuelokello.mwenyeji.ui.theme.color.AppColors.TextSecondary
 import kotlinx.coroutines.delay
 
 @Composable
-fun Screen2FindRoute(
-    currentPage: Int,
-    onNext: () -> Unit,
-    onSkip: () -> Unit,
-) {
+fun Screen2FindRoute(currentPage: Int, onNext: () -> Unit, onSkip: () -> Unit) {
     var showSearch by remember { mutableStateOf(false) }
     var showCard1 by remember { mutableStateOf(false) }
     var showCard2 by remember { mutableStateOf(false) }

@@ -19,7 +19,7 @@ package com.samuelokello.mwenyeji.ui.theme.color
  *     Amber10 for proper M3 role usage.
  */
 val LightColorScheme =
-    AppColorScheme(
+    MwenyejiColorScheme(
         // ── Primary ───────────────────────────────────────────────────────────────
         primary = AppColors.Green40, // #2D6B4D  — Figma brand primary
         primaryLight = AppColors.Green50, // #3D8B5D  — hover

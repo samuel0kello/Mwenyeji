@@ -29,5 +29,5 @@ sealed interface BottomScreenRoutes {
     data object Contribute : BottomScreenRoutes
 
     @Serializable
-    data object profile
+    data object Profile
 }
