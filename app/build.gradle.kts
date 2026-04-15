@@ -156,4 +156,8 @@ dependencies {
     // ktor
     implementation(libs.bundles.ktor)
     implementation(libs.ktor.client.android)
+
+    // play update
+    implementation(libs.app.update)
+    implementation(libs.app.update.ktx)
 }

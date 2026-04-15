@@ -90,6 +90,12 @@ data class ContributeState(
             to = to.trim(),
             via = via.trim(),
             fareKsh = fareKsh.toDoubleOrNull(),
+            fromLat = fromGeoPoint?.lat,
+            fromLng = fromGeoPoint?.lng,
+            toLat = toGeoPoint?.lat,
+            toLng = toGeoPoint?.lng,
+            routeNumber = routeNumber.trim().ifBlank { null },
+            saccos = saccos.map { it.trim() }.filter { it.isNotBlank() },
             bestTimeOfDay = bestTimeOfDay,
             timingReason = timingReason.trim(),
             steps =

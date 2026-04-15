@@ -1,6 +1,7 @@
 [versions]
 agp = "9.0.1"
 androidNdk27 = "11.21.1"
+appUpdate = "2.1.0"
 autofillNdk27 = "2.21.1"
 core = "1.49.6"
 coreKtx = "1.18.0"
@@ -52,6 +53,8 @@ android-ndk27 = { module = "com.mapbox.maps:android-ndk27", version.ref = "andro
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+app-update = { module = "com.google.android.play:app-update", version.ref = "appUpdate" }
+app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "appUpdate" }
 autofill-ndk27 = { module = "com.mapbox.search:autofill-ndk27", version.ref = "autofillNdk27" }
 composable-core = { module = "com.composables:core", version.ref = "core" }
 discover-ndk27 = { module = "com.mapbox.search:discover-ndk27", version.ref = "autofillNdk27" }

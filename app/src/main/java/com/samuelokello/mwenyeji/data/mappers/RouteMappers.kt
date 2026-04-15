@@ -32,6 +32,12 @@ fun Route.toDto(): RouteDto =
         confirmedCount = confirmedCount,
         didntWorkCount = didntWorkCount,
         outdatedCount = outdatedCount,
+        fromLat = fromLat,
+        fromLng = fromLng,
+        toLat = toLat,
+        toLng = toLng,
+        routeNumber = routeNumber,
+        saccos = saccos,
     )
 
 /**
@@ -69,4 +75,10 @@ fun RouteDto.toDomain(): Route =
         outdatedCount = outdatedCount,
         lastConfirmedAt = lastConfirmedAt?.toDate()?.time,
         createdAt = createdAt?.toDate()?.time ?: System.currentTimeMillis(),
+        fromLat = fromLat,
+        fromLng = fromLng,
+        toLat = toLat,
+        toLng = toLng,
+        routeNumber = routeNumber,
+        saccos = saccos,
     )
