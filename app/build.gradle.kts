@@ -25,7 +25,7 @@ android {
         applicationId = "com.samuelokello.mwenyeji"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1007
+        versionCode = 1010
         versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
