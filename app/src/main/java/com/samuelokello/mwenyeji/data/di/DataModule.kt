@@ -11,7 +11,7 @@ import org.koin.dsl.module
 
 val dataModule =
     module {
-        single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
+        single<AuthRepository> { AuthRepositoryImpl(get()) }
         single<RouteRepository> { RouteRepositoryImpl(get()) }
         single { DeviceIdProvider(get()) }
         single<SearchRepository> { SearchRepositoryImpl(get()) }
