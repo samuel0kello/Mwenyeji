@@ -39,7 +39,7 @@ interface AuthRepository {
 class AuthRepositoryImpl(
     private val firebaseService: FirebaseService,
 ) : AuthRepository {
-    private val TAG = "MwenyejiAuth"
+    private val tag = "MwenyejiAuth"
 
     override fun authState(): Flow<AuthState> =
         firebaseService.authStateFlow().map { data ->
@@ -75,10 +75,10 @@ class AuthRepositoryImpl(
         val credentialManager = CredentialManager.create(context)
         val clientId = context.getString(R.string.default_web_client_id)
 
-        Log.d(TAG, "Starting Google sign-in. clientId=${clientId.take(20)}...")
+        Log.d(tag, "Starting Google sign-in. clientId=${clientId.take(20)}...")
 
-        // Strategy 1 — previously authorised accounts only
-        Log.d(TAG, "Trying strategy 1: filterByAuthorizedAccounts=true")
+        // Strategy 1 — previously authorized accounts only
+        Log.d(tag, "Trying strategy 1: filterByAuthorizedAccounts=true")
         val idToken =
             tryGetIdToken(
                 tag = "Strategy1",
@@ -98,7 +98,7 @@ class AuthRepositoryImpl(
 
                 // Strategy 2 — all Google accounts on device
                 ?: run {
-                    Log.d(TAG, "Strategy 1 failed. Trying strategy 2: filterByAuthorizedAccounts=false")
+                    Log.d(tag, "Strategy 1 failed. Trying strategy 2: filterByAuthorizedAccounts=false")
                     tryGetIdToken(
                         tag = "Strategy2",
                         block = {
@@ -118,7 +118,7 @@ class AuthRepositoryImpl(
 
                 // Strategy 3 — GetSignInWithGoogleOption (newest API)
                 ?: run {
-                    Log.d(TAG, "Strategy 2 failed. Trying strategy 3: GetSignInWithGoogleOption")
+                    Log.d(tag, "Strategy 2 failed. Trying strategy 3: GetSignInWithGoogleOption")
                     tryGetIdToken(
                         tag = "Strategy3",
                         block = {
@@ -130,7 +130,7 @@ class AuthRepositoryImpl(
                     )
                 }
 
-        Log.d(TAG, "All strategies done. idToken=${if (idToken != null) "obtained" else "null"}")
+        Log.d(tag, "All strategies done. idToken=${if (idToken != null) "obtained" else "null"}")
 
         if (idToken == null) {
             return Result.failure(
@@ -142,10 +142,10 @@ class AuthRepositoryImpl(
             val uid =
                 firebaseService.signInWithGoogle(idToken)
                     ?: return Result.failure(Exception("Firebase authentication failed. Please try again."))
-            Log.d(TAG, "Firebase sign-in success. uid=$uid")
+            Log.d(tag, "Firebase sign-in success. uid=$uid")
             Result.success(uid)
         } catch (e: Exception) {
-            Log.e(TAG, "Firebase sign-in exception: ${e.message}")
+            Log.e(tag, "Firebase sign-in exception: ${e.message}")
             Result.failure(e)
         }
     }
@@ -154,7 +154,7 @@ class AuthRepositoryImpl(
      * Tries a single Credential Manager strategy.
      * Returns the idToken string on success.
      * Returns null if no credentials available (try next strategy).
-     * Re-throws cancellation so the caller knows user cancelled.
+     * Re-throws cancellation so the caller knows user canceled.
      */
     private suspend fun tryGetIdToken(
         tag: String,
@@ -167,29 +167,29 @@ class AuthRepositoryImpl(
             val response = credentialManager.getCredential(context, request)
             val credential = response.credential
 
-            Log.d(TAG, "$tag: credential type = ${credential.type}")
+            Log.d(this@AuthRepositoryImpl.tag, "$tag: credential type = ${credential.type}")
 
             if (credential is CustomCredential &&
                 credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
             ) {
                 val token = GoogleIdTokenCredential.createFrom(credential.data).idToken
-                Log.d(TAG, "$tag: success — token obtained")
+                Log.d(this@AuthRepositoryImpl.tag, "$tag: success — token obtained")
                 token
             } else {
-                Log.w(TAG, "$tag: unexpected credential type: ${credential.type}")
+                Log.w(this@AuthRepositoryImpl.tag, "$tag: unexpected credential type: ${credential.type}")
                 null
             }
         } catch (e: GetCredentialCancellationException) {
-            Log.d(TAG, "$tag: user cancelled")
-            throw e // re-throw — caller skips error snackbar for cancellations
+            Log.d(this@AuthRepositoryImpl.tag, "$tag: user cancelled")
+            throw e // re-throw — caller skips error snack bar for cancellations
         } catch (e: NoCredentialException) {
-            Log.d(TAG, "$tag: NoCredentialException — ${e.message}")
+            Log.d(this@AuthRepositoryImpl.tag, "$tag: NoCredentialException — ${e.message}")
             null // try next strategy
         } catch (e: GetCredentialException) {
-            Log.w(TAG, "$tag: GetCredentialException type=${e.type} message=${e.message}")
+            Log.w(this@AuthRepositoryImpl.tag, "$tag: GetCredentialException type=${e.type} message=${e.message}")
             null // try next strategy
         } catch (e: Exception) {
-            Log.e(TAG, "$tag: unexpected exception: ${e.message}")
+            Log.e(this@AuthRepositoryImpl.tag, "$tag: unexpected exception: ${e.message}")
             null
         }
 
@@ -200,7 +200,7 @@ class AuthRepositoryImpl(
                 .create(context)
                 .clearCredentialState(ClearCredentialStateRequest())
         } catch (e: Exception) {
-            Log.w(TAG, "clearCredentialState failed (non-fatal): ${e.message}")
+            Log.w(tag, "clearCredentialState failed (non-fatal): ${e.message}")
         }
     }
 
