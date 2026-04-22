@@ -1,4 +1,4 @@
-package com.samuelokello.mwenyeji.feature.onboarding.steps
+package com.samuelokello.mwenyeji.feature.onboarding.componenets
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring

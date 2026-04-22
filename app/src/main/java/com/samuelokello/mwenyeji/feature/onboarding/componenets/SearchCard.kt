@@ -1,4 +1,4 @@
-package com.samuelokello.mwenyeji.feature.onboarding.steps
+package com.samuelokello.mwenyeji.feature.onboarding.componenets
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
@@ -23,7 +23,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.R
-import com.samuelokello.mwenyeji.feature.onboarding.componenets.TypewriterText
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 
 @Composable

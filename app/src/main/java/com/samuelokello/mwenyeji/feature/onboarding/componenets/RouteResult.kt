@@ -1,4 +1,4 @@
-package com.samuelokello.mwenyeji.feature.onboarding.steps
+package com.samuelokello.mwenyeji.feature.onboarding.componenets
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
@@ -44,7 +44,7 @@ data class RouteResult(
 )
 
 @Composable
-fun ResultRouteCard(result: RouteResult, visible: Boolean, delayMillis: Int = 0, modifier: Modifier = Modifier) {
+fun ResultRouteCard(result: RouteResult, visible: Boolean, modifier: Modifier = Modifier, delayMillis: Int = 0) {
     val colors = MwenyejiTheme.colorScheme
     AnimatedVisibility(
         visible = visible,

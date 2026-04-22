@@ -53,5 +53,10 @@ fun NavGraphBuilder.mainGraph(navController: NavHostController) {
 data object Main
 
 fun NavHostController.navigateToMain() {
-    navigate(Main)
+    navigate(Main) {
+        popUpTo(graph.startDestinationId) {
+            inclusive = true
+        }
+        launchSingleTop = true
+    }
 }

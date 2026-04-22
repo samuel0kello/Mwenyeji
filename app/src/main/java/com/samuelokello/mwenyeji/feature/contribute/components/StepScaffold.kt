@@ -71,7 +71,6 @@ fun StepScaffold(
             content = content,
         )
 
-        // Pinned CTA button
         MwenyejiButton(
             text = buttonLabel,
             onClick = { onAction(ContributeActions.NextStep) },

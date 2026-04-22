@@ -14,6 +14,8 @@ data class FeedState(
     val locationPermissionGranted: Boolean = false,
     val userLat: Double? = null,
     val userLng: Double? = null,
+    val showFabTooltip: Boolean = false,
+    val showTimeFilterTooltip: Boolean = false,
 )
 
 sealed interface FeedAction {
@@ -43,6 +45,10 @@ sealed interface FeedAction {
         val lat: Double,
         val lng: Double,
     ) : FeedAction
+
+    data object DismissFabTooltip : FeedAction
+
+    data object DismissTimeFilterTooltip : FeedAction
 }
 
 // Effect — one-time events (navigation, toasts)

@@ -143,6 +143,7 @@ dependencies {
     implementation(libs.firebase.crashlytics)
 
     implementation(libs.play.services.basement)
+    implementation(libs.play.services.location)
 
     implementation(libs.android.ndk27)
     implementation(libs.maps.compose.ndk27)

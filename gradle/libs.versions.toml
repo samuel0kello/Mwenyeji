@@ -28,6 +28,7 @@ credentials = "1.6.0"
 credentialsPlayServicesAuth = "1.6.0"
 googleid = "1.2.0"
 playServicesBasement = "18.10.0"
+playServicesLocation = "21.3.0"
 
 googleGmsGoogleServices = "4.4.3"
 
@@ -89,6 +90,7 @@ googleid = { group = "com.google.android.libraries.identity.googleid", name = "g
 offline-ndk27 = { module = "com.mapbox.search:offline-ndk27", version.ref = "autofillNdk27" }
 place-autocomplete-ndk27 = { module = "com.mapbox.search:place-autocomplete-ndk27", version.ref = "autofillNdk27" }
 play-services-basement = { group = "com.google.android.gms", name = "play-services-basement", version.ref = "playServicesBasement" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
 
 # ktor
