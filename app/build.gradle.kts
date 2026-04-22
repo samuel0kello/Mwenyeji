@@ -59,6 +59,7 @@ android {
     buildTypes {
         debug {
             versionNameSuffix = "-debug"
+            applicationIdSuffix = ".debug"
             isDebuggable = true
         }
 
@@ -141,6 +142,7 @@ dependencies {
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.crashlytics)
+    implementation(libs.googleid)
 
     implementation(libs.play.services.basement)
     implementation(libs.play.services.location)

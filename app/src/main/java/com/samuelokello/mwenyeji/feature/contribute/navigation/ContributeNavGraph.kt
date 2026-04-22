@@ -26,6 +26,12 @@ fun NavGraphBuilder.contributeNavGraph(navController: NavHostController) {
     }
 }
 
-fun NavController.navigateToContribute() {
-    navigate(ContributeRoute)
+fun NavController.navigateToContribute(onRequireAuth: ((onAuthenticated: () -> Unit) -> Unit)? = null) {
+    if (onRequireAuth != null) {
+        onRequireAuth {
+            navigate(ContributeRoute)
+        }
+    } else {
+        navigate(ContributeRoute)
+    }
 }

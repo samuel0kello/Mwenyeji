@@ -7,6 +7,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.samuelokello.mwenyeji.data.models.TimeOfDay
+import com.samuelokello.mwenyeji.datasources.firebase.dto.AuthStateData
 import com.samuelokello.mwenyeji.datasources.firebase.dto.RouteDto
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -14,6 +15,8 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 interface FirebaseService {
+    fun authStateFlow(): Flow<AuthStateData>
+
     suspend fun loginWithEmailAndPassword(email: String, password: String): String?
 
     suspend fun createUserWithEmailAndPassword(email: String, password: String): String?
@@ -31,6 +34,10 @@ interface FirebaseService {
     fun isAnonymous(): Boolean
 
     fun currentUserId(): String?
+
+    suspend fun signOut()
+
+    suspend fun signInWithGoogle(idToken: String): String?
 
     fun getRoutes(timeOfDay: TimeOfDay): Flow<List<RouteDto>>
 
@@ -52,6 +59,70 @@ class FirebaseServiceImpl(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
 ) : FirebaseService {
     private val routesCollection = firestore.collection("routes")
+
+    override fun authStateFlow(): Flow<AuthStateData> =
+        callbackFlow {
+            val listener =
+                FirebaseAuth.AuthStateListener { firebaseAuth ->
+                    val user = firebaseAuth.currentUser
+                    trySend(
+                        AuthStateData(
+                            uid = user?.uid,
+                            isAnonymous = user?.isAnonymous ?: true,
+                            displayName = user?.displayName,
+                            email = user?.email,
+                            photoUrl = user?.photoUrl?.toString(),
+                        ),
+                    )
+                }
+            auth.addAuthStateListener(listener)
+            awaitClose { auth.removeAuthStateListener(listener) }
+        }
+
+    override suspend fun signInAnonymously(): String? =
+        runCatching {
+            auth.currentUser?.uid ?: auth
+                .signInAnonymously()
+                .await()
+                .user
+                ?.uid
+        }.getOrNull()
+
+    override suspend fun signInWithGoogle(idToken: String): String? =
+        runCatching {
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            val currentUser = auth.currentUser
+
+            if (currentUser != null && currentUser.isAnonymous) {
+                // Link Google to the existing anonymous account so the same UID is kept.
+                // If linking fails (account already exists) fall back to normal sign-in.
+                runCatching {
+                    currentUser
+                        .linkWithCredential(credential)
+                        .await()
+                        .user
+                        ?.uid
+                }.getOrElse {
+                    auth
+                        .signInWithCredential(credential)
+                        .await()
+                        .user
+                        ?.uid
+                }
+            } else {
+                auth
+                    .signInWithCredential(credential)
+                    .await()
+                    .user
+                    ?.uid
+            }
+        }.getOrNull()
+
+    override suspend fun signOut() {
+        auth.signOut()
+        // Caller is responsible for clearing Credential Manager state
+        // (must be done from a Context — handled in AuthRepository)
+    }
 
     override suspend fun loginWithEmailAndPassword(email: String, password: String): String? =
         runCatching {
@@ -75,17 +146,7 @@ class FirebaseServiceImpl(
                 ?.token
         }.getOrNull()
 
-    override suspend fun createAccountWithGoogle(googleToken: String, accessToken: String?): String? =
-        runCatching {
-            val credential = GoogleAuthProvider.getCredential(googleToken, accessToken)
-            auth
-                .signInWithCredential(credential)
-                .await()
-                .user
-                ?.getIdToken(false)
-                ?.await()
-                ?.token
-        }.getOrNull()
+    override suspend fun createAccountWithGoogle(googleToken: String, accessToken: String?): String? = signInWithGoogle(googleToken)
 
     override suspend fun sendPasswordResetEmail(email: String) {
         runCatching { auth.sendPasswordResetEmail(email).await() }
@@ -103,63 +164,42 @@ class FirebaseServiceImpl(
                 ?.token
         }.getOrNull()
 
-    override suspend fun signInAnonymously(): String? =
-        runCatching {
-            // If already signed in, return existing UID
-            auth.currentUser?.let { return@runCatching it.uid }
+    override fun isAnonymous(): Boolean = auth.currentUser?.isAnonymous ?: true
 
-            // Sign in anonymously and store device ID in the user Profile
-            val result = auth.signInAnonymously().await()
-            result.user?.uid
-        }.getOrNull()
+    override fun currentUserId(): String? = auth.currentUser?.uid
 
     override suspend fun getStableUserId(deviceId: String): String {
-        // Check if we already have a UID stored for this device
         val stored =
             firestore
                 .collection("device_identities")
                 .document(deviceId)
                 .get()
                 .await()
-
         if (stored.exists()) {
-            val uid = stored.getString("uid") ?: return signInAnonymouslyAndStore(deviceId)
-            return uid
+            return stored.getString("uid") ?: signInAnonymouslyAndStore(deviceId)
         }
-
         return signInAnonymouslyAndStore(deviceId)
     }
 
     private suspend fun signInAnonymouslyAndStore(deviceId: String): String {
+        auth.currentUser?.let { return it.uid }
         val result = auth.signInAnonymously().await()
         val uid = result.user?.uid ?: throw Exception("Failed to sign in anonymously")
-
-        // Store the mapping device → uid
         firestore
             .collection("device_identities")
             .document(deviceId)
-            .set(
-                mapOf(
-                    "uid" to uid,
-                    "deviceId" to deviceId,
-                    "createdAt" to Timestamp.now(),
-                ),
-            ).await()
-
+            .set(mapOf("uid" to uid, "deviceId" to deviceId, "createdAt" to Timestamp.now()))
+            .await()
         return uid
     }
 
-    override fun isAnonymous(): Boolean = auth.currentUser?.isAnonymous ?: true
-
-    override fun currentUserId(): String? = auth.currentUser?.uid
+    //  Routes
 
     override fun getRoutes(timeOfDay: TimeOfDay): Flow<List<RouteDto>> =
         callbackFlow {
             val query =
                 if (timeOfDay == TimeOfDay.ANYTIME) {
-                    routesCollection
-                        .orderBy("confirmedCount", Query.Direction.DESCENDING)
-                        .limit(20)
+                    routesCollection.orderBy("confirmedCount", Query.Direction.DESCENDING).limit(20)
                 } else {
                     routesCollection
                         .whereEqualTo("bestTimeOfDay", timeOfDay.name)
@@ -172,10 +212,7 @@ class FirebaseServiceImpl(
                         close(error)
                         return@addSnapshotListener
                     }
-                    val dtos =
-                        snapshot?.documents?.mapNotNull { doc ->
-                            doc.toObject(RouteDto::class.java)?.copy(id = doc.id)
-                        } ?: emptyList()
+                    val dtos = snapshot?.documents?.mapNotNull { it.toObject(RouteDto::class.java)?.copy(id = it.id) } ?: emptyList()
                     trySend(dtos)
                 }
             awaitClose { listener.remove() }
@@ -184,16 +221,13 @@ class FirebaseServiceImpl(
     override fun getRouteById(id: String): Flow<RouteDto?> =
         callbackFlow {
             val listener =
-                routesCollection
-                    .document(id)
-                    .addSnapshotListener { snapshot, error ->
-                        if (error != null) {
-                            close(error)
-                            return@addSnapshotListener
-                        }
-                        val dto = snapshot?.toObject(RouteDto::class.java)?.copy(id = snapshot.id)
-                        trySend(dto)
+                routesCollection.document(id).addSnapshotListener { snapshot, error ->
+                    if (error != null) {
+                        close(error)
+                        return@addSnapshotListener
                     }
+                    trySend(snapshot?.toObject(RouteDto::class.java)?.copy(id = snapshot.id))
+                }
             awaitClose { listener.remove() }
         }
 
@@ -207,63 +241,27 @@ class FirebaseServiceImpl(
         val routeRef = routesCollection.document(routeId)
         val confirmationRef = routeRef.collection("confirmations").document(userId)
 
-        // Read existing vote BEFORE transaction (reads inside transactions are limited)
-        val existingSnapshot =
-            runCatching {
-                confirmationRef.get().await()
-            }.getOrNull()
+        val existingSnapshot = runCatching { confirmationRef.get().await() }.getOrNull()
+        val previousVerdict = existingSnapshot?.takeIf { it.exists() }?.getString("verdict")
 
-        val previousVerdict =
-            existingSnapshot
-                ?.takeIf { it.exists() }
-                ?.getString("verdict")
-
-        // User clicking the same button they already chose — toggle it off
         if (previousVerdict == verdict) {
             firestore
                 .runTransaction { transaction ->
                     transaction.delete(confirmationRef)
-                    val decrementField = verdictToField(verdict)
-                    if (decrementField != null) {
-                        transaction.update(routeRef, decrementField, FieldValue.increment(-1))
-                    }
+                    verdictToField(verdict)?.let { transaction.update(routeRef, it, FieldValue.increment(-1)) }
                 }.await()
             return
         }
 
-        // Normal case — new vote or switching vote
         firestore
             .runTransaction { transaction ->
-                transaction.set(
-                    confirmationRef,
-                    mapOf(
-                        "verdict" to verdict,
-                        "userId" to userId,
-                        "confirmedAt" to Timestamp.now(),
-                    ),
-                )
-
-                // Undo previous verdict if switching
-                previousVerdict?.let {
-                    val decrementField = verdictToField(it)
-                    if (decrementField != null) {
-                        transaction.update(routeRef, decrementField, FieldValue.increment(-1))
-                    }
-                }
-
-                // Apply new verdict
-                val incrementField = verdictToField(verdict)
-                if (incrementField != null) {
-                    transaction.update(routeRef, incrementField, FieldValue.increment(1))
-                }
-
-                if (verdict == "CONFIRMED") {
-                    transaction.update(routeRef, "lastConfirmedAt", Timestamp.now())
-                }
+                transaction.set(confirmationRef, mapOf("verdict" to verdict, "userId" to userId, "confirmedAt" to Timestamp.now()))
+                previousVerdict?.let { verdictToField(it)?.let { f -> transaction.update(routeRef, f, FieldValue.increment(-1)) } }
+                verdictToField(verdict)?.let { transaction.update(routeRef, it, FieldValue.increment(1)) }
+                if (verdict == "CONFIRMED") transaction.update(routeRef, "lastConfirmedAt", Timestamp.now())
             }.await()
     }
 
-    // Returns the current user's verdict for a route, or null if they haven't voted
     override suspend fun getUserVerdict(routeId: String, userId: String): String? =
         runCatching {
             routesCollection
@@ -275,40 +273,27 @@ class FirebaseServiceImpl(
                 .getString("verdict")
         }.getOrNull()
 
-    // One-time migration — fixes orphaned confirmations from before the count fix
-    // Call this once from a ViewModel or admin screen, then remove it
     override suspend fun migrateOrphanedConfirmations() {
         val routes = routesCollection.get().await()
-
         routes.documents.forEach { routeDoc ->
             val confirmations =
                 routeDoc.reference
                     .collection("confirmations")
                     .get()
                     .await()
-
             var confirmed = 0
             var didntWork = 0
             var outdated = 0
-
-            // Count each unique user's verdict
-            // One document per userId so no duplicates possible
-            confirmations.documents.forEach { confirmation ->
-                when (confirmation.getString("verdict")) {
+            confirmations.documents.forEach { c ->
+                when (c.getString("verdict")) {
                     "CONFIRMED" -> confirmed++
                     "DIDNT_WORK" -> didntWork++
                     "OUTDATED" -> outdated++
                 }
             }
-
-            // Overwrite the counts on the route document with real values
             routeDoc.reference
                 .update(
-                    mapOf(
-                        "confirmedCount" to confirmed,
-                        "didntWorkCount" to didntWork,
-                        "outdatedCount" to outdated,
-                    ),
+                    mapOf("confirmedCount" to confirmed, "didntWorkCount" to didntWork, "outdatedCount" to outdated),
                 ).await()
         }
     }
