@@ -59,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -66,11 +67,12 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.data.models.TimeOfDay
 import com.samuelokello.mwenyeji.feature.feed.components.RouteCard
 import com.samuelokello.mwenyeji.ui.designsystem.components.MwenyejiLargeHeaderBar
 import com.samuelokello.mwenyeji.ui.designsystem.components.card.MwenyejiCard
-import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackbarManager
+import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackBarManager
 import com.samuelokello.mwenyeji.ui.designsystem.components.toolTip.MwenyejiTooltip
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiAppTheme
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
@@ -85,7 +87,7 @@ fun FeedScreen(
     modifier: Modifier = Modifier,
     viewModel: FeedViewModel = koinViewModel(),
     onNavigateToContribute: () -> Unit,
-    snackBarManager: SnackbarManager = koinInject(),
+    snackBarManager: SnackBarManager = koinInject(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -200,15 +202,15 @@ internal fun FeedScreenContent(
         containerColor = colors.background,
         topBar = {
             MwenyejiLargeHeaderBar(
-                title = "Where to?",
-                subtitle = "Find local ways to move around Nairobi",
+                title = stringResource(R.string.where_to),
+                subtitle = stringResource(R.string.find_local_ways_to_move_around_nairobi),
                 content = {
                     OutlinedTextField(
                         value = state.searchQuery,
                         onValueChange = { onAction(FeedAction.SearchQueryChanged(it)) },
                         placeholder = {
                             Text(
-                                text = "Search area, stage, destination...",
+                                text = stringResource(R.string.search_area_stage_destination),
                                 style = typography.bodyMedium,
                                 color = colors.onSurfaceVariant,
                             )
@@ -223,8 +225,8 @@ internal fun FeedScreenContent(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 TooltipWithAnimation(
                     show = state.showFabTooltip,
-                    text = "Know a route? Add it here",
-                    emoji = "✍️",
+                    text = stringResource(R.string.know_a_route_add_it_here),
+                    emoji = "",
                     onDismiss = { onAction(FeedAction.DismissFabTooltip) },
                 )
 
@@ -267,7 +269,7 @@ internal fun FeedScreenContent(
                         color = colors.error,
                     )
                     TextButton(onClick = { onAction(FeedAction.RetryClicked) }) {
-                        Text("Retry", color = colors.primary)
+                        Text(stringResource(R.string.retry), color = colors.primary)
                     }
                 }
             }

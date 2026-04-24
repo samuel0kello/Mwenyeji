@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.samuelokello.mwenyeji.data.models.Route
 import com.samuelokello.mwenyeji.data.repository.AuthRepository
 import com.samuelokello.mwenyeji.data.repository.RouteRepository
-import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackbarManager
+import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackBarManager
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 class RouteDetailsViewModel(
     private val routeRepository: RouteRepository,
     private val authRepository: AuthRepository,
-    private val snackbarManager: SnackbarManager,
+    private val snackbarManager: SnackBarManager,
 ) : ViewModel() {
     private val _state = MutableStateFlow(RouteDetailsState())
     val state: StateFlow<RouteDetailsState> = _state.asStateFlow()

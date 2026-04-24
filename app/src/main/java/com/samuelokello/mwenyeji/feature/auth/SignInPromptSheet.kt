@@ -34,19 +34,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.ui.designsystem.components.button.MwenyejiButton
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 
-/**
- * Bottom sheet shown when an anonymous user taps Contribute.
- *
- * Explains why sign-in is needed (builds trust, not a wall),
- * then shows the Google Sign-In button.
- *
- * On success → onSignInSuccess() is called → ContributeSheet opens.
- */
 @Composable
 fun SignInPromptSheet(
     visible: Boolean,
@@ -105,7 +99,7 @@ fun SignInPromptSheet(
 
                 // Title
                 Text(
-                    text = "Sign in to share your knowledge",
+                    text = stringResource(R.string.sign_in_to_share_your_knowledge),
                     style = typography.headlineSmall,
                     color = colors.onSurface,
                     textAlign = TextAlign.Center,
@@ -115,7 +109,7 @@ fun SignInPromptSheet(
 
                 // Subtitle
                 Text(
-                    text = "Contributing requires a Google account so the community knows who to trust.",
+                    text = stringResource(R.string.contributing_requires_a_google_account_so_the_community_knows_who_to_trust),
                     style = typography.bodyMedium,
                     color = colors.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -126,20 +120,20 @@ fun SignInPromptSheet(
                 // Value props
                 SignInBenefit(
                     icon = Icons.Outlined.Route,
-                    title = "Your routes, your identity",
-                    body = "Contributions are linked to your account so you get credit for your knowledge.",
+                    title = stringResource(R.string.your_routes_your_identity),
+                    body = stringResource(R.string.contributions_are_linked_to_your_account_so_you_get_credit_for_your_knowledge),
                 )
                 Spacer(Modifier.height(16.dp))
                 SignInBenefit(
                     icon = Icons.Outlined.Verified,
-                    title = "Trusted community",
-                    body = "Signed-in contributors build reputation over time. The community knows who to trust.",
+                    title = stringResource(R.string.trusted_community),
+                    body = stringResource(R.string.signed_in_contributors_build_reputation_over_time_the_community_knows_who_to_trust),
                 )
                 Spacer(Modifier.height(16.dp))
                 SignInBenefit(
                     icon = Icons.Outlined.Groups,
-                    title = "Browsing stays free",
-                    body = "No account needed to read routes. Sign in only when you want to contribute.",
+                    title = stringResource(R.string.browsing_stays_free),
+                    body = stringResource(R.string.no_account_needed_to_read_routes_sign_in_only_when_you_want_to_contribute),
                 )
 
                 Spacer(Modifier.height(32.dp))
@@ -152,7 +146,7 @@ fun SignInPromptSheet(
                     )
                 } else {
                     MwenyejiButton(
-                        text = "Continue with Google",
+                        text = stringResource(R.string.continue_with_google),
                         onClick = onGoogleSignIn,
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -162,7 +156,7 @@ fun SignInPromptSheet(
 
                 // Dismiss link
                 Text(
-                    text = "Maybe later",
+                    text = stringResource(R.string.maybe_later),
                     style = typography.labelMedium,
                     color = colors.onSurfaceVariant,
                     modifier =

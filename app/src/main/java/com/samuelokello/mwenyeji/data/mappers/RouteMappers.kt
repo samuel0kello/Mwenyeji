@@ -4,7 +4,7 @@ import com.samuelokello.mwenyeji.data.models.Route
 import com.samuelokello.mwenyeji.data.models.RouteStep
 import com.samuelokello.mwenyeji.data.models.RouteTag
 import com.samuelokello.mwenyeji.data.models.TimeOfDay
-import com.samuelokello.mwenyeji.datasources.firebase.dto.RouteDto
+import com.samuelokello.mwenyeji.datasources.sources.routes.dto.RouteDto
 
 /**
  * Converts domain [Route] → Firestore [RouteDto].

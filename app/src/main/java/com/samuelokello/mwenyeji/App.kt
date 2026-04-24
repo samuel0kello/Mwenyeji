@@ -26,13 +26,13 @@ import com.samuelokello.mwenyeji.feature.auth.AuthState
 import com.samuelokello.mwenyeji.feature.auth.SignInPromptSheet
 import com.samuelokello.mwenyeji.navigation.MwenyejiNavGraph
 import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.MwenyejiSnackbarHost
-import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackbarManager
+import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackBarManager
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Composable
-fun App(modifier: Modifier = Modifier, snackbarManager: SnackbarManager) {
+fun App(modifier: Modifier = Modifier, snackbarManager: SnackBarManager) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val navHostController = rememberNavController()
@@ -75,7 +75,11 @@ fun App(modifier: Modifier = Modifier, snackbarManager: SnackbarManager) {
                     showSignInPrompt = false
                     pendingAction = null
                 },
-                onSignInSuccess = {},
+                onSignInSuccess = {
+                    showSignInPrompt = false
+                    pendingAction?.invoke()
+                    pendingAction = null
+                },
                 onGoogleSignIn = {
                     scope.launch {
                         isSigningIn = true

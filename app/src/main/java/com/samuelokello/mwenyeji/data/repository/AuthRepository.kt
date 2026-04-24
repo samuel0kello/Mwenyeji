@@ -14,197 +14,196 @@ import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
 import com.samuelokello.mwenyeji.R
-import com.samuelokello.mwenyeji.datasources.firebase.FirebaseService
+import com.samuelokello.mwenyeji.data.helpers.DataResult
+import com.samuelokello.mwenyeji.data.helpers.DomainError
+import com.samuelokello.mwenyeji.data.helpers.toDataResult
+import com.samuelokello.mwenyeji.datasources.sources.auth.AuthRemoteDataSource
+import com.samuelokello.mwenyeji.datasources.sources.auth.dto.AuthStateData
 import com.samuelokello.mwenyeji.feature.auth.AuthState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 interface AuthRepository {
-    fun authState(): Flow<AuthState>
-
+    val authState: Flow<AuthState>
     val currentUserId: String?
     val isAnonymous: Boolean
 
-    suspend fun signInAnonymously(): String?
+    suspend fun signInAnonymously(): DataResult<String>
 
-    suspend fun signInWithGoogle(context: Context): Result<String>
+    suspend fun signInWithEmail(email: String, password: String): DataResult<String>
 
-    suspend fun signOut(context: Context)
+    suspend fun createAccountWithEmail(email: String, password: String): DataResult<String>
 
-    suspend fun login(email: String, password: String): String?
+    suspend fun signInWithGoogle(context: Context): DataResult<String>
 
-    suspend fun signup(email: String, password: String): String?
+    suspend fun signOut(context: Context): DataResult<Unit>
 }
 
-class AuthRepositoryImpl(
-    private val firebaseService: FirebaseService,
+internal class AuthRepositoryImpl(
+    private val authRemoteDataSource: AuthRemoteDataSource,
 ) : AuthRepository {
-    private val tag = "MwenyejiAuth"
+    override val authState: Flow<AuthState> =
+        authRemoteDataSource.observeAuthState().map { it.toAuthState() }
 
-    override fun authState(): Flow<AuthState> =
-        firebaseService.authStateFlow().map { data ->
-            when {
-                data.uid == null -> {
-                    AuthState.Anonymous
-                }
+    override val currentUserId: String? get() = authRemoteDataSource.currentUserId
+    override val isAnonymous: Boolean get() = authRemoteDataSource.isAnonymous
 
-                data.isAnonymous -> {
-                    AuthState.Anonymous
-                }
+    override suspend fun signInAnonymously(): DataResult<String> = authRemoteDataSource.signInAnonymously().toDataResult()
 
-                else -> {
-                    AuthState.SignedIn(
-                        uid = data.uid,
-                        displayName = data.displayName,
-                        email = data.email,
-                        photoUrl = data.photoUrl,
-                    )
-                }
+    override suspend fun signInWithEmail(email: String, password: String): DataResult<String> =
+        authRemoteDataSource.signInWithEmail(email, password).toDataResult()
+
+    override suspend fun createAccountWithEmail(email: String, password: String): DataResult<String> =
+        authRemoteDataSource.createAccountWithEmail(email, password).toDataResult()
+
+    override suspend fun signInWithGoogle(context: Context): DataResult<String> {
+        val idToken =
+            when (val credResult = obtainGoogleIdToken(context)) {
+                is GoogleCredentialResult.Success -> credResult.idToken
+
+                is GoogleCredentialResult.Cancelled -> return DataResult.Error(DomainError.UserCancelled)
+
+                is GoogleCredentialResult.NoAccount -> return DataResult.Error(DomainError.NoGoogleAccount)
+
+                is GoogleCredentialResult.Failed -> return DataResult.Error(
+                    DomainError.Unknown(credResult.message),
+                )
             }
-        }
+        return authRemoteDataSource.signInWithGoogle(idToken).toDataResult()
+    }
 
-    override val currentUserId: String?
-        get() = firebaseService.currentUserId()
+    override suspend fun signOut(context: Context): DataResult<Unit> {
+        val result = authRemoteDataSource.signOut().toDataResult()
+        // Always try to clear Credential Manager state, even if Firebase sign-out failed.
+        runCatching {
+            CredentialManager
+                .create(context)
+                .clearCredentialState(ClearCredentialStateRequest())
+        }.onFailure { Log.w(TAG, "clearCredentialState failed (non-fatal): ${it.message}") }
+        return result
+    }
 
-    override val isAnonymous: Boolean
-        get() = firebaseService.isAnonymous()
+    // Google Credential Manager
+    private sealed interface GoogleCredentialResult {
+        data class Success(
+            val idToken: String,
+        ) : GoogleCredentialResult
 
-    override suspend fun signInAnonymously(): String? = firebaseService.signInAnonymously()
+        data object Cancelled : GoogleCredentialResult
 
-    override suspend fun signInWithGoogle(context: Context): Result<String> {
+        data object NoAccount : GoogleCredentialResult
+
+        data class Failed(
+            val message: String,
+        ) : GoogleCredentialResult
+    }
+
+    private suspend fun obtainGoogleIdToken(context: Context): GoogleCredentialResult {
         val credentialManager = CredentialManager.create(context)
         val clientId = context.getString(R.string.default_web_client_id)
 
-        Log.d(tag, "Starting Google sign-in. clientId=${clientId.take(20)}...")
+        Log.d(TAG, "Starting Google sign-in. clientId=${clientId.take(10)}...")
 
-        // Strategy 1 — previously authorized accounts only
-        Log.d(tag, "Trying strategy 1: filterByAuthorizedAccounts=true")
-        val idToken =
-            tryGetIdToken(
-                tag = "Strategy1",
-                block = {
-                    val option =
-                        GetGoogleIdOption
-                            .Builder()
-                            .setServerClientId(clientId)
-                            .setFilterByAuthorizedAccounts(true)
-                            .setAutoSelectEnabled(false)
-                            .build()
-                    GetCredentialRequest.Builder().addCredentialOption(option).build()
-                },
-                context = context,
-                credentialManager = credentialManager,
-            )
+        for (strategy in googleSignInStrategies(clientId)) {
+            return when (val result = tryStrategy(strategy, context, credentialManager)) {
+                is GoogleCredentialResult.Success -> result
 
-                // Strategy 2 — all Google accounts on device
-                ?: run {
-                    Log.d(tag, "Strategy 1 failed. Trying strategy 2: filterByAuthorizedAccounts=false")
-                    tryGetIdToken(
-                        tag = "Strategy2",
-                        block = {
-                            val option =
-                                GetGoogleIdOption
-                                    .Builder()
-                                    .setServerClientId(clientId)
-                                    .setFilterByAuthorizedAccounts(false)
-                                    .setAutoSelectEnabled(false)
-                                    .build()
-                            GetCredentialRequest.Builder().addCredentialOption(option).build()
-                        },
-                        context = context,
-                        credentialManager = credentialManager,
-                    )
-                }
+                is GoogleCredentialResult.Cancelled -> result
 
-                // Strategy 3 — GetSignInWithGoogleOption (newest API)
-                ?: run {
-                    Log.d(tag, "Strategy 2 failed. Trying strategy 3: GetSignInWithGoogleOption")
-                    tryGetIdToken(
-                        tag = "Strategy3",
-                        block = {
-                            val option = GetSignInWithGoogleOption.Builder(clientId).build()
-                            GetCredentialRequest.Builder().addCredentialOption(option).build()
-                        },
-                        context = context,
-                        credentialManager = credentialManager,
-                    )
-                }
+                // don't retry on cancel
+                is GoogleCredentialResult.NoAccount -> continue
 
-        Log.d(tag, "All strategies done. idToken=${if (idToken != null) "obtained" else "null"}")
-
-        if (idToken == null) {
-            return Result.failure(
-                Exception("No Google account found on this device. Please add a Google account in Settings and try again."),
-            )
+                // try next
+                is GoogleCredentialResult.Failed -> continue // try next
+            }
         }
-
-        return try {
-            val uid =
-                firebaseService.signInWithGoogle(idToken)
-                    ?: return Result.failure(Exception("Firebase authentication failed. Please try again."))
-            Log.d(tag, "Firebase sign-in success. uid=$uid")
-            Result.success(uid)
-        } catch (e: Exception) {
-            Log.e(tag, "Firebase sign-in exception: ${e.message}")
-            Result.failure(e)
-        }
+        return GoogleCredentialResult.NoAccount
     }
 
-    /**
-     * Tries a single Credential Manager strategy.
-     * Returns the idToken string on success.
-     * Returns null if no credentials available (try next strategy).
-     * Re-throws cancellation so the caller knows user canceled.
-     */
-    private suspend fun tryGetIdToken(
-        tag: String,
-        block: () -> GetCredentialRequest,
+    private fun googleSignInStrategies(clientId: String): List<SignInStrategy> =
+        listOf(
+            SignInStrategy("AuthorizedOnly") {
+                val option =
+                    GetGoogleIdOption
+                        .Builder()
+                        .setServerClientId(clientId)
+                        .setFilterByAuthorizedAccounts(true)
+                        .setAutoSelectEnabled(false)
+                        .build()
+                GetCredentialRequest.Builder().addCredentialOption(option).build()
+            },
+            SignInStrategy("AllAccounts") {
+                val option =
+                    GetGoogleIdOption
+                        .Builder()
+                        .setServerClientId(clientId)
+                        .setFilterByAuthorizedAccounts(false)
+                        .setAutoSelectEnabled(false)
+                        .build()
+                GetCredentialRequest.Builder().addCredentialOption(option).build()
+            },
+            SignInStrategy("ButtonFlow") {
+                val option = GetSignInWithGoogleOption.Builder(clientId).build()
+                GetCredentialRequest.Builder().addCredentialOption(option).build()
+            },
+        )
+
+    private data class SignInStrategy(
+        val name: String,
+        val buildRequest: () -> GetCredentialRequest,
+    )
+
+    private suspend fun tryStrategy(
+        strategy: SignInStrategy,
         context: Context,
         credentialManager: CredentialManager,
-    ): String? =
+    ): GoogleCredentialResult =
         try {
-            val request = block()
-            val response = credentialManager.getCredential(context, request)
+            val response = credentialManager.getCredential(context, strategy.buildRequest())
             val credential = response.credential
-
-            Log.d(this@AuthRepositoryImpl.tag, "$tag: credential type = ${credential.type}")
 
             if (credential is CustomCredential &&
                 credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
             ) {
                 val token = GoogleIdTokenCredential.createFrom(credential.data).idToken
-                Log.d(this@AuthRepositoryImpl.tag, "$tag: success — token obtained")
-                token
+                Log.d(TAG, "${strategy.name}: success")
+                GoogleCredentialResult.Success(token)
             } else {
-                Log.w(this@AuthRepositoryImpl.tag, "$tag: unexpected credential type: ${credential.type}")
-                null
+                Log.w(TAG, "${strategy.name}: unexpected credential type ${credential.type}")
+                GoogleCredentialResult.Failed("Unexpected credential type")
             }
         } catch (e: GetCredentialCancellationException) {
-            Log.d(this@AuthRepositoryImpl.tag, "$tag: user cancelled")
-            throw e // re-throw — caller skips error snack bar for cancellations
+            Log.d(TAG, "${strategy.name}: user cancelled")
+            GoogleCredentialResult.Cancelled
         } catch (e: NoCredentialException) {
-            Log.d(this@AuthRepositoryImpl.tag, "$tag: NoCredentialException — ${e.message}")
-            null // try next strategy
+            Log.d(TAG, "${strategy.name}: no credential — ${e.message}")
+            GoogleCredentialResult.NoAccount
         } catch (e: GetCredentialException) {
-            Log.w(this@AuthRepositoryImpl.tag, "$tag: GetCredentialException type=${e.type} message=${e.message}")
-            null // try next strategy
-        } catch (e: Exception) {
-            Log.e(this@AuthRepositoryImpl.tag, "$tag: unexpected exception: ${e.message}")
-            null
+            Log.w(TAG, "${strategy.name}: GetCredentialException ${e.type} — ${e.message}")
+            GoogleCredentialResult.Failed(e.message ?: "Credential error")
         }
 
-    override suspend fun signOut(context: Context) {
-        firebaseService.signOut()
-        try {
-            CredentialManager
-                .create(context)
-                .clearCredentialState(ClearCredentialStateRequest())
-        } catch (e: Exception) {
-            Log.w(tag, "clearCredentialState failed (non-fatal): ${e.message}")
+    private fun AuthStateData.toAuthState(): AuthState =
+        when {
+            uid == null -> {
+                AuthState.Anonymous
+            }
+
+            isAnonymous -> {
+                AuthState.Anonymous
+            }
+
+            else -> {
+                AuthState.SignedIn(
+                    uid = uid,
+                    displayName = displayName,
+                    email = email,
+                    photoUrl = photoUrl,
+                )
+            }
         }
+
+    private companion object {
+        const val TAG = "MwenyejiAuth"
     }
-
-    override suspend fun login(email: String, password: String): String? = firebaseService.loginWithEmailAndPassword(email, password)
-
-    override suspend fun signup(email: String, password: String): String? = firebaseService.createUserWithEmailAndPassword(email, password)
 }

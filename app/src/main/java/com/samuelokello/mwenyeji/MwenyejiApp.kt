@@ -2,7 +2,6 @@ package com.samuelokello.mwenyeji
 
 import android.app.Application
 import android.util.Log
-import com.samuelokello.mwenyeji.datasources.firebase.FirebaseService
 import com.samuelokello.mwenyeji.di.mwenyejiModules
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

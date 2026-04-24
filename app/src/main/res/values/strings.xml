@@ -39,4 +39,19 @@
     <string name="share_what_you_know">Share what\nyou know</string>
     <string name="add_a_route_in_under_2_minutes_help_the_next_commuter">Add a route in under 2 minutes. Help the next commuter.</string>
     <string name="i_want_to_contribute">I want to contribute</string>
+    <string name="contributing_requires_a_google_account_so_the_community_knows_who_to_trust">Contributing requires a Google account so the community knows who to trust.</string>
+    <string name="your_routes_your_identity">Your routes, your identity</string>
+    <string name="contributions_are_linked_to_your_account_so_you_get_credit_for_your_knowledge">Contributions are linked to your account so you get credit for your knowledge.</string>
+    <string name="trusted_community">Trusted community</string>
+    <string name="signed_in_contributors_build_reputation_over_time_the_community_knows_who_to_trust">Signed-in contributors build reputation over time. The community knows who to trust.</string>
+    <string name="browsing_stays_free">Browsing stays free</string>
+    <string name="no_account_needed_to_read_routes_sign_in_only_when_you_want_to_contribute">No account needed to read routes. Sign in only when you want to contribute.</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="maybe_later">Maybe later</string>
+    <string name="sign_in_to_share_your_knowledge">Sign in to share your knowledge</string>
+    <string name="where_to">Where to?</string>
+    <string name="find_local_ways_to_move_around_nairobi">Find local ways to move around Nairobi</string>
+    <string name="search_area_stage_destination">Search area, stage, destination...</string>
+    <string name="know_a_route_add_it_here">Know a route? Add it here</string>
+    <string name="retry">Retry</string>
 </resources>

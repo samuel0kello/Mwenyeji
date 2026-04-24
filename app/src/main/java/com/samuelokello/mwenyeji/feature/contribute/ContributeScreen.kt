@@ -15,7 +15,7 @@ import com.samuelokello.mwenyeji.feature.contribute.step.InstructionsStepScreen
 import com.samuelokello.mwenyeji.feature.contribute.step.RouteStepScreen
 import com.samuelokello.mwenyeji.feature.contribute.step.TimingStepScreen
 import com.samuelokello.mwenyeji.feature.contribute.step.WarningsStepScreen
-import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackbarManager
+import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackBarManager
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -36,7 +36,7 @@ fun ContributeScreen(
     onNavigateToSuccess: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ContributeViewModel = koinViewModel(),
-    snackBarManager: SnackbarManager = koinInject(),
+    snackBarManager: SnackBarManager = koinInject(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 

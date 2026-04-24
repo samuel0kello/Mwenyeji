@@ -5,8 +5,12 @@ data class SearchResult(
     val name: String,
     val fullAddress: String?,
     val distanceMeters: Double?,
-    val lat: Double? = null,
-    val lng: Double? = null,
+    val coordinates: Coordinates? = null,
+)
+
+data class Coordinates(
+    val latitude: Double,
+    val longitude: Double,
 )
 
 data class SearchRequest(
