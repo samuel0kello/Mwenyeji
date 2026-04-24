@@ -9,6 +9,7 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.samuelokello.mwenyeji.datasources.core.result.RemoteError
 
+@PublishedApi
 internal object FirebaseErrorMapper {
     fun map(throwable: Throwable): RemoteError =
         when (throwable) {
