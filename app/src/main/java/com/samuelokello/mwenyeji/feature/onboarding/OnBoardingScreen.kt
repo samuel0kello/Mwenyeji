@@ -129,5 +129,43 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = koinViewModel(), onFinish:
                 Text(text = "Skip", style = MwenyejiTheme.typography.titleMedium)
             }
         }
+
+        // CTA button — disabled on last page until user picks an option
+        val isLastPage = state.currentPage == TOTAL_PAGES - 1
+        val isButtonEnabled = !isLastPage || state.selectedUserType != null
+
+        MwenyejiButton(
+            onClick = {
+                scope.launch {
+                    viewModel.onAction(OnboardingContract.Action.OnNextClicked)
+
+                    if (state.currentPage < TOTAL_PAGES) {
+                        pagerState.animateScrollToPage(state.currentPage + 1)
+                    }
+                }
+            },
+            text =
+                when {
+                    isLastPage -> "Get started →"
+                    else -> "Next"
+                },
+            enabled = isButtonEnabled,
+            modifier =
+                Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(8.dp),
+        )
+
+        if (state.currentPage <= 1) {
+            TextButton(
+                onClick = {
+                    viewModel.onAction(OnboardingContract.Action.OnSkipClicked)
+                    onFinish()
+                },
+                modifier = Modifier.align(Alignment.TopEnd),
+            ) {
+                Text(text = "Skip", style = MwenyejiTheme.typography.titleMedium)
+            }
+        }
     }
 }

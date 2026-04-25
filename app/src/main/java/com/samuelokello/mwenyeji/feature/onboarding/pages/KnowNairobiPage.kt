@@ -25,6 +25,12 @@ sealed interface KnowNairobiEvent {
     data object ShowCard : KnowNairobiEvent
 }
 
+val timeline =
+    timeline<KnowNairobiEvent> {
+        step(200) { emit -> emit(KnowNairobiEvent.ShowNotif) }
+        step(400) { emit -> emit(KnowNairobiEvent.ShowCard) }
+    }
+
 @Composable
 fun KnowNairobiPage(isActive: Boolean) {
     var showNotif by remember { mutableStateOf(false) }

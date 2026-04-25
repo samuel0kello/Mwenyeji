@@ -30,6 +30,13 @@ sealed interface FindRouteEvent {
     data object ShowCard2 : FindRouteEvent
 }
 
+val findRouteTimeline =
+    timeline<FindRouteEvent> {
+        step(150) { emit -> emit(FindRouteEvent.ShowSearch) }
+        step(400) { emit -> emit(FindRouteEvent.ShowCard1) }
+        step(200) { emit -> emit(FindRouteEvent.ShowCard2) }
+    }
+
 @Composable
 fun FindRoutePage(isActive: Boolean) {
     var showSearch by remember { mutableStateOf(false) }

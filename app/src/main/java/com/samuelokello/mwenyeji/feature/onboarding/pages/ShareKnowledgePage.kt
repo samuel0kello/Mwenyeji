@@ -35,6 +35,14 @@ sealed interface ShareKnowledgeEvent {
     data object HideToast : ShareKnowledgeEvent
 }
 
+val shareKnowledgeTimeline =
+    timeline<ShareKnowledgeEvent> {
+        step(150) { emit -> emit(ShareKnowledgeEvent.ShowCard) }
+        step(600) { emit -> emit(ShareKnowledgeEvent.AnimateBar) }
+        step(800) { emit -> emit(ShareKnowledgeEvent.ShowToast) }
+        step(2500) { emit -> emit(ShareKnowledgeEvent.HideToast) }
+    }
+
 @Composable
 fun ShareKnowledgePage(isActive: Boolean) {
     var showCard by remember { mutableStateOf(false) }
