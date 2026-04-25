@@ -6,11 +6,15 @@ interface OnboardingContract {
     data class State(
         val currentPage: Int = 0,
         val isCompleted: Boolean = false,
-        val selectedUserType: UserType? = null, // ← personalization answer
+        val selectedUserType: UserType? = null,
     )
 
     sealed interface Action {
         data object OnNextClicked : Action
+
+        data class OnPreviousClicked(
+            val page: Int,
+        ) : Action
 
         data object OnSkipClicked : Action
 

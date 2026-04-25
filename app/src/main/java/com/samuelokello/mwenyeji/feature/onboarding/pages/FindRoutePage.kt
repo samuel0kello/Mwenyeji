@@ -18,6 +18,7 @@ import com.samuelokello.mwenyeji.feature.onboarding.animation.timeline
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.ResultRouteCard
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.RouteResult
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.SearchCard
+import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 import com.samuelokello.mwenyeji.ui.theme.color.AppColors.AmberWarm
 import com.samuelokello.mwenyeji.ui.theme.color.AppColors.GreenLight
 
@@ -41,6 +42,17 @@ fun FindRoutePage(isActive: Boolean) {
     var showSearch by remember { mutableStateOf(false) }
     var showCard1 by remember { mutableStateOf(false) }
     var showCard2 by remember { mutableStateOf(false) }
+
+    val duration = MwenyejiTheme.duration
+
+    val findRouteTimeline =
+        remember(duration) {
+            timeline {
+                step(duration.QUICK.toLong()) { emit -> emit(FindRouteEvent.ShowSearch) }
+                step(duration.NORMAL.toLong()) { emit -> emit(FindRouteEvent.ShowCard1) }
+                step(duration.SHORT.toLong()) { emit -> emit(FindRouteEvent.ShowCard2) }
+            }
+        }
 
     val results =
         remember {

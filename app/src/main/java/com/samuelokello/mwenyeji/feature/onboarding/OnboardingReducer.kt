@@ -34,5 +34,9 @@ class OnboardingReducer {
             is OnboardingContract.Action.OnUserTypeSelected -> {
                 state.copy(selectedUserType = action.userType) to null
             }
+
+            is OnboardingContract.Action.OnPreviousClicked -> {
+                state.copy(currentPage = action.page - 1) to null
+            }
         }
 }

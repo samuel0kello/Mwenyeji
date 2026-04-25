@@ -28,7 +28,7 @@ fun ProgressDots(total: Int, current: Int, modifier: Modifier = Modifier) {
         repeat(total) { index ->
             val isActive = index == current
             val width by animateDpAsState(
-                targetValue = if (isActive) 24.dp else 8.dp,
+                targetValue = if (isActive) 16.dp else 8.dp,
                 animationSpec =
                     spring(
                         dampingRatio = Spring.DampingRatioMediumBouncy,

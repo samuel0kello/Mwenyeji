@@ -1,7 +1,10 @@
 package com.samuelokello.mwenyeji.feature.onboarding
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.pager.HorizontalPager
@@ -15,7 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import com.samuelokello.mwenyeji.feature.onboarding.componenets.ProgressDots
 import com.samuelokello.mwenyeji.feature.onboarding.pages.CommunityPage
 import com.samuelokello.mwenyeji.feature.onboarding.pages.FindRoutePage
 import com.samuelokello.mwenyeji.feature.onboarding.pages.KnowNairobiPage
@@ -76,6 +79,54 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = koinViewModel(), onFinish:
                         },
                     )
                 }
+            }
+        }
+
+        val isLastPage = state.currentPage == TOTAL_PAGES - 1
+        val isButtonEnabled = !isLastPage || state.selectedUserType != null
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = MwenyejiTheme.spacing.small,
+                        vertical = MwenyejiTheme.spacing.small,
+                    ).align(Alignment.BottomEnd),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            ProgressDots(
+                total = TOTAL_PAGES,
+                current = state.currentPage,
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            MwenyejiButton(
+                onClick = {
+                    scope.launch {
+                        viewModel.onAction(OnboardingContract.Action.OnNextClicked)
+
+                        if (state.currentPage < TOTAL_PAGES) {
+                            pagerState.animateScrollToPage(state.currentPage + 1)
+                        }
+                    }
+                },
+                text =
+                    when {
+                        isLastPage -> "Get started →"
+                        else -> "Next"
+                    },
+                enabled = isButtonEnabled,
+            )
+        }
+
+        if (state.currentPage <= 1) {
+            TextButton(
+                onClick = {
+                    viewModel.onAction(OnboardingContract.Action.OnSkipClicked)
+                    onFinish()
+                },
+                modifier = Modifier.align(Alignment.TopEnd),
+            ) {
+                Text(text = "Skip", style = MwenyejiTheme.typography.titleMedium)
             }
         }
 

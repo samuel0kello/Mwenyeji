@@ -23,6 +23,7 @@ import com.samuelokello.mwenyeji.feature.onboarding.animation.timeline
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.ConfidenceSection
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.ContribCard
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.PointsToast
+import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 
 sealed interface ShareKnowledgeEvent {
     data object ShowCard : ShareKnowledgeEvent
@@ -47,6 +48,18 @@ fun ShareKnowledgePage(isActive: Boolean) {
     var showCard by remember { mutableStateOf(false) }
     var animateBar by remember { mutableStateOf(false) }
     var showToast by remember { mutableStateOf(false) }
+
+    val duration = MwenyejiTheme.duration
+
+    val shareKnowledgeTimeline =
+        remember {
+            timeline {
+                step(duration.QUICK.toLong()) { emit -> emit(ShareKnowledgeEvent.ShowCard) }
+                step(duration.LONG.toLong()) { emit -> emit(ShareKnowledgeEvent.AnimateBar) }
+                step(duration.SLOW.toLong()) { emit -> emit(ShareKnowledgeEvent.ShowToast) }
+                step(2500) { emit -> emit(ShareKnowledgeEvent.HideToast) }
+            }
+        }
 
     RememberTimelineRunner(
         isActive = isActive,

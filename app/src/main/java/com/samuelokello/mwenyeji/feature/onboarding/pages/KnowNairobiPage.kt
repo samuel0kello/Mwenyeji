@@ -9,12 +9,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.feature.onboarding.animation.OnboardingPage
 import com.samuelokello.mwenyeji.feature.onboarding.animation.RememberTimelineRunner
 import com.samuelokello.mwenyeji.feature.onboarding.animation.timeline
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.NotificationCard
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.RouteCard
+import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 
 sealed interface KnowNairobiEvent {
     data object ShowNotif : KnowNairobiEvent
@@ -33,11 +36,19 @@ fun KnowNairobiPage(isActive: Boolean) {
     var showNotif by remember { mutableStateOf(false) }
     var showCard by remember { mutableStateOf(false) }
 
-    val t = remember { timeline }
+    val duration = MwenyejiTheme.duration
+
+    val knowNairobiTimeline =
+        remember(duration) {
+            timeline {
+                step(duration.SHORT.toLong()) { emit -> emit(KnowNairobiEvent.ShowNotif) }
+                step(duration.NORMAL.toLong()) { emit -> emit(KnowNairobiEvent.ShowCard) }
+            }
+        }
 
     RememberTimelineRunner(
         isActive = isActive,
-        timeline = t,
+        timeline = knowNairobiTimeline,
         onReset = {
             showNotif = false
             showCard = false
@@ -53,8 +64,8 @@ fun KnowNairobiPage(isActive: Boolean) {
     OnboardingPage(
         isActive = isActive,
         label = "Mwenyeji",
-        title = "Know Nairobi like a local",
-        subtitle = "Real routes & fares",
+        title = stringResource(R.string.know_nairobi_like_a_local),
+        subtitle = stringResource(R.string.real_routes_fares),
     ) {
         Column {
             NotificationCard(showNotif)

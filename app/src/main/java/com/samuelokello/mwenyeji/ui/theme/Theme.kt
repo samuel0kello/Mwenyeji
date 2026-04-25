@@ -6,6 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.samuelokello.mwenyeji.ui.theme.animation.AppEasing
+import com.samuelokello.mwenyeji.ui.theme.animation.Duration
 import com.samuelokello.mwenyeji.ui.theme.color.LightColorScheme
 import com.samuelokello.mwenyeji.ui.theme.color.MwenyejiColorScheme
 import com.samuelokello.mwenyeji.ui.theme.color.resolveAppColorScheme
@@ -33,6 +35,10 @@ val LocalAppSpacing = staticCompositionLocalOf { Spacing }
 val LocalAppSizes = staticCompositionLocalOf { Sizes }
 val LocalAppElevation = staticCompositionLocalOf { Elevation }
 val LocalCornerRadius = staticCompositionLocalOf { CornerRadii }
+
+val LocalDuration = staticCompositionLocalOf { Duration }
+
+val LocalEasing = staticCompositionLocalOf { AppEasing }
 
 object MwenyejiTheme {
     val colorScheme: MwenyejiColorScheme
@@ -62,6 +68,14 @@ object MwenyejiTheme {
     val cornerRadius: CornerRadius
         @Composable @ReadOnlyComposable
         get() = LocalCornerRadius.current
+
+    val duration: Duration
+        @Composable @ReadOnlyComposable
+        get() = LocalDuration.current
+
+    val easing: AppEasing
+        @Composable @ReadOnlyComposable
+        get() = LocalEasing.current
 }
 
 @Composable
@@ -77,6 +91,8 @@ fun MwenyejiAppTheme(darkTheme: Boolean = isSystemInDarkTheme(), dynamicColor: B
         LocalAppSizes provides Sizes,
         LocalAppElevation provides Elevation,
         LocalCornerRadius provides CornerRadii,
+        LocalDuration provides Duration,
+        LocalEasing provides AppEasing,
     ) {
         MaterialTheme(
             colorScheme = materialColors,

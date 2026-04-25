@@ -16,8 +16,8 @@ object Duration {
     const val NORMAL = 400
 
     // Longer animations for complex transitions
-    const val LONG = 500
-    const val SLOW = 700
+    const val LONG = 600
+    const val SLOW = 800
     const val VERY_SLOW = 1000
 
     // Specific use cases

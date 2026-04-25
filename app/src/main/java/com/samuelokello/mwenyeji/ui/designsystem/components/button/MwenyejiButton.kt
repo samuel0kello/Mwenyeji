@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 
 /**
@@ -70,15 +69,12 @@ fun MwenyejiButton(
 fun MwenyejiButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, icon: ImageVector? = null) {
     MwenyejiButton(
         onClick = onClick,
-        modifier =
-            modifier
-                .heightIn(54.dp),
         enabled = enabled,
         icon = icon,
     ) {
         Text(
             text = text,
-            style = MwenyejiTheme.typography.labelLarge,
+            style = MwenyejiTheme.typography.labelSmall,
         )
     }
 }

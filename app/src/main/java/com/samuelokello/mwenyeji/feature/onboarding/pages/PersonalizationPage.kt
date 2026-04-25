@@ -69,15 +69,17 @@ sealed interface PersonalizationEvent {
     data object ShowOptions : PersonalizationEvent
 }
 
-val personalizationTimeline =
-    timeline<PersonalizationEvent> {
-        step(300) { emit -> emit(PersonalizationEvent.ShowOptions) }
-    }
-
 @Composable
 fun PersonalizationPage(isActive: Boolean, selectedUserType: UserType?, onUserTypeSelected: (UserType) -> Unit) {
     var showOptions by remember { mutableStateOf(false) }
+    val duration = MwenyejiTheme.duration
 
+    val personalizationTimeline =
+        remember(duration) {
+            timeline<PersonalizationEvent> {
+                step(300) { emit -> emit(PersonalizationEvent.ShowOptions) }
+            }
+        }
     RememberTimelineRunner(
         isActive = isActive,
         timeline = personalizationTimeline,
@@ -106,7 +108,12 @@ fun PersonalizationPage(isActive: Boolean, selectedUserType: UserType?, onUserTy
                         ),
                     initialOffsetY = { it / 2 },
                 ) +
-                    fadeIn(tween(400)),
+                    fadeIn(
+                        tween(
+                            durationMillis = duration.NORMAL,
+                            easing = MwenyejiTheme.easing.decelerated,
+                        ),
+                    ),
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 UserType.entries.forEach { type ->

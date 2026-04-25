@@ -6,7 +6,7 @@ import androidx.compose.animation.core.Easing
 /**
  * Material Design easing curves for animations
  */
-object Easing {
+object AppEasing {
     /**
      * Standard easing - most common, for NORMAL motion
      */
@@ -33,7 +33,7 @@ object Easing {
     val linear: Easing = CubicBezierEasing(0.0f, 0.0f, 1.0f, 1.0f)
 
     /**
-     * Legacy easings for backwards compatibility
+     * Legacy easing for backwards compatibility
      */
     val legacyEaseInOut: Easing = CubicBezierEasing(0.42f, 0.0f, 0.58f, 1.0f)
     val legacyEaseIn: Easing = CubicBezierEasing(0.42f, 0.0f, 1.0f, 1.0f)

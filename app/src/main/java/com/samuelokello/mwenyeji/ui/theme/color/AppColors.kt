@@ -16,13 +16,13 @@ import androidx.compose.ui.graphics.Color
  * Green tonal palette (brand)
  */
 object AppColors {
-    // ── Green (brand / primary) ─────────────────────────────────────────────
+    //
     val Green0 = Color(0xFF000000)
     val Green10 = Color(0xFF002111) // deepest — primaryDark / primaryContainer dark
     val Green20 = Color(0xFF003920) // onPrimary dark
     val Green25 = Color(0xFF00452A)
-    val Green30 = Color(0xFF1D4B35) // primaryDark from Figma
-    val Green40 = Color(0xFF2D6B4D) // Primary — #2D6B4D (Figma brand primary)
+    val Green30 = Color(0xFF1D4B35) // primaryDark
+    val Green40 = Color(0xFF2D6B4D) // Primary
     val Green50 = Color(0xFF3D8B5D) // Primary Light — hover states
     val Green60 = Color(0xFF4CAF78) // bright accent — used on dark surfaces
     val Green70 = Color(0xFF6DC496)
@@ -33,7 +33,7 @@ object AppColors {
     val Green99 = Color(0xFFF8FDF9)
     val Green100 = Color(0xFFFFFFFF)
 
-    // ── Green-Gray (secondary / neutral-variant) ────────────────────────────
+    // Green-Gray (secondary / neutral-variant)
     val GreenGray10 = Color(0xFF0D1F13)
     val GreenGray20 = Color(0xFF223527)
     val GreenGray30 = Color(0xFF384B3C)
@@ -47,7 +47,7 @@ object AppColors {
     val GreenGray99 = Color(0xFFF6FAF7) // background light-theme
     val GreenGray100 = Color(0xFFFFFFFF)
 
-    // ── Blue (tertiary / info / matatu tag) ─────────────────────────────────
+    //  Blue (tertiary / info / matatu tag)
     val Blue10 = Color(0xFF003258)
     val Blue20 = Color(0xFF00497D)
     val Blue30 = Color(0xFF01579B)
@@ -57,23 +57,23 @@ object AppColors {
     val Blue90 = Color(0xFFBBDEFB)
     val Blue100 = Color(0xFFFFFFFF)
 
-    // ── Neutral (surface / background tones) ────────────────────────────────
+    //  Neutral (surface / background tones)
     val Neutral0 = Color(0xFF000000)
     val Neutral4 = Color(0xFF0A0F0C) // surfaceContainerLowest dark
-    val Neutral6 = Color(0xFF0E1210) // background dark — Figma #121212 green-tinted
+    val Neutral6 = Color(0xFF0E1210) // background dark
     val Neutral10 = Color(0xFF121212) // pure Figma dark background
     val Neutral12 = Color(0xFF161A17) // surface dark
     val Neutral17 = Color(0xFF1C2119) // surfaceContainer dark
-    val Neutral20 = Color(0xFF1E1E1E) // Figma Surface #1E1E1E
+    val Neutral20 = Color(0xFF1E1E1E) // Surface #1E1E1E
     val Neutral22 = Color(0xFF252B22) // surfaceContainerHigh dark
-    val Neutral24 = Color(0xFF2A2A2A) // Figma Surface Raised #2A2A2A
+    val Neutral24 = Color(0xFF2A2A2A) //  Surface Raised #2A2A2A
     val Neutral30 = Color(0xFF303530) // surfaceContainerHighest dark
-    val Neutral35 = Color(0xFF333333) // Figma Border #333333
+    val Neutral35 = Color(0xFF333333) // Border #333333
     val Neutral40 = Color(0xFF383A35) // surfaceBright dark
     val Neutral50 = Color(0xFF424940) // surfaceVariant dark / outlineVariant
-    val Neutral60 = Color(0xFF666666) // Figma text muted
+    val Neutral60 = Color(0xFF666666) //  text muted
     val Neutral70 = Color(0xFF8C9388) // outline dark
-    val Neutral80 = Color(0xFF9E9E9E) // Figma text secondary
+    val Neutral80 = Color(0xFF9E9E9E) //  text secondary
     val Neutral87 = Color(0xFFDEE5DA) // surfaceVariant light
     val Neutral90 = Color(0xFFE5E6E0) // onBackground / onSurface dark
     val Neutral92 = Color(0xFFECEDE7)
@@ -84,7 +84,7 @@ object AppColors {
     val Neutral99 = Color(0xFFFEFEF9)
     val Neutral100 = Color(0xFFFFFFFF) // surface light
 
-    // ── Neutral-Variant (for secondary surface roles) ───────────────────────
+    // Neutral-Variant (for secondary surface roles)
     val NeutralVariant30 = Color(0xFF3F4942)
     val NeutralVariant40 = Color(0xFF565E59)
     val NeutralVariant50 = Color(0xFF6E7770)
@@ -95,19 +95,19 @@ object AppColors {
     val NeutralVariant95 = Color(0xFFECF3ED)
     val NeutralVariant99 = Color(0xFFF6FAF7)
 
-    // ── Amber (warning / boda tag) ───────────────────────────────────────────
-    // Figma semantic: Warning / Boda = #FF9800
+    //  Amber (warning / boda tag)
+    // semantic: Warning / Boda = #FF9800
     val Amber10 = Color(0xFF4A2800)
     val Amber20 = Color(0xFF6A3C00)
     val Amber30 = Color(0xFFE65100)
-    val Amber40 = Color(0xFFFF9800) // Warning — exact from Figma
+    val Amber40 = Color(0xFFFF9800) // Warning — exact from
     val Amber60 = Color(0xFFFFB74D) // warning dark-theme
     val Amber80 = Color(0xFFFFCC80)
     val Amber90 = Color(0xFFFFE0B2)
     val Amber100 = Color(0xFFFFFFFF)
 
-    // ── Red (error) ───────────────────────────────────────────────────────────
-    // Figma semantic: Error = #F44336
+    // Red (error)
+    //  semantic: Error = #F44336
     val Red10 = Color(0xFF410002)
     val Red20 = Color(0xFF690005)
     val Red30 = Color(0xFF93000A)
@@ -117,7 +117,7 @@ object AppColors {
     val Red90 = Color(0xFFFFDAD6)
     val Red100 = Color(0xFFFFFFFF)
 
-    // ── Success
+    //  Success
     val SuccessGreen10 = Color(0xFF1B5E20)
     val SuccessGreen20 = Color(0xFF003909)
     val SuccessGreen30 = Color(0xFF00530F)
