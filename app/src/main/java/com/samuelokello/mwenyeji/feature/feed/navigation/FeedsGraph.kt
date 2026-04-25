@@ -26,17 +26,18 @@ data class RouteDetailsRoute(
 @Serializable
 data object SeeAllRoutesRoute
 
-fun NavGraphBuilder.feedsNavGraph(navController: NavHostController) {
-    navigation<FeedsGraph>(
-        startDestination = FeedsRoute,
-    ) {
+fun NavGraphBuilder.feedsNavGraph(navController: NavHostController, onRequireAuth: (onAuthenticated: () -> Unit) -> Unit = {}) {
+    navigation<FeedsGraph>(startDestination = FeedsRoute) {
         composable<FeedsRoute> {
             FeedScreen(
                 onNavigateToRouteDetail = { routeId -> navController.navigateToRouteDetails(routeId) },
                 onNavigateToSeeAll = { navController.navigateToAllRoutes() },
-                onNavigateToContribute = { navController.navigateToContribute() },
+                onNavigateToContribute = {
+                    onRequireAuth { navController.navigateToContribute() }
+                },
             )
         }
+
         composable<RouteDetailsRoute> { backStackEntry ->
             val routeId = backStackEntry.arguments?.getString("routeId") ?: ""
             RouteDetailsScreen(

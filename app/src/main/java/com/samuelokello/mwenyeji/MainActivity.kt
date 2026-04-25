@@ -9,14 +9,14 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.samuelokello.mwenyeji.core.InAppUpdateManager
-import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackbarManager
+import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackBarManager
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiAppTheme
 import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
     private lateinit var inAppUpdateManager: InAppUpdateManager
 
-    private val snackbarManager: SnackbarManager by inject<SnackbarManager>()
+    private val snackbarManager: SnackBarManager by inject<SnackBarManager>()
 
     private val updateLauncher =
         registerForActivityResult(

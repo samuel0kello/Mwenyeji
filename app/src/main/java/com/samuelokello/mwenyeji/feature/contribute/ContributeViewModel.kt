@@ -8,7 +8,7 @@ import com.samuelokello.mwenyeji.data.models.RouteTag
 import com.samuelokello.mwenyeji.data.models.SearchRequest
 import com.samuelokello.mwenyeji.data.models.SearchResult
 import com.samuelokello.mwenyeji.data.repository.AuthRepository
-import com.samuelokello.mwenyeji.data.repository.RouteRepository
+import com.samuelokello.mwenyeji.data.repository.RoutesRepository
 import com.samuelokello.mwenyeji.data.repository.SearchRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ContributeViewModel(
-    private val routeRepository: RouteRepository,
+    private val routeRepository: RoutesRepository,
     private val authRepository: AuthRepository,
     private val searchRepository: SearchRepository,
 ) : ViewModel() {
@@ -222,15 +222,15 @@ class ContributeViewModel(
                     contributorId = authRepository.currentUserId ?: "anonymous",
                 )
 
-            routeRepository
-                .submitRoute(route)
-                .onSuccess {
-                    resetState()
-                    _effects.send(ContributeEffect.NavigateToSuccess)
-                }.onFailure { e ->
-                    _state.update { it.copy(isSubmitting = false) }
-                    _effects.send(ContributeEffect.ShowError(e.message ?: "Failed to submit guide"))
+            when (routeRepository.submitRoute(route)) {
+                is DataResult.Success -> {
+                    _effects.send(ContributeEffect.NavigateBack)
                 }
+
+                is DataResult.Error -> {
+                    _state.update { it.copy(isSubmitting = false) }
+                }
+            }
         }
     }
 
@@ -286,8 +286,8 @@ class ContributeViewModel(
     private fun selectSuggestion(result: SearchResult, isFrom: Boolean) {
         val point =
             GeoPoint(
-                lat = result.lat ?: return,
-                lng = result.lng ?: return,
+                lat = result.coordinates?.latitude ?: return,
+                lng = result.coordinates.longitude,
                 displayName = result.fullAddress ?: result.name,
             )
 

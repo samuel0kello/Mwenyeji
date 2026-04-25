@@ -1,44 +1,48 @@
 package com.samuelokello.mwenyeji.data.repository
 
+import com.samuelokello.mwenyeji.data.helpers.DataResult
+import com.samuelokello.mwenyeji.data.helpers.toDataResult
+import com.samuelokello.mwenyeji.data.helpers.toDataResultFlow
 import com.samuelokello.mwenyeji.data.mappers.toDomain
 import com.samuelokello.mwenyeji.data.mappers.toDto
 import com.samuelokello.mwenyeji.data.models.Route
 import com.samuelokello.mwenyeji.data.models.TimeOfDay
-import com.samuelokello.mwenyeji.datasources.firebase.FirebaseService
+import com.samuelokello.mwenyeji.data.models.Verdict
+import com.samuelokello.mwenyeji.datasources.sources.confirmation.ConfirmationsRemoteDataSource
+import com.samuelokello.mwenyeji.datasources.sources.routes.RoutesRemoteDataSource
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
-interface RouteRepository {
-    fun getRoutes(timeOfDay: TimeOfDay): Flow<List<Route>>
+interface RoutesRepository {
+    fun observeRoutes(timeOfDay: TimeOfDay): Flow<DataResult<List<Route>>>
 
-    fun getRouteById(id: String): Flow<Route?>
+    fun observeRouteById(id: String): Flow<DataResult<Route?>>
 
-    suspend fun submitRoute(route: Route): Result<String>
+    suspend fun submitRoute(route: Route): DataResult<String>
 
-    suspend fun confirmRoute(routeId: String, userId: String, verdict: String): Result<Unit>
+    suspend fun submitVerdict(routeId: String, userId: String, verdict: Verdict): DataResult<Unit>
 
-    suspend fun getUserVerdict(routeId: String, userId: String): String?
+    suspend fun getUserVerdict(routeId: String, userId: String): DataResult<Verdict?>
 }
 
-class RouteRepositoryImpl(
-    private val firebaseService: FirebaseService, // ← only dependency
-) : RouteRepository {
-    override fun getRoutes(timeOfDay: TimeOfDay): Flow<List<Route>> =
-        firebaseService.getRoutes(timeOfDay).map { dtos ->
+internal class RoutesRepositoryImpl(
+    private val routesDataSource: RoutesRemoteDataSource,
+    private val confirmationsDataSource: ConfirmationsRemoteDataSource,
+) : RoutesRepository {
+    override fun observeRoutes(timeOfDay: TimeOfDay): Flow<DataResult<List<Route>>> =
+        routesDataSource.observeRoutes(timeOfDay).toDataResultFlow { dtos ->
             dtos.map { it.toDomain() }
         }
 
-    override fun getRouteById(id: String): Flow<Route?> = firebaseService.getRouteById(id).map { it?.toDomain() }
-
-    override suspend fun submitRoute(route: Route): Result<String> =
-        runCatching {
-            firebaseService.submitRoute(route.toDto())
+    override fun observeRouteById(id: String): Flow<DataResult<Route?>> =
+        routesDataSource.observeRouteById(id).toDataResultFlow { dto ->
+            dto?.toDomain()
         }
 
-    override suspend fun confirmRoute(routeId: String, userId: String, verdict: String): Result<Unit> =
-        runCatching {
-            firebaseService.confirmRoute(routeId, userId, verdict)
-        }
+    override suspend fun submitRoute(route: Route): DataResult<String> = routesDataSource.submitRoute(route.toDto()).toDataResult()
 
-    override suspend fun getUserVerdict(routeId: String, userId: String): String? = firebaseService.getUserVerdict(routeId, userId)
+    override suspend fun submitVerdict(routeId: String, userId: String, verdict: Verdict): DataResult<Unit> =
+        confirmationsDataSource.submitVerdict(routeId, userId, verdict).toDataResult()
+
+    override suspend fun getUserVerdict(routeId: String, userId: String): DataResult<Verdict?> =
+        confirmationsDataSource.getUserVerdict(routeId, userId).toDataResult()
 }

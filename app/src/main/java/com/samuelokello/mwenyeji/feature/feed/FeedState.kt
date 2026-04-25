@@ -1,19 +1,21 @@
 package com.samuelokello.mwenyeji.feature.feed
 
+import com.samuelokello.mwenyeji.data.helpers.DomainError
 import com.samuelokello.mwenyeji.data.models.Route
 import com.samuelokello.mwenyeji.data.models.TimeOfDay
 
 data class FeedState(
-    val isLoading: Boolean = false,
+    val selectedTimeOfDay: TimeOfDay = TimeOfDay.MORNING_RUSH,
+    val searchQuery: String = "",
     val routes: List<Route> = emptyList(),
     val filteredRoutes: List<Route> = emptyList(),
-    val selectedTimeOfDay: TimeOfDay = TimeOfDay.ANYTIME,
-    val searchQuery: String = "",
-    val error: String? = null,
-    val showContributeSheet: Boolean = false,
-    val locationPermissionGranted: Boolean = false,
     val userLat: Double? = null,
     val userLng: Double? = null,
+    val locationPermissionGranted: Boolean = false,
+    val isLoading: Boolean = false,
+    val error: DomainError? = null,
+    val showFabTooltip: Boolean = false,
+    val showTimeFilterTooltip: Boolean = false,
 )
 
 sealed interface FeedAction {
@@ -43,6 +45,10 @@ sealed interface FeedAction {
         val lat: Double,
         val lng: Double,
     ) : FeedAction
+
+    data object DismissFabTooltip : FeedAction
+
+    data object DismissTimeFilterTooltip : FeedAction
 }
 
 // Effect — one-time events (navigation, toasts)

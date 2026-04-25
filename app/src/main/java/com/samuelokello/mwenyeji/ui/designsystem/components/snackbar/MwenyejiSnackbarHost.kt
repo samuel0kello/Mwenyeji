@@ -31,11 +31,11 @@ import kotlinx.coroutines.delay
 
 /**
  * Hosts the snackbar — place this at the bottom of your App Scaffold content.
- * Observes [SnackbarManager] and shows/hides automatically.
+ * Observes [SnackBarManager] and shows/hides automatically.
  * Auto-dismisses after [autoDismissMs] unless it has an action button.
  */
 @Composable
-fun MwenyejiSnackbarHost(manager: SnackbarManager, modifier: Modifier = Modifier, autoDismissMs: Long = 3000L) {
+fun MwenyejiSnackbarHost(manager: SnackBarManager, modifier: Modifier = Modifier, autoDismissMs: Long = 3000L) {
     val message by manager.currentMessage.collectAsStateWithLifecycle()
 
     LaunchedEffect(message) {
@@ -65,13 +65,13 @@ fun MwenyejiSnackbarHost(manager: SnackbarManager, modifier: Modifier = Modifier
 }
 
 @Composable
-private fun MwenyejiSnackbar(message: SnackbarMessage, onAction: () -> Unit, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
+private fun MwenyejiSnackbar(message: SnackBarMessage, onAction: () -> Unit, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
 
     val (containerColor, contentColor, icon) =
         when (message.type) {
-            SnackbarMessageType.SUCCESS -> {
+            SnackBarMessageType.SUCCESS -> {
                 Triple(
                     colors.success,
                     colors.onSuccess,
@@ -79,7 +79,7 @@ private fun MwenyejiSnackbar(message: SnackbarMessage, onAction: () -> Unit, onD
                 )
             }
 
-            SnackbarMessageType.ERROR -> {
+            SnackBarMessageType.ERROR -> {
                 Triple(
                     colors.error,
                     colors.onErrorContainer,
@@ -87,7 +87,7 @@ private fun MwenyejiSnackbar(message: SnackbarMessage, onAction: () -> Unit, onD
                 )
             }
 
-            SnackbarMessageType.INFO -> {
+            SnackBarMessageType.INFO -> {
                 Triple(
                     colors.info,
                     colors.onInfoContainer,

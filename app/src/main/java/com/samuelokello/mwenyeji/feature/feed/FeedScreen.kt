@@ -1,25 +1,50 @@
 package com.samuelokello.mwenyeji.feature.feed
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.animateValue
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -27,25 +52,34 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.data.models.TimeOfDay
 import com.samuelokello.mwenyeji.feature.feed.components.RouteCard
 import com.samuelokello.mwenyeji.ui.designsystem.components.MwenyejiLargeHeaderBar
 import com.samuelokello.mwenyeji.ui.designsystem.components.card.MwenyejiCard
-import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackbarManager
+import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackBarManager
+import com.samuelokello.mwenyeji.ui.designsystem.components.toolTip.MwenyejiTooltip
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiAppTheme
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
+@SuppressLint("MissingPermission")
 @Composable
 fun FeedScreen(
     onNavigateToRouteDetail: (String) -> Unit,
@@ -53,8 +87,32 @@ fun FeedScreen(
     modifier: Modifier = Modifier,
     viewModel: FeedViewModel = koinViewModel(),
     onNavigateToContribute: () -> Unit,
+    snackBarManager: SnackBarManager = koinInject(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    var backPressedTime by remember { mutableLongStateOf(0L) }
+
+    val locationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+
+    val permissionLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions(),
+        ) { permissions ->
+            val granted = permissions.entries.all { it.value }
+            viewModel.onAction(FeedAction.LocationPermissionResult(granted))
+        }
+
+    BackHandler {
+        val currentTime = System.currentTimeMillis()
+
+        if (currentTime - backPressedTime < 2000) {
+            (context as? Activity)?.finish()
+        } else {
+            Toast.makeText(context, "Press back again to exit", Toast.LENGTH_SHORT).show()
+            backPressedTime = currentTime
+        }
+    }
 
     // Collect one-time effects
     LaunchedEffect(Unit) {
@@ -68,23 +126,62 @@ fun FeedScreen(
                     onNavigateToSeeAll()
                 }
 
-                is FeedEffect.ShowError -> { // show snackbar if needed
+                is FeedEffect.ShowError -> {
+                    snackBarManager.showError(
+                        message = effect.message,
+                        actionLabel = "Dismiss",
+                        onAction = { snackBarManager.dismiss() },
+                    )
                 }
 
                 FeedEffect.GetLocation -> {
-                    TODO()
+                    locationClient
+                        .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+                        .addOnSuccessListener { location ->
+                            location?.let {
+                                viewModel.onAction(
+                                    FeedAction.LocationReceived(
+                                        it.latitude,
+                                        it.longitude,
+                                    ),
+                                )
+                            }
+                        }
                 }
 
                 FeedEffect.RequestLocationPermission -> {
-                    TODO()
+                    val permissions =
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                        )
+                    val allGranted =
+                        permissions.all {
+                            ContextCompat.checkSelfPermission(
+                                context,
+                                it,
+                            ) == PackageManager.PERMISSION_GRANTED
+                        }
+                    if (allGranted) {
+                        viewModel.onAction(FeedAction.LocationPermissionResult(true))
+                    } else {
+                        permissionLauncher.launch(permissions)
+                    }
                 }
             }
         }
     }
 
+    LaunchedEffect(state.showFabTooltip) {
+        if (state.showFabTooltip) {
+            kotlinx.coroutines.delay(5000)
+            viewModel.onAction(FeedAction.DismissFabTooltip)
+        }
+    }
+
     FeedScreenContent(
         state = state,
-        onIntent = viewModel::onAction,
+        onAction = viewModel::onAction,
         onNavigateToContribute = onNavigateToContribute,
         modifier = modifier,
     )
@@ -93,29 +190,27 @@ fun FeedScreen(
 @Composable
 internal fun FeedScreenContent(
     state: FeedState,
-    onIntent: (FeedAction) -> Unit,
+    onAction: (FeedAction) -> Unit,
     onNavigateToContribute: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
-    var showContributeSheet by rememberSaveable { mutableStateOf(false) }
-    val snackbarManager: SnackbarManager = koinInject()
 
     Scaffold(
         modifier = modifier,
         containerColor = colors.background,
         topBar = {
             MwenyejiLargeHeaderBar(
-                title = "Where to?",
-                subtitle = "Find local ways to move around Nairobi",
+                title = stringResource(R.string.where_to),
+                subtitle = stringResource(R.string.find_local_ways_to_move_around_nairobi),
                 content = {
                     OutlinedTextField(
                         value = state.searchQuery,
-                        onValueChange = { onIntent(FeedAction.SearchQueryChanged(it)) },
+                        onValueChange = { onAction(FeedAction.SearchQueryChanged(it)) },
                         placeholder = {
                             Text(
-                                text = "Search area, stage, destination...",
+                                text = stringResource(R.string.search_area_stage_destination),
                                 style = typography.bodyMedium,
                                 color = colors.onSurfaceVariant,
                             )
@@ -127,10 +222,22 @@ internal fun FeedScreenContent(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onNavigateToContribute,
-            ) {
-                Icon(Icons.Outlined.Add, contentDescription = "Contribute")
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                TooltipWithAnimation(
+                    show = state.showFabTooltip,
+                    text = stringResource(R.string.know_a_route_add_it_here),
+                    emoji = "",
+                    onDismiss = { onAction(FeedAction.DismissFabTooltip) },
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                FloatingActionButton(
+                    onClick = onNavigateToContribute,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = null)
+                }
             }
         },
     ) { paddingValues ->
@@ -157,12 +264,12 @@ internal fun FeedScreenContent(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = state.error,
+                        text = state.error.toString(),
                         style = typography.bodyMedium,
                         color = colors.error,
                     )
-                    TextButton(onClick = { onIntent(FeedAction.RetryClicked) }) {
-                        Text("Retry", color = colors.primary)
+                    TextButton(onClick = { onAction(FeedAction.RetryClicked) }) {
+                        Text(stringResource(R.string.retry), color = colors.primary)
                     }
                 }
             }
@@ -191,7 +298,7 @@ internal fun FeedScreenContent(
                                     title = timeOfDay.displayName,
                                     selected = state.selectedTimeOfDay == timeOfDay,
                                     onSelected = {
-                                        onIntent(FeedAction.SelectTimeOfDay(timeOfDay))
+                                        onAction(FeedAction.SelectTimeOfDay(timeOfDay))
                                     },
                                 )
                             }
@@ -218,7 +325,7 @@ internal fun FeedScreenContent(
                                 modifier = Modifier.weight(1f),
                             )
                             TextButton(
-                                onClick = { onIntent(FeedAction.SeeAllClicked) },
+                                onClick = { onAction(FeedAction.SeeAllClicked) },
                                 contentPadding = PaddingValues(0.dp),
                             ) {
                                 Text(
@@ -255,7 +362,7 @@ internal fun FeedScreenContent(
                         ) { route ->
                             RouteCard(
                                 route = route,
-                                onClick = { onIntent(FeedAction.RouteClicked(route)) },
+                                onClick = { onAction(FeedAction.RouteClicked(route)) },
                                 modifier = Modifier.padding(horizontal = 16.dp),
                             )
                         }
@@ -263,6 +370,36 @@ internal fun FeedScreenContent(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun TooltipWithAnimation(show: Boolean, text: String, emoji: String, onDismiss: () -> Unit) {
+    val infiniteTransition = rememberInfiniteTransition(label = "TooltipBounce")
+    val offsetY by infiniteTransition.animateValue(
+        initialValue = 0.dp,
+        targetValue = (-8).dp,
+        typeConverter = Dp.VectorConverter,
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(1200, easing = LinearOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+        label = "bounce",
+    )
+
+    AnimatedVisibility(
+        visible = show,
+        enter = fadeIn() + expandVertically() + scaleIn(initialScale = 0.8f),
+        exit = fadeOut() + shrinkVertically() + scaleOut(targetScale = 0.8f),
+    ) {
+        MwenyejiTooltip(
+            text = text,
+            emoji = emoji,
+            onDismiss = onDismiss,
+            modifier = Modifier.offset(y = offsetY), // Apply the bounce here
+            visible = show,
+        )
     }
 }
 
@@ -276,7 +413,7 @@ private fun FeedScreenContentPreview() {
                     selectedTimeOfDay = TimeOfDay.MORNING_RUSH,
                     filteredRoutes = emptyList(),
                 ),
-            onIntent = {},
+            onAction = {},
             onNavigateToContribute = {},
         )
     }

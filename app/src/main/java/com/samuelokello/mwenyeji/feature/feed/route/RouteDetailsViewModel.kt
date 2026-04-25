@@ -2,10 +2,13 @@ package com.samuelokello.mwenyeji.feature.feed.route
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.samuelokello.mwenyeji.data.helpers.DataResult
+import com.samuelokello.mwenyeji.data.helpers.toUserMessage
 import com.samuelokello.mwenyeji.data.models.Route
+import com.samuelokello.mwenyeji.data.models.Verdict
 import com.samuelokello.mwenyeji.data.repository.AuthRepository
-import com.samuelokello.mwenyeji.data.repository.RouteRepository
-import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackbarManager
+import com.samuelokello.mwenyeji.data.repository.RoutesRepository
+import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackBarManager
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,9 +20,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class RouteDetailsViewModel(
-    private val routeRepository: RouteRepository,
+    private val routeRepository: RoutesRepository,
     private val authRepository: AuthRepository,
-    private val snackbarManager: SnackbarManager,
+    private val snackbarManager: SnackBarManager,
 ) : ViewModel() {
     private val _state = MutableStateFlow(RouteDetailsState())
     val state: StateFlow<RouteDetailsState> = _state.asStateFlow()
@@ -48,13 +51,24 @@ class RouteDetailsViewModel(
     private fun loadRoute(routeId: String) {
         viewModelScope.launch {
             routeRepository
-                .getRouteById(routeId)
+                .observeRouteById(routeId)
                 .onStart { _state.update { it.copy(isLoading = true, error = null) } }
                 .catch { e ->
                     _state.update { it.copy(isLoading = false, error = e.message) }
                     snackbarManager.showError(e.message ?: "Failed to load route")
                 }.collect { route ->
-                    _state.update { it.copy(isLoading = false, route = route) }
+                    when (route) {
+                        is DataResult.Error -> {
+                            val userMessage = route.error.toUserMessage()
+                            _state.update { it.copy(isLoading = false, error = userMessage) }
+                            snackbarManager.showError(userMessage)
+                        }
+
+                        is DataResult.Success -> {
+                            _state.update { it.copy(isLoading = false, route = route.data) }
+                        }
+                    }
+
                     // Load user's existing verdict once route is loaded
                     loadUserVerdict(routeId)
                 }
@@ -64,13 +78,21 @@ class RouteDetailsViewModel(
     private fun loadUserVerdict(routeId: String) {
         val userId = authRepository.currentUserId ?: return
         viewModelScope.launch {
-            val firestoreVerdict = routeRepository.getUserVerdict(routeId, userId)
-            // Map the Firestore string back to the enum
-            val verdict =
-                RouteVerdict.entries.find {
-                    it.firestoreValue == firestoreVerdict
+            when (val firestoreVerdict = routeRepository.getUserVerdict(routeId, userId)) {
+                is DataResult.Error -> {
+                    val userMessage = firestoreVerdict.error.toUserMessage()
+                    _state.update { it.copy(error = userMessage) }
+                    snackbarManager.showError(userMessage)
                 }
-            _state.update { it.copy(selectedVerdict = verdict) }
+
+                is DataResult.Success -> {
+                    val verdict =
+                        RouteVerdict.entries.find {
+                            it.firestoreValue == firestoreVerdict.data?.name
+                        }
+                    _state.update { it.copy(selectedVerdict = verdict) }
+                }
+            }
         }
     }
 
@@ -90,29 +112,34 @@ class RouteDetailsViewModel(
                     ?: _state.value.selectedVerdict?.firestoreValue
                     ?: return@launch
 
-            routeRepository
-                .confirmRoute(
-                    routeId = routeId,
-                    userId = userId,
-                    verdict = firestoreVerdict, // ← now passes "CONFIRMED" not "WORKS"
-                ).onSuccess {
+            when (
+                val response =
+                    routeRepository.submitVerdict(
+                        routeId = routeId,
+                        userId = userId,
+                        verdict = Verdict.valueOf(firestoreVerdict),
+                    )
+            ) {
+                is DataResult.Error -> {
+                    _state.update { it.copy(selectedVerdict = _state.value.selectedVerdict) }
+                    snackbarManager.showError(
+                        message = response.error.toUserMessage() ?: "Failed to submit feedback",
+                        actionLabel = "Retry",
+                        onAction = { onVerdictSelected(verdict) },
+                    )
+                }
+
+                is DataResult.Success -> {
                     val message =
                         when (newVerdict) {
-                            RouteVerdict.WORKS -> "Thanks for confirming this route works! 👍"
+                            RouteVerdict.WORKS -> "Thanks for confirming this route works!"
                             RouteVerdict.DIDNT -> "Thanks for the feedback — we'll note this route had issues."
                             RouteVerdict.OUTDATED -> "Thanks! We'll flag this route as potentially outdated."
                             null -> "Feedback removed."
                         }
                     snackbarManager.showSuccess(message)
-                }.onFailure { e ->
-                    // Revert optimistic update on failure
-                    _state.update { it.copy(selectedVerdict = _state.value.selectedVerdict) }
-                    snackbarManager.showError(
-                        message = e.message ?: "Failed to submit feedback",
-                        actionLabel = "Retry",
-                        onAction = { onVerdictSelected(verdict) },
-                    )
                 }
+            }
         }
     }
 }
