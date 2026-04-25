@@ -1,14 +1,14 @@
 package com.samuelokello.mwenyeji.datasources.sources.search
 
 import com.samuelokello.mwenyeji.datasources.sources.search.dto.BoundingBox
-import com.samuelokello.mwenyeji.datasources.sources.search.dto.Coordinates
+import com.samuelokello.mwenyeji.datasources.sources.search.dto.CoordinatesDto
 
 /**
  * App-level defaults for search. Injected via DI so tests can override
  * and future expansion (other cities) is trivial.
  */
 data class SearchConfig(
-    val defaultProximity: Coordinates,
+    val defaultProximity: CoordinatesDto,
     val defaultBoundingBox: BoundingBox,
     val countryCode: String,
     val userAgent: String,
@@ -16,7 +16,7 @@ data class SearchConfig(
     companion object {
         val NAIROBI =
             SearchConfig(
-                defaultProximity = Coordinates(latitude = -1.2921, longitude = 36.8219),
+                defaultProximity = CoordinatesDto(latitude = -1.2921, longitude = 36.8219),
                 defaultBoundingBox =
                     BoundingBox(
                         minLng = 36.6,

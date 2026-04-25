@@ -2,9 +2,11 @@ package com.samuelokello.mwenyeji.feature.feed.route
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.samuelokello.mwenyeji.data.helpers.DataResult
+import com.samuelokello.mwenyeji.data.helpers.toUserMessage
 import com.samuelokello.mwenyeji.data.models.Route
 import com.samuelokello.mwenyeji.data.models.TimeOfDay
-import com.samuelokello.mwenyeji.data.repository.RouteRepository
+import com.samuelokello.mwenyeji.data.repository.RoutesRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +18,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AllRoutesViewModel(
-    private val routeRepository: RouteRepository,
+    private val routeRepository: RoutesRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(AllRoutesState())
     val state: StateFlow<AllRoutesState> = _state.asStateFlow()
@@ -44,15 +46,29 @@ class AllRoutesViewModel(
     private fun loadRoutes() {
         viewModelScope.launch {
             routeRepository
-                .getRoutes(TimeOfDay.ANYTIME) // all routes, no time filter
+                .observeRoutes(TimeOfDay.ANYTIME) // all routes, no time filter
                 .onStart {
                     _state.update { it.copy(isLoading = true, error = null) }
                 }.catch { e ->
                     _state.update { it.copy(isLoading = false, error = e.message) }
                     _effects.send(AllRoutesEffects.ShowError(e.message ?: "Failed to load routes"))
                 }.collect { routes ->
-                    _state.update {
-                        it.copy(isLoading = false, routes = routes)
+                    when (routes) {
+                        is DataResult.Error -> {
+                            val userMessage = routes.error.toUserMessage()
+                            _state.update { it.copy(isLoading = false, error = userMessage) }
+                            _effects.send(AllRoutesEffects.ShowError(userMessage))
+                        }
+
+                        is DataResult.Success -> {
+                            _state.update {
+                                it.copy(
+                                    isLoading = false,
+                                    error = null,
+                                    routes = routes.data,
+                                )
+                            }
+                        }
                     }
                 }
         }

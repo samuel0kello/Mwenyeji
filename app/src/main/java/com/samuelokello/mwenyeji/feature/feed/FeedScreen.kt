@@ -264,7 +264,7 @@ internal fun FeedScreenContent(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = state.error,
+                        text = state.error.toString(),
                         style = typography.bodyMedium,
                         color = colors.error,
                     )

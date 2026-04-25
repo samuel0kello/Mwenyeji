@@ -28,6 +28,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,9 +37,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.ui.designsystem.components.button.MwenyejiButton
+import com.samuelokello.mwenyeji.ui.theme.MwenyejiAppTheme
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 
 @Composable
@@ -46,127 +49,166 @@ fun SignInPromptSheet(
     visible: Boolean,
     onDismiss: () -> Unit,
     onGoogleSignIn: () -> Unit,
-    onSignInSuccess: () -> Unit,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
 ) {
-    val colors = MwenyejiTheme.colorScheme
-    val typography = MwenyejiTheme.typography
-
     Box(modifier = modifier.fillMaxSize()) {
-        // Scrim
-        AnimatedVisibility(visible = visible) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.5f))
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() },
-                            onClick = onDismiss,
-                        ),
-            )
-        }
+        Scrim(
+            visible = visible,
+            onDismiss = onDismiss,
+            dismissEnabled = !isLoading,
+        )
 
-        // Sheet
         AnimatedVisibility(
             visible = visible,
             enter = slideInVertically { it } + fadeIn(),
             exit = slideOutVertically { it } + fadeOut(),
             modifier = Modifier.align(Alignment.BottomCenter),
         ) {
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                        .background(colors.surface)
-                        .padding(horizontal = 24.dp, vertical = 28.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                // Drag handle
-                Box(
-                    modifier =
-                        Modifier
-                            .width(40.dp)
-                            .height(4.dp)
-                            .clip(RoundedCornerShape(2.dp))
-                            .background(colors.outlineVariant),
-                )
+            SheetContent(
+                isLoading = isLoading,
+                onGoogleSignIn = onGoogleSignIn,
+                onDismiss = onDismiss,
+            )
+        }
+    }
+}
 
-                Spacer(Modifier.height(24.dp))
+@Composable
+private fun Scrim(visible: Boolean, onDismiss: () -> Unit, dismissEnabled: Boolean) {
+    AnimatedVisibility(visible = visible, enter = fadeIn(), exit = fadeOut()) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = SCRIM_ALPHA))
+                    .clickable(
+                        enabled = dismissEnabled,
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = onDismiss,
+                    ),
+        )
+    }
+}
 
-                // Title
-                Text(
-                    text = stringResource(R.string.sign_in_to_share_your_knowledge),
-                    style = typography.headlineSmall,
-                    color = colors.onSurface,
-                    textAlign = TextAlign.Center,
-                )
+@Composable
+private fun SheetContent(isLoading: Boolean, onGoogleSignIn: () -> Unit, onDismiss: () -> Unit) {
+    val colors = MwenyejiTheme.colorScheme
+    val typography = MwenyejiTheme.typography
+    val spacing = MwenyejiTheme.spacing
+    val cornerRadius = MwenyejiTheme.cornerRadius
 
-                Spacer(Modifier.height(8.dp))
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(
+                    RoundedCornerShape(
+                        topStart = cornerRadius.large,
+                        topEnd = cornerRadius.large,
+                    ),
+                ).background(colors.surface)
+                .padding(
+                    horizontal = spacing.large,
+                    vertical = spacing.extraLarge,
+                ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        DragHandle()
+        Spacer(Modifier.height(spacing.large))
 
-                // Subtitle
-                Text(
-                    text = stringResource(R.string.contributing_requires_a_google_account_so_the_community_knows_who_to_trust),
-                    style = typography.bodyMedium,
-                    color = colors.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
+        Text(
+            text = stringResource(R.string.sign_in_to_share_your_knowledge),
+            style = typography.headlineSmall,
+            color = colors.onSurface,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(spacing.small))
+        Text(
+            text =
+                stringResource(
+                    R.string.contributing_requires_a_google_account_so_the_community_knows_who_to_trust,
+                ),
+            style = typography.bodyMedium,
+            color = colors.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(spacing.extraLarge))
 
-                Spacer(Modifier.height(28.dp))
+        BenefitsList(benefits = rememberBenefits())
 
-                // Value props
-                SignInBenefit(
-                    icon = Icons.Outlined.Route,
-                    title = stringResource(R.string.your_routes_your_identity),
-                    body = stringResource(R.string.contributions_are_linked_to_your_account_so_you_get_credit_for_your_knowledge),
-                )
-                Spacer(Modifier.height(16.dp))
-                SignInBenefit(
-                    icon = Icons.Outlined.Verified,
-                    title = stringResource(R.string.trusted_community),
-                    body = stringResource(R.string.signed_in_contributors_build_reputation_over_time_the_community_knows_who_to_trust),
-                )
-                Spacer(Modifier.height(16.dp))
-                SignInBenefit(
-                    icon = Icons.Outlined.Groups,
-                    title = stringResource(R.string.browsing_stays_free),
-                    body = stringResource(R.string.no_account_needed_to_read_routes_sign_in_only_when_you_want_to_contribute),
-                )
+        Spacer(Modifier.height(spacing.extraLarge))
 
-                Spacer(Modifier.height(32.dp))
+        SignInButton(
+            isLoading = isLoading,
+            onClick = onGoogleSignIn,
+        )
 
-                // Google Sign-In button
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        color = colors.primary,
-                        modifier = Modifier.size(40.dp),
-                    )
-                } else {
-                    MwenyejiButton(
-                        text = stringResource(R.string.continue_with_google),
-                        onClick = onGoogleSignIn,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
+        Spacer(Modifier.height(spacing.medium))
 
-                Spacer(Modifier.height(12.dp))
+        Text(
+            text = stringResource(R.string.maybe_later),
+            style = typography.labelMedium,
+            color = colors.onSurfaceVariant,
+            modifier =
+                Modifier
+                    .clickable(enabled = !isLoading, onClick = onDismiss)
+                    .padding(spacing.small),
+        )
+        Spacer(Modifier.height(spacing.small))
+    }
+}
 
-                // Dismiss link
-                Text(
-                    text = stringResource(R.string.maybe_later),
-                    style = typography.labelMedium,
-                    color = colors.onSurfaceVariant,
-                    modifier =
-                        Modifier
-                            .clickable(onClick = onDismiss)
-                            .padding(8.dp),
-                )
+@Composable
+private fun SignInButton(isLoading: Boolean, onClick: () -> Unit) {
+    val colors = MwenyejiTheme.colorScheme
+    val sizes = MwenyejiTheme.sizes
 
-                Spacer(Modifier.height(8.dp))
-            }
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center,
+    ) {
+        MwenyejiButton(
+            text = stringResource(R.string.continue_with_google),
+            onClick = onClick,
+            enabled = !isLoading,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        if (isLoading) {
+            CircularProgressIndicator(
+                color = colors.onPrimary,
+                strokeWidth = sizes.borderWidthThick,
+                modifier = Modifier.size(sizes.iconExtraSmall),
+            )
+        }
+    }
+}
+
+@Composable
+private fun DragHandle() {
+    val sizes = MwenyejiTheme.sizes
+    val cornerRadius = MwenyejiTheme.cornerRadius
+    Box(
+        modifier =
+            Modifier
+                .width(DRAG_HANDLE_WIDTH)
+                .height(sizes.borderWidthThick * 2) // 4.dp
+                .clip(RoundedCornerShape(cornerRadius.small))
+                .background(MwenyejiTheme.colorScheme.outlineVariant),
+    )
+}
+
+@Composable
+private fun BenefitsList(benefits: List<Benefit>) {
+    val spacing = MwenyejiTheme.spacing
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
+        benefits.forEach { benefit ->
+            SignInBenefit(
+                icon = benefit.icon,
+                title = stringResource(benefit.titleRes),
+                body = stringResource(benefit.bodyRes),
+            )
         }
     }
 }
@@ -175,30 +217,81 @@ fun SignInPromptSheet(
 private fun SignInBenefit(icon: ImageVector, title: String, body: String) {
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
+    val spacing = MwenyejiTheme.spacing
+    val sizes = MwenyejiTheme.sizes
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(spacing.medium),
         verticalAlignment = Alignment.Top,
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             tint = colors.primary,
-            modifier = Modifier.size(22.dp),
+            modifier = Modifier.size(sizes.iconSmall),
         )
         Column {
-            Text(
-                text = title,
-                style = typography.labelMedium,
-                color = colors.onSurface,
-            )
-            Spacer(Modifier.height(2.dp))
-            Text(
-                text = body,
-                style = typography.bodySmall,
-                color = colors.onSurfaceVariant,
-            )
+            Text(title, style = typography.labelMedium, color = colors.onSurface)
+            Spacer(Modifier.height(spacing.extraSmall / 2))
+            Text(body, style = typography.bodySmall, color = colors.onSurfaceVariant)
         }
+    }
+}
+
+@Immutable
+private data class Benefit(
+    val icon: ImageVector,
+    val titleRes: Int,
+    val bodyRes: Int,
+)
+
+@Composable
+private fun rememberBenefits(): List<Benefit> =
+    remember {
+        listOf(
+            Benefit(
+                icon = Icons.Outlined.Route,
+                titleRes = R.string.your_routes_your_identity,
+                bodyRes = R.string.contributions_are_linked_to_your_account_so_you_get_credit_for_your_knowledge,
+            ),
+            Benefit(
+                icon = Icons.Outlined.Verified,
+                titleRes = R.string.trusted_community,
+                bodyRes = R.string.signed_in_contributors_build_reputation_over_time_the_community_knows_who_to_trust,
+            ),
+            Benefit(
+                icon = Icons.Outlined.Groups,
+                titleRes = R.string.browsing_stays_free,
+                bodyRes = R.string.no_account_needed_to_read_routes_sign_in_only_when_you_want_to_contribute,
+            ),
+        )
+    }
+
+private const val SCRIM_ALPHA = 0.5f
+private val DRAG_HANDLE_WIDTH = 40.dp
+
+@Preview(name = "Idle", showBackground = true)
+@Composable
+private fun SignInPromptSheetPreview_Idle() {
+    MwenyejiAppTheme {
+        SignInPromptSheet(
+            visible = true,
+            onDismiss = {},
+            onGoogleSignIn = {},
+        )
+    }
+}
+
+@Preview(name = "Loading", showBackground = true)
+@Composable
+private fun SignInPromptSheetPreview_Loading() {
+    MwenyejiAppTheme {
+        SignInPromptSheet(
+            visible = true,
+            onDismiss = {},
+            onGoogleSignIn = {},
+            isLoading = true,
+        )
     }
 }
