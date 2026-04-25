@@ -54,4 +54,5 @@
     <string name="search_area_stage_destination">Search area, stage, destination...</string>
     <string name="know_a_route_add_it_here">Know a route? Add it here</string>
     <string name="retry">Retry</string>
+    <string name="real_routes_fares"><![CDATA[Real routes & fares]]></string>
 </resources>

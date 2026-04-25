@@ -1,5 +1,9 @@
 package com.samuelokello.mwenyeji.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -16,6 +20,9 @@ import com.samuelokello.mwenyeji.feature.feed.navigation.FeedsGraph
 import com.samuelokello.mwenyeji.feature.feed.navigation.feedsNavGraph
 import com.samuelokello.mwenyeji.feature.onboarding.navigation.OnBoarding
 import com.samuelokello.mwenyeji.feature.onboarding.navigation.onBoarding
+import com.samuelokello.mwenyeji.ui.theme.animation.AppEasing
+import com.samuelokello.mwenyeji.ui.theme.animation.Duration
+import com.samuelokello.mwenyeji.ui.theme.animation.appTween
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
@@ -34,6 +41,27 @@ fun MwenyejiNavGraph(navController: NavHostController, onRequireAuth: (onAuthent
         NavHost(
             navController = navController,
             startDestination = destination,
+            enterTransition = {
+                fadeIn(appTween(Duration.NORMAL, AppEasing.decelerated))
+            },
+            exitTransition = {
+                slideOutOfContainer(SlideDirection.Up, appTween(easing = AppEasing.accelerated)) +
+                    fadeOut(appTween(easing = AppEasing.accelerated))
+            },
+            popEnterTransition = {
+                slideIntoContainer(
+                    SlideDirection.Right,
+                    tween(Duration.MEDIUM, easing = AppEasing.decelerated),
+                ) +
+                    fadeIn(tween(Duration.MEDIUM))
+            },
+            popExitTransition = {
+                slideOutOfContainer(
+                    SlideDirection.Right,
+                    tween(Duration.MEDIUM, easing = AppEasing.accelerated),
+                ) +
+                    fadeOut(tween(Duration.MEDIUM))
+            },
         ) {
             mainGraph(navController, onRequireAuth)
             onBoarding(navController)

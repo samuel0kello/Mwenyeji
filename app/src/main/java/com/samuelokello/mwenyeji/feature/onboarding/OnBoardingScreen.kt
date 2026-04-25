@@ -18,7 +18,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.ProgressDots
 import com.samuelokello.mwenyeji.feature.onboarding.pages.CommunityPage
 import com.samuelokello.mwenyeji.feature.onboarding.pages.FindRoutePage
@@ -86,15 +85,18 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = koinViewModel(), onFinish:
         val isLastPage = state.currentPage == TOTAL_PAGES - 1
         val isButtonEnabled = !isLastPage || state.selectedUserType != null
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 16.dp)
-                .align(Alignment.BottomEnd),
-            verticalAlignment = Alignment.CenterVertically
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = MwenyejiTheme.spacing.small,
+                        vertical = MwenyejiTheme.spacing.small,
+                    ).align(Alignment.BottomEnd),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             ProgressDots(
                 total = TOTAL_PAGES,
-                current = state.currentPage
+                current = state.currentPage,
             )
             Spacer(modifier = Modifier.weight(1f))
             MwenyejiButton(

@@ -20,6 +20,7 @@ import com.samuelokello.mwenyeji.feature.onboarding.animation.timeline
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.FeedEntry
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.LeaderBoard
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.LiveFeedCard
+import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
 import com.samuelokello.mwenyeji.ui.theme.color.AppColors.DangerRed
 
 sealed interface CommunityEvent {
@@ -28,19 +29,22 @@ sealed interface CommunityEvent {
     data object ShowLeader : CommunityEvent
 }
 
-val communityTimeline =
-    timeline<CommunityEvent> {
-        step(300) { emit -> emit(CommunityEvent.ShowFeedRow) }
-        step(180) { emit -> emit(CommunityEvent.ShowFeedRow) }
-        step(180) { emit -> emit(CommunityEvent.ShowFeedRow) }
-        step(180) { emit -> emit(CommunityEvent.ShowFeedRow) }
-        step(300) { emit -> emit(CommunityEvent.ShowLeader) }
-    }
-
 @Composable
 fun CommunityPage(isActive: Boolean) {
     var visibleRows by remember { mutableIntStateOf(0) }
     var showLeader by remember { mutableStateOf(false) }
+    val duration = MwenyejiTheme.duration
+
+    val communityTimeline =
+        remember(duration) {
+            timeline {
+                step(duration.MEDIUM.toLong()) { emit -> emit(CommunityEvent.ShowFeedRow) }
+                step(180) { emit -> emit(CommunityEvent.ShowFeedRow) }
+                step(180) { emit -> emit(CommunityEvent.ShowFeedRow) }
+                step(180) { emit -> emit(CommunityEvent.ShowFeedRow) }
+                step(duration.MEDIUM.toLong()) { emit -> emit(CommunityEvent.ShowLeader) }
+            }
+        }
 
     val feedEntries =
         remember {

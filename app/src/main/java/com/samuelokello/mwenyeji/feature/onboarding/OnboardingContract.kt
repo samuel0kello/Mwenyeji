@@ -12,7 +12,9 @@ interface OnboardingContract {
     sealed interface Action {
         data object OnNextClicked : Action
 
-        data class OnPreviousClicked(val page: Int) : Action
+        data class OnPreviousClicked(
+            val page: Int,
+        ) : Action
 
         data object OnSkipClicked : Action
 
