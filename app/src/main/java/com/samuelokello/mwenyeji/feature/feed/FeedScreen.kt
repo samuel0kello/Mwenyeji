@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
@@ -55,14 +56,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.location.LocationServices
@@ -72,10 +77,14 @@ import com.samuelokello.mwenyeji.data.models.TimeOfDay
 import com.samuelokello.mwenyeji.feature.feed.components.RouteCard
 import com.samuelokello.mwenyeji.ui.designsystem.components.MwenyejiLargeHeaderBar
 import com.samuelokello.mwenyeji.ui.designsystem.components.card.MwenyejiCard
+import com.samuelokello.mwenyeji.ui.designsystem.components.pulltorefresh.MwenyejiPullToRefresh
 import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackBarManager
 import com.samuelokello.mwenyeji.ui.designsystem.components.toolTip.MwenyejiTooltip
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiAppTheme
 import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -94,6 +103,9 @@ fun FeedScreen(
     var backPressedTime by remember { mutableLongStateOf(0L) }
 
     val locationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+
+    var isRefreshing by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     val permissionLauncher =
         rememberLauncherForActivityResult(
@@ -174,13 +186,21 @@ fun FeedScreen(
 
     LaunchedEffect(state.showFabTooltip) {
         if (state.showFabTooltip) {
-            kotlinx.coroutines.delay(5000)
+            delay(5000)
             viewModel.onAction(FeedAction.DismissFabTooltip)
         }
     }
 
     FeedScreenContent(
         state = state,
+        isRefreshing = isRefreshing,
+        onRefresh = {
+            scope.launch {
+                isRefreshing = true
+                delay(5_000L) // TODO: replace with viewModel.refresh()
+                isRefreshing = false
+            }
+        },
         onAction = viewModel::onAction,
         onNavigateToContribute = onNavigateToContribute,
         modifier = modifier,
@@ -190,6 +210,8 @@ fun FeedScreen(
 @Composable
 internal fun FeedScreenContent(
     state: FeedState,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
     onAction: (FeedAction) -> Unit,
     onNavigateToContribute: () -> Unit,
     modifier: Modifier = Modifier,
@@ -275,96 +297,122 @@ internal fun FeedScreenContent(
             }
 
             else -> {
-                LazyColumn(
+                MwenyejiPullToRefresh(
+                    isRefreshing = isRefreshing,
+                    onRefresh = onRefresh,
+                    confirmationText = "Updated • ${state.filteredRoutes.size} routes",
                     modifier =
                         Modifier
                             .fillMaxSize()
                             .padding(paddingValues),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(bottom = 24.dp),
                 ) {
-                    // Time of day filter chips
-                    item(key = "time_filters") {
-                        LazyRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            items(
-                                items = TimeOfDay.entries,
-                                key = { it.name },
-                            ) { timeOfDay ->
-                                TimeOfDayChip(
-                                    title = timeOfDay.displayName,
-                                    selected = state.selectedTimeOfDay == timeOfDay,
-                                    onSelected = {
-                                        onAction(FeedAction.SelectTimeOfDay(timeOfDay))
-                                    },
-                                )
-                            }
-                        }
-                        HorizontalDivider(
-                            color = colors.border,
-                            thickness = 1.dp,
-                        )
-                    }
+                    val cardRotation = 5f * pullProgress.coerceAtMost(1f)
+                    val effectiveRotation = if (isRefreshing) 5f else cardRotation
 
-                    // Section header
-                    item(key = "section_header") {
-                        Row(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = "Near CBD Now",
-                                style = typography.titleSmall,
-                                color = colors.onSurfaceVariant,
-                                modifier = Modifier.weight(1f),
-                            )
-                            TextButton(
-                                onClick = { onAction(FeedAction.SeeAllClicked) },
-                                contentPadding = PaddingValues(0.dp),
+                    LazyColumn(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(bottom = 24.dp),
+                    ) {
+                        // Time of day filter chips
+                        item(key = "time_filters") {
+                            LazyRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                Text(
-                                    text = "See all",
-                                    style = typography.labelMedium,
-                                    color = colors.primary,
-                                )
+                                items(
+                                    items = TimeOfDay.entries,
+                                    key = { it.name },
+                                ) { timeOfDay ->
+                                    TimeOfDayChip(
+                                        title = timeOfDay.displayName,
+                                        selected = state.selectedTimeOfDay == timeOfDay,
+                                        onSelected = {
+                                            onAction(FeedAction.SelectTimeOfDay(timeOfDay))
+                                        },
+                                    )
+                                }
                             }
+                            HorizontalDivider(
+                                color = colors.border,
+                                thickness = 1.dp,
+                            )
                         }
-                    }
 
-                    // Route cards
-                    if (state.filteredRoutes.isEmpty()) {
-                        item(key = "empty_state") {
-                            Box(
+                        // Section header
+                        item(key = "section_header") {
+                            Row(
                                 modifier =
                                     Modifier
                                         .fillMaxWidth()
-                                        .padding(vertical = 48.dp),
-                                contentAlignment = Alignment.Center,
+                                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Text(
-                                    text = "No routes found for this time.\nTry a different filter.",
-                                    style = typography.bodyMedium,
+                                    text = "Near CBD Now",
+                                    style = typography.titleSmall,
                                     color = colors.onSurfaceVariant,
-                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                    modifier = Modifier.weight(1f),
                                 )
+                                TextButton(
+                                    onClick = { onAction(FeedAction.SeeAllClicked) },
+                                    contentPadding = PaddingValues(0.dp),
+                                ) {
+                                    Text(
+                                        text = "See all",
+                                        style = typography.labelMedium,
+                                        color = colors.primary,
+                                    )
+                                }
                             }
                         }
-                    } else {
-                        items(
-                            items = state.filteredRoutes,
-                            key = { it.id },
-                        ) { route ->
-                            RouteCard(
-                                route = route,
-                                onClick = { onAction(FeedAction.RouteClicked(route)) },
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                            )
+
+                        indicatorItem()
+                        // Route cards
+                        if (state.filteredRoutes.isEmpty()) {
+                            item(key = "empty_state") {
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 48.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text(
+                                        text = "No routes found for this time.\nTry a different filter.",
+                                        style = typography.bodyMedium,
+                                        color = colors.onSurfaceVariant,
+                                        textAlign = TextAlign.Center,
+                                    )
+                                }
+                            }
+                        } else {
+                            itemsIndexed(
+                                items = state.filteredRoutes,
+                                key = { _, route -> route.id },
+                            ) { index, route ->
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp)
+                                            .zIndex((state.filteredRoutes.size - index).toFloat())
+                                            .graphicsLayer {
+                                                rotationZ =
+                                                    effectiveRotation * if (index % 2 == 0) 1f else -1f
+                                            },
+                                ) {
+                                    RouteCard(
+                                        route = route,
+                                        onClick = { onAction(FeedAction.RouteClicked(route)) },
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -415,6 +463,8 @@ private fun FeedScreenContentPreview() {
                 ),
             onAction = {},
             onNavigateToContribute = {},
+            isRefreshing = false,
+            onRefresh = {},
         )
     }
 }

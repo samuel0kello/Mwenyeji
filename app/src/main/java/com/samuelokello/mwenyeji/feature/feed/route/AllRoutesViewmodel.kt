@@ -43,7 +43,7 @@ class AllRoutesViewModel(
         }
     }
 
-    private fun loadRoutes() {
+    fun loadRoutes() {
         viewModelScope.launch {
             routeRepository
                 .observeRoutes(TimeOfDay.ANYTIME) // all routes, no time filter
