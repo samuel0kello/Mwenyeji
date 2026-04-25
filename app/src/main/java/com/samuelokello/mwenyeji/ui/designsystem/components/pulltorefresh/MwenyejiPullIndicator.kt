@@ -31,12 +31,7 @@ private val INDICATOR_HEIGHT = 120.dp
 private const val OFFSCREEN_X = -200f
 
 @Composable
-internal fun MwenyejiPullIndicator(
-    pullProgress: Float,
-    isRefreshing: Boolean,
-    statusText: String,
-    modifier: Modifier = Modifier
-) {
+internal fun MwenyejiPullIndicator(pullProgress: Float, isRefreshing: Boolean, statusText: String, modifier: Modifier = Modifier) {
     val targetHeight =
         when {
             isRefreshing -> INDICATOR_HEIGHT
@@ -50,9 +45,10 @@ internal fun MwenyejiPullIndicator(
     )
 
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(height),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(height),
         contentAlignment = Alignment.Center,
     ) {
         if (height > 0.dp) {
