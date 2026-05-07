@@ -8,7 +8,7 @@ import com.samuelokello.mwenyeji.data.models.Route
 import com.samuelokello.mwenyeji.data.models.Verdict
 import com.samuelokello.mwenyeji.data.repository.AuthRepository
 import com.samuelokello.mwenyeji.data.repository.RoutesRepository
-import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackBarManager
+import com.samuelokello.mwenyeji.presentation.designsystem.components.snackbar.SnackBarManager
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

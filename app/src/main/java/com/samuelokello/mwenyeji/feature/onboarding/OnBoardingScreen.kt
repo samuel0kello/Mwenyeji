@@ -24,8 +24,8 @@ import com.samuelokello.mwenyeji.feature.onboarding.pages.FindRoutePage
 import com.samuelokello.mwenyeji.feature.onboarding.pages.KnowNairobiPage
 import com.samuelokello.mwenyeji.feature.onboarding.pages.PersonalizationPage
 import com.samuelokello.mwenyeji.feature.onboarding.pages.ShareKnowledgePage
-import com.samuelokello.mwenyeji.ui.designsystem.components.button.MwenyejiButton
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.designsystem.components.button.MwenyejiButton
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -91,7 +91,8 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = koinViewModel(), onFinish:
                     .padding(
                         horizontal = MwenyejiTheme.spacing.small,
                         vertical = MwenyejiTheme.spacing.small,
-                    ).align(Alignment.BottomEnd),
+                    )
+                    .align(Alignment.BottomEnd),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             ProgressDots(

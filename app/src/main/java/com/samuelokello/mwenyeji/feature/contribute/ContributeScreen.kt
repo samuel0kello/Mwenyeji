@@ -15,7 +15,7 @@ import com.samuelokello.mwenyeji.feature.contribute.step.InstructionsStepScreen
 import com.samuelokello.mwenyeji.feature.contribute.step.RouteStepScreen
 import com.samuelokello.mwenyeji.feature.contribute.step.TimingStepScreen
 import com.samuelokello.mwenyeji.feature.contribute.step.WarningsStepScreen
-import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackBarManager
+import com.samuelokello.mwenyeji.presentation.designsystem.components.snackbar.SnackBarManager
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 

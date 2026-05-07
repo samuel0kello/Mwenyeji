@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -22,11 +21,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.samuelokello.mwenyeji.feature.feed.FeedAction
 import com.samuelokello.mwenyeji.feature.feed.components.RouteCard
-import com.samuelokello.mwenyeji.ui.designsystem.components.MwenyejiTopBar
-import com.samuelokello.mwenyeji.ui.designsystem.components.pulltorefresh.MwenyejiPullIndicator
-import com.samuelokello.mwenyeji.ui.designsystem.components.pulltorefresh.MwenyejiPullToRefresh
+import com.samuelokello.mwenyeji.presentation.designsystem.components.MwenyejiTopBar
+import com.samuelokello.mwenyeji.presentation.designsystem.components.pulltorefresh.MwenyejiPullToRefresh
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel

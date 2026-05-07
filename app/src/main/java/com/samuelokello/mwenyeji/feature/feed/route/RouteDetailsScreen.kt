@@ -40,9 +40,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.samuelokello.mwenyeji.data.models.RouteStep
 import com.samuelokello.mwenyeji.data.models.RouteTag
 import com.samuelokello.mwenyeji.feature.feed.components.RouteTagChip
-import com.samuelokello.mwenyeji.ui.designsystem.components.MwenyejiRouteBar
-import com.samuelokello.mwenyeji.ui.designsystem.components.card.MwenyejiCard
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.designsystem.components.MwenyejiRouteBar
+import com.samuelokello.mwenyeji.presentation.designsystem.components.card.MwenyejiCard
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 import org.koin.compose.viewmodel.koinViewModel
 
 enum class RouteVerdict(

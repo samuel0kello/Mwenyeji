@@ -22,13 +22,15 @@ import com.samuelokello.mwenyeji.feature.auth.SessionEvent
 import com.samuelokello.mwenyeji.feature.auth.SessionViewModel
 import com.samuelokello.mwenyeji.feature.auth.SignInPromptSheet
 import com.samuelokello.mwenyeji.navigation.MwenyejiNavGraph
-import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.MwenyejiSnackbarHost
-import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackBarManager
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.designsystem.components.snackbar.MwenyejiSnackbarHost
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun App(snackbarManager: SnackBarManager, modifier: Modifier = Modifier, sessionViewModel: SessionViewModel = koinViewModel()) {
+fun App(
+    snackbarManager: com.samuelokello.mwenyeji.presentation.designsystem.components.snackbar.SnackBarManager,
+    modifier: Modifier = Modifier,
+    sessionViewModel: SessionViewModel = koinViewModel(),
+) {
     val context = LocalContext.current
     val navController = rememberNavController()
 
@@ -90,6 +92,6 @@ private fun StatusBarScrim(modifier: Modifier = Modifier) {
             modifier
                 .fillMaxWidth()
                 .height(heightDp)
-                .background(MwenyejiTheme.colorScheme.surface),
+                .background(com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme.colorScheme.surface),
     )
 }

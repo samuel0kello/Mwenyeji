@@ -31,14 +31,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
-import com.samuelokello.mwenyeji.ui.theme.color.AppColors.AmberWarm
-import com.samuelokello.mwenyeji.ui.theme.color.AppColors.DangerRed
-import com.samuelokello.mwenyeji.ui.theme.color.AppColors.GreenDim
-import com.samuelokello.mwenyeji.ui.theme.color.AppColors.GreenLight
-import com.samuelokello.mwenyeji.ui.theme.color.AppColors.TextPrimary
-import com.samuelokello.mwenyeji.ui.theme.color.AppColors.TextSecondary
-import com.samuelokello.mwenyeji.ui.theme.color.AppColors.TextTertiary
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.AmberWarm
+import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.DangerRed
+import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.GreenDim
+import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.GreenLight
+import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.TextPrimary
+import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.TextSecondary
+import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.TextTertiary
 
 data class FeedEntry(
     val initials: String,

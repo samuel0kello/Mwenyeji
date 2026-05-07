@@ -2,7 +2,6 @@ package com.samuelokello.mwenyeji.data.models
 
 /**
  * Time-of-day filter — Step 2 "Best time of day" chips.
- * [displayName] is the human-readable label shown on the chip.
  */
 enum class TimeOfDay(
     val displayName: String,
@@ -15,8 +14,7 @@ enum class TimeOfDay(
 }
 
 /**
- * Route tags — Step 4 "Tags (select all that apply)".
- * Multiple can be selected, stored as a Set<RouteTag>.
+ * Route tags — Step 4 multi-select chips.
  */
 enum class RouteTag(
     val displayName: String,
@@ -29,11 +27,7 @@ enum class RouteTag(
 }
 
 /**
- * A single step in the "How do you do it?" instructions — Step 3.
- * Steps are ordered; the list index determines display order.
- *
- * @param order   1-based position (Step 1, Step 2, …).
- * @param instruction The contributor's text for this step.
+ * A single step in the "How do you do it?" instructions.
  */
 data class RouteStep(
     val order: Int,
@@ -41,70 +35,88 @@ data class RouteStep(
 )
 
 /**
- * A crowdsourced transit guide contributed by a Mwenyeji user.
+ * Confidence level derived from community confirmations.
+ * Drives the coloured dot on route cards.
+ */
+enum class RouteConfidence {
+    HIGH, // green  — many confirmations, no outdated flags
+    MEDIUM, // amber  — some confirmations or minor concerns
+    STALE, // red    — more outdated flags than confirmations
+    UNVERIFIED, // grey   — no community feedback yet
+}
+
+/**
+ * Domain model for a Nairobi matatu route.
  *
- * Maps 1-to-1 to the 4-step contribution flow:
+ * Two source types coexist:
  *
- *  Step 1 — Route:   [from], [to], [via], [fareKsh]
- *  Step 2 — Timing:  [bestTimeOfDay], [timingReason]
- *  Step 3 — Steps:   [steps]
- *  Step 4 — Warnings:[warnings], [tags]
+ *   source = "community"       — contributed by a user through the contribute flow.
+ *                                Has steps, warnings, fare, tags from day one.
+ *                                Coordinates stored in fromLat/fromLng/toLat/toLng.
  *
- * @param id                Unique identifier (UUID or Firestore doc ID).
- * @param from              Boarding location e.g. "CBD, Kencom".
- * @param to                Destination e.g. "Westlands, Sarit".
- * @param via               Route description e.g. "via Uhuru Highway".
- * @param fareKsh           Fare in Kenyan shillings. Null if contributor skipped.
- * @param bestTimeOfDay     When the route works best (single selection from Step 2).
- * @param timingReason      Optional explanation for the timing choice.
- * @param steps             Ordered list of instructions from Step 3.
- * @param warnings          Free-text warnings from Step 4 e.g. "Don't board from Tom Mboya".
- * @param tags              Set of tags selected in Step 4.
- * @param contributorId     UID of the user who submitted this guide.
- * @param confirmedCount    How many users confirmed this route works.
- * @param didntWorkCount    How many users said it didn't work.
- * @param outdatedCount     How many users flagged it as outdated.
- * @param lastConfirmedAt   Epoch millis of the most recent confirmation.
- * @param createdAt         Epoch millis when the guide was first submitted.
+ *   source = "digital_matatus" — seeded from the 2018 Digital Matatus GTFS dataset.
+ *                                Has routeNumber, stopCount, headway data.
+ *                                Coordinates in fromLat/fromLng (resolved from terminus1).
+ *                                Community fields start empty — contributors enrich them.
  */
 data class Route(
-    // Identity
     val id: String = "",
-    // Step 1 — Route
     val from: String = "",
     val to: String = "",
     val via: String = "",
     val fareKsh: Double? = null,
-    // Coordinates — captured from map search
+    // Proximity coordinates — resolved from terminus1 (GTFS) or fromLat (community)
     val fromLat: Double? = null,
     val fromLng: Double? = null,
     val toLat: Double? = null,
     val toLng: Double? = null,
-    // Route identity
+    // GTFS-only fields
     val routeNumber: String? = null,
-    val saccos: List<String> = emptyList(),
-    // Step 2 — Timing
+    val stopCount: Int = 0,
+    val peakHeadwayMins: Int? = null,
+    val offPeakHeadwayMins: Int? = null,
+    val searchTerms: List<String> = emptyList(),
+    val sacco: List<String> = emptyList(),
     val bestTimeOfDay: TimeOfDay = TimeOfDay.ANYTIME,
     val timingReason: String = "",
-    // Step 3 — Steps
     val steps: List<RouteStep> = emptyList(),
-    // Step 4 — Warnings & Tags
     val warnings: String = "",
     val tags: Set<RouteTag> = emptySet(),
-    // Metadata
     val contributorId: String = "",
     val confirmedCount: Int = 0,
     val didntWorkCount: Int = 0,
     val outdatedCount: Int = 0,
     val lastConfirmedAt: Long? = null,
     val createdAt: Long = System.currentTimeMillis(),
+    val source: String = "community",
+    val isEnriched: Boolean = false,
 ) {
-    val title: String get() = "$from → $to"
-    val isConfirmed: Boolean get() = confirmedCount > 0
-    val hasCoordinates: Boolean
-        get() =
-            fromLat != null && fromLng != null && toLat != null && toLng != null
+    val title: String
+        get() = if (routeNumber != null) "$routeNumber: $from → $to" else "$from → $to"
 
+    val formattedFare: String?
+        get() = fareKsh?.let { "Ksh ${it.toInt()}" }
+
+    val isConfirmed: Boolean
+        get() = confirmedCount > 0
+
+    val isGtfsSeed: Boolean
+        get() = source == "digital_matatus"
+
+    /** Community routes that have steps/warnings/fare added on top of GTFS base. */
+    val isCommunityEnriched: Boolean
+        get() = isGtfsSeed && isEnriched
+
+    val hasCoordinates: Boolean
+        get() = fromLat != null && fromLng != null
+
+    val hasSteps: Boolean
+        get() = steps.isNotEmpty()
+
+    /**
+     * Confidence level for the route card dot.
+     * GTFS-only routes (no community feedback) start as UNVERIFIED.
+     */
     val confidence: RouteConfidence
         get() =
             when {
@@ -114,17 +126,27 @@ data class Route(
                 else -> RouteConfidence.UNVERIFIED
             }
 
-    val hasSteps: Boolean get() = steps.isNotEmpty()
-    val formattedFare: String? get() = fareKsh?.let { "Ksh ${it.toInt()}" }
-}
+    /**
+     * Subtitle shown on route card below the title.
+     * GTFS routes show stop count and headway. Community routes show via.
+     */
+    val subtitle: String
+        get() =
+            when {
+                isGtfsSeed && stopCount > 0 && peakHeadwayMins != null -> {
+                    "$stopCount stages · every ${peakHeadwayMins}min peak"
+                }
 
-/**
- * Confidence level derived from community confirmations.
- * Drives the coloured dot on route cards.
- */
-enum class RouteConfidence {
-    HIGH, // green dot  — many confirmations, no outdated flags
-    MEDIUM, // amber dot  — some confirmations or minor concerns
-    STALE, // red dot    — more outdated flags than confirmations
-    UNVERIFIED, // grey dot   — no community feedback yet
+                isGtfsSeed && stopCount > 0 -> {
+                    "$stopCount stages"
+                }
+
+                via.isNotBlank() -> {
+                    "via $via"
+                }
+
+                else -> {
+                    ""
+                }
+            }
 }

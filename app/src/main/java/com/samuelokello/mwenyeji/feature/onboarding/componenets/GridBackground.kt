@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 @Composable
 fun GridBackground(modifier: Modifier = Modifier) {

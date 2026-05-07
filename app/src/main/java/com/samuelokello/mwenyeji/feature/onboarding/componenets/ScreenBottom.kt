@@ -7,7 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 @Composable
 fun ScreenBottom(label: String, title: String, subtitle: String, modifier: Modifier = Modifier) {

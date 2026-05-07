@@ -22,7 +22,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.feature.contribute.ContributeActions
 import com.samuelokello.mwenyeji.feature.contribute.ContributeState
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 @Composable
 fun InstructionsStepScreen(state: ContributeState, onAction: (ContributeActions) -> Unit, modifier: Modifier = Modifier) {

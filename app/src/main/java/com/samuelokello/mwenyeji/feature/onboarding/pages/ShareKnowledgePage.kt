@@ -23,7 +23,7 @@ import com.samuelokello.mwenyeji.feature.onboarding.animation.timeline
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.ConfidenceSection
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.ContribCard
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.PointsToast
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 sealed interface ShareKnowledgeEvent {
     data object ShowCard : ShareKnowledgeEvent

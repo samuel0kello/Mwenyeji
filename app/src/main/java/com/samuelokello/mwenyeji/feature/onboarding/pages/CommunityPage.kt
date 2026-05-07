@@ -20,8 +20,8 @@ import com.samuelokello.mwenyeji.feature.onboarding.animation.timeline
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.FeedEntry
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.LeaderBoard
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.LiveFeedCard
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
-import com.samuelokello.mwenyeji.ui.theme.color.AppColors.DangerRed
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.DangerRed
 
 sealed interface CommunityEvent {
     data object ShowFeedRow : CommunityEvent

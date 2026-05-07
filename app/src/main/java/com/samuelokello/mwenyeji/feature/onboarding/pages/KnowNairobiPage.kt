@@ -17,7 +17,7 @@ import com.samuelokello.mwenyeji.feature.onboarding.animation.RememberTimelineRu
 import com.samuelokello.mwenyeji.feature.onboarding.animation.timeline
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.NotificationCard
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.RouteCard
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 sealed interface KnowNairobiEvent {
     data object ShowNotif : KnowNairobiEvent

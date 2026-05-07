@@ -31,8 +31,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.samuelokello.mwenyeji.R
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
-import com.samuelokello.mwenyeji.ui.theme.typography.JetBrainsFamily
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.ui.theme.typography.JetBrainsFamily
 
 @Composable
 fun RouteCard(visible: Boolean, modifier: Modifier = Modifier) {
@@ -98,7 +98,8 @@ fun RouteCard(visible: Boolean, modifier: Modifier = Modifier) {
                             1.dp,
                             colors.surfaceContainerLowest.copy(alpha = glowAlpha),
                             RoundedCornerShape(8.dp),
-                        ).padding(horizontal = 10.dp, vertical = 6.dp),
+                        )
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {

@@ -16,8 +16,8 @@ import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.feature.contribute.ContributeActions
 import com.samuelokello.mwenyeji.feature.contribute.ContributeState
 import com.samuelokello.mwenyeji.feature.contribute.ContributeStep
-import com.samuelokello.mwenyeji.ui.designsystem.components.MwenyejiStepBar
-import com.samuelokello.mwenyeji.ui.designsystem.components.button.MwenyejiButton
+import com.samuelokello.mwenyeji.presentation.designsystem.components.MwenyejiStepBar
+import com.samuelokello.mwenyeji.presentation.designsystem.components.button.MwenyejiButton
 
 @Composable
 fun StepScaffold(

@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.samuelokello.mwenyeji.data.helpers.DataResult
 import com.samuelokello.mwenyeji.data.helpers.toUserMessage
 import com.samuelokello.mwenyeji.data.models.Route
-import com.samuelokello.mwenyeji.data.models.TimeOfDay
 import com.samuelokello.mwenyeji.data.repository.RoutesRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,7 +45,7 @@ class AllRoutesViewModel(
     fun loadRoutes() {
         viewModelScope.launch {
             routeRepository
-                .observeRoutes(TimeOfDay.ANYTIME) // all routes, no time filter
+                .observeRoutes() // all routes, no time filter
                 .onStart {
                     _state.update { it.copy(isLoading = true, error = null) }
                 }.catch { e ->

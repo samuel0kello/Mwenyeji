@@ -40,9 +40,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.R
-import com.samuelokello.mwenyeji.ui.designsystem.components.button.MwenyejiButton
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiAppTheme
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.designsystem.components.button.MwenyejiButton
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiAppTheme
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 @Composable
 fun SignInPromptSheet(
@@ -94,10 +94,14 @@ private fun Scrim(visible: Boolean, onDismiss: () -> Unit, dismissEnabled: Boole
 
 @Composable
 private fun SheetContent(isLoading: Boolean, onGoogleSignIn: () -> Unit, onDismiss: () -> Unit) {
-    val colors = MwenyejiTheme.colorScheme
-    val typography = MwenyejiTheme.typography
-    val spacing = MwenyejiTheme.spacing
-    val cornerRadius = MwenyejiTheme.cornerRadius
+    val colors =
+        MwenyejiTheme.colorScheme
+    val typography =
+        MwenyejiTheme.typography
+    val spacing =
+        MwenyejiTheme.spacing
+    val cornerRadius =
+        MwenyejiTheme.cornerRadius
 
     Column(
         modifier =
@@ -108,7 +112,8 @@ private fun SheetContent(isLoading: Boolean, onGoogleSignIn: () -> Unit, onDismi
                         topStart = cornerRadius.large,
                         topEnd = cornerRadius.large,
                     ),
-                ).background(colors.surface)
+                )
+                .background(colors.surface)
                 .padding(
                     horizontal = spacing.large,
                     vertical = spacing.extraLarge,
@@ -162,8 +167,10 @@ private fun SheetContent(isLoading: Boolean, onGoogleSignIn: () -> Unit, onDismi
 
 @Composable
 private fun SignInButton(isLoading: Boolean, onClick: () -> Unit) {
-    val colors = MwenyejiTheme.colorScheme
-    val sizes = MwenyejiTheme.sizes
+    val colors =
+        MwenyejiTheme.colorScheme
+    val sizes =
+        MwenyejiTheme.sizes
 
     Box(
         modifier = Modifier.fillMaxWidth(),
@@ -187,8 +194,10 @@ private fun SignInButton(isLoading: Boolean, onClick: () -> Unit) {
 
 @Composable
 private fun DragHandle() {
-    val sizes = MwenyejiTheme.sizes
-    val cornerRadius = MwenyejiTheme.cornerRadius
+    val sizes =
+        MwenyejiTheme.sizes
+    val cornerRadius =
+        MwenyejiTheme.cornerRadius
     Box(
         modifier =
             Modifier

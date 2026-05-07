@@ -10,8 +10,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.samuelokello.mwenyeji.feature.onboarding.OnboardingScreen
 import com.samuelokello.mwenyeji.navigation.navigateToMain
-import com.samuelokello.mwenyeji.ui.theme.animation.AppEasing
-import com.samuelokello.mwenyeji.ui.theme.animation.Duration
+import com.samuelokello.mwenyeji.presentation.ui.theme.animation.AppEasing
+import com.samuelokello.mwenyeji.presentation.ui.theme.animation.Duration
 import kotlinx.serialization.Serializable
 
 @Serializable

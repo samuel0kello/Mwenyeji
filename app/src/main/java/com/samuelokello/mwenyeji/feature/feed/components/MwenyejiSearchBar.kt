@@ -2,7 +2,7 @@ package com.samuelokello.mwenyeji.feature.feed.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.samuelokello.mwenyeji.ui.designsystem.components.inputFields.MwenyejiInputField
+import com.samuelokello.mwenyeji.presentation.designsystem.components.inputFields.MwenyejiInputField
 
 @Composable
 fun MwenywjiSearchBar(modifier: Modifier = Modifier) {

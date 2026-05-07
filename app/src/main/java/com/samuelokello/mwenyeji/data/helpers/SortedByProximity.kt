@@ -1,4 +1,3 @@
-// feature/feed/FeedSorting.kt
 package com.samuelokello.mwenyeji.data.helpers
 
 import com.samuelokello.mwenyeji.data.models.Route

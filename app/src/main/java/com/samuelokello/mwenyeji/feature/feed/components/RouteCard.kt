@@ -27,9 +27,9 @@ import com.samuelokello.mwenyeji.data.models.RouteConfidence
 import com.samuelokello.mwenyeji.data.models.RouteStep
 import com.samuelokello.mwenyeji.data.models.RouteTag
 import com.samuelokello.mwenyeji.data.models.TimeOfDay
-import com.samuelokello.mwenyeji.ui.designsystem.components.card.MwenyejiCard
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiAppTheme
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.designsystem.components.card.MwenyejiCard
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiAppTheme
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 /**
  * @param route    The route domain model to display.
@@ -209,7 +209,8 @@ internal fun RouteTagChip(label: String, modifier: Modifier = Modifier, isPrimar
                     } else {
                         colors.surfaceContainerHigh
                     },
-                ).padding(horizontal = 10.dp, vertical = 4.dp),
+                )
+                .padding(horizontal = 10.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -272,7 +273,7 @@ private fun RouteCardPreview() {
                 ),
             onClick = {},
             modifier =
-                androidx.compose.ui.Modifier
+                Modifier
                     .padding(16.dp),
         )
     }

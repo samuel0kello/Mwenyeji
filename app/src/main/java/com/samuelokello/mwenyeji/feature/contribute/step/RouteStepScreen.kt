@@ -47,8 +47,8 @@ import com.samuelokello.mwenyeji.data.models.SearchResult
 import com.samuelokello.mwenyeji.feature.contribute.ContributeActions
 import com.samuelokello.mwenyeji.feature.contribute.ContributeState
 import com.samuelokello.mwenyeji.feature.contribute.components.RouteMapPreview
-import com.samuelokello.mwenyeji.ui.designsystem.components.inputFields.MwenyejiInputField
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.designsystem.components.inputFields.MwenyejiInputField
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 @OptIn(MapboxExperimental::class)
 @Composable
@@ -265,7 +265,7 @@ fun FromMapPreview(
 ) {
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
-    val context = LocalContext.current
+    LocalContext.current
 
     val point = Point.fromLngLat(lng, lat)
 

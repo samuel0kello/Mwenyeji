@@ -20,8 +20,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
-import com.samuelokello.mwenyeji.ui.theme.color.AppColors.GreenLight
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.GreenLight
 
 @Composable
 fun PointsToast(visible: Boolean, modifier: Modifier = Modifier) {

@@ -21,7 +21,7 @@ import com.mapbox.maps.extension.compose.annotation.generated.PolylineAnnotation
 import com.mapbox.maps.extension.compose.annotation.rememberIconImage
 import com.mapbox.maps.extension.compose.style.MapStyle
 import com.samuelokello.mwenyeji.R
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 @OptIn(MapboxExperimental::class)
 @Composable

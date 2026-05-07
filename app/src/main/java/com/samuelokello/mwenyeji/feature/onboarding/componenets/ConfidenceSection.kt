@@ -27,10 +27,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.R
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
-import com.samuelokello.mwenyeji.ui.theme.color.AppColors.DangerRed
-import com.samuelokello.mwenyeji.ui.theme.color.AppColors.TextSecondary
-import com.samuelokello.mwenyeji.ui.theme.color.AppColors.TextTertiary
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.DangerRed
+import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.TextSecondary
+import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.TextTertiary
 
 @Composable
 fun ConfidenceSection(animate: Boolean, modifier: Modifier = Modifier) {

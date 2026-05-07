@@ -22,7 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.samuelokello.mwenyeji.R
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 @Composable
 fun NotificationCard(visible: Boolean, modifier: Modifier = Modifier) {
@@ -51,11 +51,13 @@ fun NotificationCard(visible: Boolean, modifier: Modifier = Modifier) {
                         width = 1.dp,
                         color = color.border,
                         shape = RoundedCornerShape(14.dp),
-                    ).border(
+                    )
+                    .border(
                         width = 2.dp,
                         color = color.border,
                         shape = RoundedCornerShape(topStart = 14.dp, bottomStart = 14.dp),
-                    ).padding(14.dp),
+                    )
+                    .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {

@@ -9,8 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.samuelokello.mwenyeji.core.InAppUpdateManager
-import com.samuelokello.mwenyeji.ui.designsystem.components.snackbar.SnackBarManager
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiAppTheme
+import com.samuelokello.mwenyeji.presentation.designsystem.components.snackbar.SnackBarManager
 import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
@@ -43,7 +42,7 @@ class MainActivity : ComponentActivity() {
             }
 
         setContent {
-            MwenyejiAppTheme {
+            _root_ide_package_.com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiAppTheme {
                 App(snackbarManager = snackbarManager)
             }
         }

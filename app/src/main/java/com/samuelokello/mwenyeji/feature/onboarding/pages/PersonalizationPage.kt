@@ -37,7 +37,7 @@ import com.samuelokello.mwenyeji.data.models.TimeOfDay
 import com.samuelokello.mwenyeji.feature.onboarding.animation.OnboardingPage
 import com.samuelokello.mwenyeji.feature.onboarding.animation.RememberTimelineRunner
 import com.samuelokello.mwenyeji.feature.onboarding.animation.timeline
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 enum class UserType(
     val label: String,

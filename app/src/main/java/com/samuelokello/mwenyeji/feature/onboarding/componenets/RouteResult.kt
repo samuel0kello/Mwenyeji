@@ -27,10 +27,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
-import com.samuelokello.mwenyeji.ui.theme.color.AppColors.TextPrimary
-import com.samuelokello.mwenyeji.ui.theme.color.AppColors.TextSecondary
-import com.samuelokello.mwenyeji.ui.theme.typography.JetBrainsFamily
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.TextPrimary
+import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.TextSecondary
+import com.samuelokello.mwenyeji.presentation.ui.theme.typography.JetBrainsFamily
 
 data class RouteResult(
     val from: String,
@@ -70,7 +70,8 @@ fun ResultRouteCard(result: RouteResult, visible: Boolean, modifier: Modifier = 
                         width = 1.dp,
                         color = if (result.isActive) colors.primary else colors.background,
                         shape = RoundedCornerShape(16.dp),
-                    ).padding(16.dp),
+                    )
+                    .padding(16.dp),
         ) {
             // Top row
             Row(

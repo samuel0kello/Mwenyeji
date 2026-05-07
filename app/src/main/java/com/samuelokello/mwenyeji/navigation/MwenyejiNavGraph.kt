@@ -20,9 +20,9 @@ import com.samuelokello.mwenyeji.feature.feed.navigation.FeedsGraph
 import com.samuelokello.mwenyeji.feature.feed.navigation.feedsNavGraph
 import com.samuelokello.mwenyeji.feature.onboarding.navigation.OnBoarding
 import com.samuelokello.mwenyeji.feature.onboarding.navigation.onBoarding
-import com.samuelokello.mwenyeji.ui.theme.animation.AppEasing
-import com.samuelokello.mwenyeji.ui.theme.animation.Duration
-import com.samuelokello.mwenyeji.ui.theme.animation.appTween
+import com.samuelokello.mwenyeji.presentation.ui.theme.animation.AppEasing
+import com.samuelokello.mwenyeji.presentation.ui.theme.animation.Duration
+import com.samuelokello.mwenyeji.presentation.ui.theme.animation.appTween
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject

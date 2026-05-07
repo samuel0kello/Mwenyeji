@@ -18,9 +18,9 @@ import com.samuelokello.mwenyeji.feature.onboarding.animation.timeline
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.ResultRouteCard
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.RouteResult
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.SearchCard
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
-import com.samuelokello.mwenyeji.ui.theme.color.AppColors.AmberWarm
-import com.samuelokello.mwenyeji.ui.theme.color.AppColors.GreenLight
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.AmberWarm
+import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.GreenLight
 
 sealed interface FindRouteEvent {
     data object ShowSearch : FindRouteEvent

@@ -16,8 +16,8 @@ import com.samuelokello.mwenyeji.data.models.RouteTag
 import com.samuelokello.mwenyeji.feature.contribute.ContributeActions
 import com.samuelokello.mwenyeji.feature.contribute.ContributeState
 import com.samuelokello.mwenyeji.feature.feed.TimeOfDayChip
-import com.samuelokello.mwenyeji.ui.designsystem.components.inputFields.MwenyejiInputField
-import com.samuelokello.mwenyeji.ui.theme.MwenyejiTheme
+import com.samuelokello.mwenyeji.presentation.designsystem.components.inputFields.MwenyejiInputField
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
