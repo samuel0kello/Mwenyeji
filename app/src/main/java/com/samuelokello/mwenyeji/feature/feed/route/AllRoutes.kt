@@ -18,9 +18,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.feature.feed.components.RouteCard
 import com.samuelokello.mwenyeji.presentation.designsystem.components.MwenyejiTopBar
 import com.samuelokello.mwenyeji.presentation.designsystem.components.pulltorefresh.MwenyejiPullToRefresh
@@ -81,13 +83,16 @@ fun AllRoutesContent(
     Scaffold(
         modifier = modifier,
         topBar = {
-            MwenyejiTopBar(title = "All routes", onNavigateBack = onNavigateBack)
+            MwenyejiTopBar(
+                title = stringResource(R.string.all_routes),
+                onNavigateBack = onNavigateBack,
+            )
         },
     ) { paddingValues ->
         MwenyejiPullToRefresh(
             isRefreshing = isRefreshing,
             onRefresh = onRefresh,
-            confirmationText = "Updated • ${state.routes.size} routes",
+            confirmationText = stringResource(R.string.updated_routes_format, state.routes.size),
             modifier = Modifier.fillMaxSize().padding(paddingValues),
         ) {
             val cardRotation = 5f * pullProgress.coerceAtMost(1f)

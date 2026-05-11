@@ -1,5 +1,6 @@
 package com.samuelokello.mwenyeji.feature.feed.components
 
+import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,9 +18,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.data.models.BoardableRoute
 import com.samuelokello.mwenyeji.data.models.Route
 import com.samuelokello.mwenyeji.data.models.RouteConfidence
@@ -34,6 +38,7 @@ fun RouteCard(boardableRoute: BoardableRoute, onClick: () -> Unit, modifier: Mod
     val route = boardableRoute.route
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
+    val context = LocalContext.current
 
     MwenyejiCard(
         modifier = modifier.fillMaxWidth(),
@@ -86,7 +91,7 @@ fun RouteCard(boardableRoute: BoardableRoute, onClick: () -> Unit, modifier: Mod
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = boardableRoute.walkingLabel,
+                    text = boardableRoute.getWalkingLabel(context),
                     style = typography.bodySmall,
                     color = colors.primary,
                 )
@@ -97,7 +102,7 @@ fun RouteCard(boardableRoute: BoardableRoute, onClick: () -> Unit, modifier: Mod
                         color = colors.outlineVariant,
                     )
                     Text(
-                        text = "${boardableRoute.stopsRemaining} stops",
+                        text = stringResource(R.string.stops_remaining_format, boardableRoute.stopsRemaining),
                         style = typography.bodySmall,
                         color = colors.onSurfaceVariant,
                     )
@@ -109,7 +114,7 @@ fun RouteCard(boardableRoute: BoardableRoute, onClick: () -> Unit, modifier: Mod
                         color = colors.outlineVariant,
                     )
                     Text(
-                        text = "every ${headway}min peak",
+                        text = stringResource(R.string.peak_headway_format, headway),
                         style = typography.bodySmall,
                         color = colors.onSurfaceVariant,
                     )
@@ -124,7 +129,7 @@ fun RouteCard(boardableRoute: BoardableRoute, onClick: () -> Unit, modifier: Mod
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = route.formattedGuideCount,
+                    text = route.getFormattedGuideCount(context),
                     style = typography.labelSmall,
                     color = if (route.hasGuides) colors.primary else colors.onSurfaceVariant,
                 )
@@ -134,8 +139,9 @@ fun RouteCard(boardableRoute: BoardableRoute, onClick: () -> Unit, modifier: Mod
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         Text(text = "✓", style = typography.labelSmall, color = colors.success)
+                        val timeStr = route.lastConfirmedAt?.toRelativeTime(context) ?: stringResource(R.string.recently)
                         Text(
-                            text = "Confirmed ${route.lastConfirmedAt?.toRelativeTime() ?: "recently"}",
+                            text = stringResource(R.string.confirmed_at_format, timeStr),
                             style = typography.labelSmall,
                             color = colors.onSurfaceVariant,
                         )
@@ -184,16 +190,32 @@ internal fun RouteTagChip(label: String, modifier: Modifier = Modifier, isPrimar
     }
 }
 
-private fun Long.toRelativeTime(): String {
+private fun Long.toRelativeTime(context: Context): String {
     val diff = System.currentTimeMillis() - this
     val minutes = diff / 60_000
     val hours = diff / 3_600_000
     val days = diff / 86_400_000
     return when {
-        minutes < 1 -> "just now"
-        minutes < 60 -> "${minutes}m ago"
-        hours < 24 -> "${hours}h ago"
-        else -> "${days}d ago"
+        minutes < 1 -> context.getString(R.string.just_now)
+        minutes < 60 -> context.getString(R.string.minutes_ago_short, minutes.toInt())
+        hours < 24 -> context.getString(R.string.hours_ago_short, hours.toInt())
+        else -> context.getString(R.string.days_ago_short, days.toInt())
+    }
+}
+
+private fun Route.getFormattedGuideCount(context: Context): String {
+    return when (guideCount) {
+        0 -> context.getString(R.string.no_guides_yet)
+        1 -> context.getString(R.string.one_guide)
+        else -> context.getString(R.string.guides_count_format, guideCount)
+    }
+}
+
+private fun BoardableRoute.getWalkingLabel(context: Context): String {
+    return when {
+        walkingDistanceMetres < 50 -> context.getString(R.string.right_here)
+        walkingDistanceMetres < 200 -> context.getString(R.string.walking_distance_m_format, walkingDistanceMetres)
+        else -> context.getString(R.string.walking_distance_km_format, (walkingDistanceKm * 10).toInt() / 10.0)
     }
 }
 

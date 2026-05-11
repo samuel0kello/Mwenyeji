@@ -55,9 +55,9 @@
     <string name="know_a_route_add_it_here">Know a route? Add it here</string>
     <string name="retry">Retry</string>
     <string name="real_routes_fares"><![CDATA[Real routes & fares]]></string>
-
     <string name="all_routes">All routes</string>
     <string name="updated_routes_format">Updated • %1$d routes</string>
+    <string name="failed_to_load_routes">Failed to load routes</string>
     <string name="routes_near_you">Routes near you</string>
     <string name="see_all">See all</string>
     <string name="finding_stops_near_you">Finding stops near you…</string>
@@ -65,50 +65,18 @@
     <string name="no_routes_found">No routes found.\nAllow location access for nearby routes.</string>
     <string name="press_back_again_to_exit">Press back again to exit</string>
     <string name="dismiss">Dismiss</string>
-
-    <!-- Route Card Strings -->
-    <string name="stops_remaining_format">%1$d stops</string>
-    <string name="peak_headway_format">every %1$dmin peak</string>
-    <string name="confirmed_at_format">Confirmed %1$s</string>
+    <string name="confirmed_format">Confirmed %1$s</string>
     <string name="recently">recently</string>
-    <string name="just_now">just now</string>
-    <string name="minutes_ago_short">%1$dm ago</string>
-    <string name="hours_ago_short">%1$dh ago</string>
-    <string name="days_ago_short">%1$dd ago</string>
-    <string name="right_here">Right here</string>
-    <string name="walking_distance_m_format">%1$dm walk</string>
-    <string name="walking_distance_km_format">%1$.1fkm walk</string>
+    <string name="stops_format">%1$d stops</string>
+    <string name="every_min_peak_format">every %1$dmin peak</string>
     <string name="no_guides_yet">No guides yet</string>
     <string name="one_guide">1 guide</string>
     <string name="guides_count_format">%1$d guides</string>
     <string name="stages_format">%1$d stages</string>
     <string name="stages_and_frequency_format">%1$d stages · every %2$dmin peak</string>
     <string name="via_format">via %1$s</string>
-
-    <!-- Time of Day -->
-    <string name="time_morning_rush">Morning rush</string>
-    <string name="time_midday">Midday</string>
-    <string name="time_evening_rush">Evening rush</string>
-    <string name="time_late_night">Late night</string>
-    <string name="time_anytime">Anytime</string>
-
-    <!-- Route Tags -->
-    <string name="tag_cheap">Cheap</string>
-    <string name="tag_fast">Fast</string>
-    <string name="tag_less_crowded">Less crowded</string>
-    <string name="tag_avoid_cbd">Avoid CBD</string>
-    <string name="tag_reliable">Reliable</string>
-
-    <!-- Domain Error Messages -->
-    <string name="error_no_connection">No internet connection. Check your network and try again.</string>
-    <string name="error_no_google_account">No Google account found on this device.</string>
-    <string name="error_service_unavailable">Service is temporarily unavailable. Try again in a moment.</string>
-    <string name="error_not_authorized">You don\'t have access to do that.</string>
-    <string name="error_session_expired">Your session expired. Please sign in again.</string>
-    <string name="error_invalid_credentials">Invalid credentials.</string>
-    <string name="error_user_not_found">No account found with that email.</string>
-    <string name="error_email_already_in_use">That email is already registered.</string>
-    <string name="error_weak_password">Password is too weak.</string>
-    <string name="error_account_disabled">This account has been disabled.</string>
-    <string name="error_unknown">Something went wrong. Please try again.</string>
+    <string name="just_now">just now</string>
+    <string name="minutes_ago_short">%1$dm ago</string>
+    <string name="hours_ago_short">%1$dh ago</string>
+    <string name="days_ago_short">%1$dd ago</string>
 </resources>

@@ -112,16 +112,18 @@ fun FeedScreen(
             viewModel.onAction(FeedAction.LocationPermissionResult(granted))
         }
 
+    val backExitMessage = stringResource(R.string.press_back_again_to_exit)
     BackHandler {
         val now = System.currentTimeMillis()
         if (now - backPressedTime < 2000) {
             (context as? Activity)?.finish()
         } else {
-            Toast.makeText(context, "Press back again to exit", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, backExitMessage, Toast.LENGTH_SHORT).show()
             backPressedTime = now
         }
     }
 
+    val dismissLabel = stringResource(R.string.dismiss)
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
             when (effect) {
@@ -136,7 +138,7 @@ fun FeedScreen(
                 is FeedEffect.ShowError -> {
                     snackBarManager.showError(
                         message = effect.message,
-                        actionLabel = "Dismiss",
+                        actionLabel = dismissLabel,
                         onAction = { snackBarManager.dismiss() },
                     )
                 }
@@ -280,7 +282,7 @@ internal fun FeedScreenContent(
                 MwenyejiPullToRefresh(
                     isRefreshing = isRefreshing,
                     onRefresh = onRefresh,
-                    confirmationText = "Updated • ${state.filteredRoutes.size} routes",
+                    confirmationText = stringResource(R.string.updated_routes_format, state.filteredRoutes.size),
                     modifier = Modifier.fillMaxSize().padding(paddingValues),
                 ) {
                     val cardRotation = 5f * pullProgress.coerceAtMost(1f)
@@ -320,9 +322,9 @@ internal fun FeedScreenContent(
                             ) {
                                 val headerText =
                                     if (state.userLat != null) {
-                                        "Routes near you"
+                                        stringResource(R.string.routes_near_you)
                                     } else {
-                                        "All routes"
+                                        stringResource(R.string.all_routes)
                                     }
                                 Text(
                                     text = headerText,
@@ -335,7 +337,7 @@ internal fun FeedScreenContent(
                                     contentPadding = PaddingValues(0.dp),
                                 ) {
                                     Text(
-                                        text = "See all",
+                                        text = stringResource(R.string.see_all),
                                         style = typography.labelMedium,
                                         color = colors.primary,
                                     )
@@ -347,7 +349,7 @@ internal fun FeedScreenContent(
                         if (state.isRefiningProximity) {
                             item(key = "refining") {
                                 Text(
-                                    text = "Finding stops near you…",
+                                    text = stringResource(R.string.finding_stops_near_you),
                                     style = typography.labelSmall,
                                     color = colors.onSurfaceVariant,
                                     modifier =
@@ -368,9 +370,9 @@ internal fun FeedScreenContent(
                                     Text(
                                         text =
                                             if (state.userLat != null) {
-                                                "No routes found near you.\nTry searching by stage or route number."
+                                                stringResource(R.string.no_routes_found_near_you)
                                             } else {
-                                                "No routes found.\nAllow location access for nearby routes."
+                                                stringResource(R.string.no_routes_found)
                                             },
                                         style = typography.bodyMedium,
                                         color = colors.onSurfaceVariant,
