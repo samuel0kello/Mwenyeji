@@ -29,19 +29,26 @@ import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun AllRoutes(viewmodel: AllRoutesViewModel = koinViewModel(), onNavigateToRouteDetail: (id: String) -> Unit, onNavigateBack: () -> Unit) {
-    val state by viewmodel.state.collectAsStateWithLifecycle()
+fun AllRoutes(
+    onNavigateToRouteDetail: (id: String) -> Unit,
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: AllRoutesViewModel = koinViewModel(),
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
     var isRefreshing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        viewmodel.effects.collect { effects ->
-            when (effects) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
                 is AllRoutesEffects.NavigateToRouteDetail -> {
-                    onNavigateToRouteDetail(effects.route.id)
+                    onNavigateToRouteDetail(effect.route.id)
                 }
 
-                is AllRoutesEffects.ShowError -> {}
+                is AllRoutesEffects.ShowError -> {
+                    Unit
+                }
             }
         }
     }
@@ -52,12 +59,13 @@ fun AllRoutes(viewmodel: AllRoutesViewModel = koinViewModel(), onNavigateToRoute
         onRefresh = {
             scope.launch {
                 isRefreshing = true
-                delay(5_000L) // TODO: replace with viewModel.refresh()
+                delay(5_000L)
                 isRefreshing = false
             }
         },
-        onAction = viewmodel::onAction,
+        onAction = viewModel::onAction,
         onNavigateBack = onNavigateBack,
+        modifier = modifier,
     )
 }
 
@@ -71,34 +79,29 @@ fun AllRoutesContent(
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
+        modifier = modifier,
         topBar = {
-            MwenyejiTopBar(
-                title = "",
-                onNavigateBack = onNavigateBack,
-            )
+            MwenyejiTopBar(title = "All routes", onNavigateBack = onNavigateBack)
         },
     ) { paddingValues ->
         MwenyejiPullToRefresh(
             isRefreshing = isRefreshing,
             onRefresh = onRefresh,
             confirmationText = "Updated • ${state.routes.size} routes",
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+            modifier = Modifier.fillMaxSize().padding(paddingValues),
         ) {
             val cardRotation = 5f * pullProgress.coerceAtMost(1f)
             val effectiveRotation = if (isRefreshing) 5f else cardRotation
 
             LazyColumn {
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
+                item { Spacer(modifier = Modifier.height(16.dp)) }
                 indicatorItem()
+
+                // routes is List<BoardableRoute> — key must be unique per (routeId, direction)
                 itemsIndexed(
                     items = state.routes,
-                    key = { _, route -> route.id },
-                ) { index, route ->
+                    key = { _, br -> "${br.route.id}_${br.tripDirection}" },
+                ) { index, boardableRoute ->
                     Box(
                         modifier =
                             Modifier
@@ -106,13 +109,12 @@ fun AllRoutesContent(
                                 .padding(vertical = 4.dp)
                                 .zIndex((state.routes.size - index).toFloat())
                                 .graphicsLayer {
-                                    rotationZ =
-                                        effectiveRotation * if (index % 2 == 0) 1f else -1f
+                                    rotationZ = effectiveRotation * if (index % 2 == 0) 1f else -1f
                                 },
                     ) {
                         RouteCard(
-                            route = route,
-                            onClick = { onAction(AllRoutesActions.RouteClicked(route)) },
+                            boardableRoute = boardableRoute,
+                            onClick = { onAction(AllRoutesActions.RouteClicked(boardableRoute)) },
                             modifier = Modifier.padding(horizontal = 16.dp),
                         )
                     }

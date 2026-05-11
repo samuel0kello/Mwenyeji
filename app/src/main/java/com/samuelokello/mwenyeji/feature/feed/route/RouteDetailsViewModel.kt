@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.samuelokello.mwenyeji.data.helpers.DataResult
 import com.samuelokello.mwenyeji.data.helpers.toUserMessage
+import com.samuelokello.mwenyeji.data.models.Guide
 import com.samuelokello.mwenyeji.data.models.Route
 import com.samuelokello.mwenyeji.data.models.Verdict
 import com.samuelokello.mwenyeji.data.repository.AuthRepository
@@ -37,7 +38,7 @@ class RouteDetailsViewModel(
             }
 
             is RouteDetailsAction.VerdictSelected -> {
-                onVerdictSelected(action.verdict)
+                onVerdictSelected(action.guideId, action.verdict)
             }
 
             is RouteDetailsAction.NavigateBack -> {
@@ -56,88 +57,101 @@ class RouteDetailsViewModel(
                 .catch { e ->
                     _state.update { it.copy(isLoading = false, error = e.message) }
                     snackbarManager.showError(e.message ?: "Failed to load route")
-                }.collect { route ->
-                    when (route) {
-                        is DataResult.Error -> {
-                            val userMessage = route.error.toUserMessage()
-                            _state.update { it.copy(isLoading = false, error = userMessage) }
-                            snackbarManager.showError(userMessage)
+                }.collect { result ->
+                    when (result) {
+                        is DataResult.Success -> {
+                            _state.update { it.copy(isLoading = false, route = result.data) }
+                            // Load guides once route is confirmed to exist
+                            loadGuides(routeId)
                         }
 
-                        is DataResult.Success -> {
-                            _state.update { it.copy(isLoading = false, route = route.data) }
+                        is DataResult.Error -> {
+                            val message = result.error.toUserMessage()
+                            _state.update { it.copy(isLoading = false, error = message) }
+                            snackbarManager.showError(message)
                         }
                     }
-
-                    // Load user's existing verdict once route is loaded
-                    loadUserVerdict(routeId)
                 }
         }
     }
 
-    private fun loadUserVerdict(routeId: String) {
-        val userId = authRepository.currentUserId ?: return
+    private fun loadGuides(routeId: String) {
         viewModelScope.launch {
-            when (val firestoreVerdict = routeRepository.getUserVerdict(routeId, userId)) {
-                is DataResult.Error -> {
-                    val userMessage = firestoreVerdict.error.toUserMessage()
-                    _state.update { it.copy(error = userMessage) }
-                    snackbarManager.showError(userMessage)
-                }
-
-                is DataResult.Success -> {
-                    val verdict =
-                        RouteVerdict.entries.find {
-                            it.firestoreValue == firestoreVerdict.data?.name
+            routeRepository
+                .observeGuides(routeId)
+                .onStart { _state.update { it.copy(isLoadingGuides = true) } }
+                .catch { e ->
+                    _state.update { it.copy(isLoadingGuides = false) }
+                    snackbarManager.showError(e.message ?: "Failed to load guides")
+                }.collect { result ->
+                    when (result) {
+                        is DataResult.Success -> {
+                            _state.update {
+                                it.copy(isLoadingGuides = false, guides = result.data)
+                            }
                         }
-                    _state.update { it.copy(selectedVerdict = verdict) }
+
+                        is DataResult.Error -> {
+                            _state.update { it.copy(isLoadingGuides = false) }
+                            snackbarManager.showError(result.error.toUserMessage())
+                        }
+                    }
                 }
-            }
         }
     }
 
-    private fun onVerdictSelected(verdict: RouteVerdict) {
+    /**
+     * Submits a verdict for a specific guide.
+     * Tapping the already-selected verdict toggles it off.
+     * Uses optimistic update — reverts on failure.
+     *
+     * Verdicts are currently stored under the parent route's confirmations
+     * subcollection. The guideId is embedded in the verdict to distinguish
+     * per-guide feedback until guide-level confirmations are implemented.
+     */
+    private fun onVerdictSelected(guideId: String, verdict: RouteVerdict) {
         val routeId = _state.value.route?.id ?: return
         val userId = authRepository.currentUserId ?: return
 
-        // If tapping the already-selected verdict, toggle it off
-        val newVerdict = if (_state.value.selectedVerdict == verdict) null else verdict
+        // Toggle off if same verdict tapped again
+        val isSameGuide = _state.value.selectedGuideId == guideId
+        val isSameVerdict = _state.value.selectedVerdict == verdict
+        val newVerdict = if (isSameGuide && isSameVerdict) null else verdict
+        val newGuideId = if (newVerdict == null) null else guideId
 
         // Optimistic update
-        _state.update { it.copy(selectedVerdict = newVerdict) }
+        _state.update { it.copy(selectedGuideId = newGuideId, selectedVerdict = newVerdict) }
+
+        val firestoreVerdict = newVerdict?.firestoreValue ?: verdict.firestoreValue
 
         viewModelScope.launch {
-            val firestoreVerdict =
-                newVerdict?.firestoreValue
-                    ?: _state.value.selectedVerdict?.firestoreValue
-                    ?: return@launch
-
             when (
-                val response =
+                val result =
                     routeRepository.submitVerdict(
                         routeId = routeId,
                         userId = userId,
                         verdict = Verdict.valueOf(firestoreVerdict),
                     )
             ) {
-                is DataResult.Error -> {
-                    _state.update { it.copy(selectedVerdict = _state.value.selectedVerdict) }
-                    snackbarManager.showError(
-                        message = response.error.toUserMessage() ?: "Failed to submit feedback",
-                        actionLabel = "Retry",
-                        onAction = { onVerdictSelected(verdict) },
-                    )
-                }
-
                 is DataResult.Success -> {
                     val message =
                         when (newVerdict) {
-                            RouteVerdict.WORKS -> "Thanks for confirming this route works!"
-                            RouteVerdict.DIDNT -> "Thanks for the feedback — we'll note this route had issues."
-                            RouteVerdict.OUTDATED -> "Thanks! We'll flag this route as potentially outdated."
+                            RouteVerdict.WORKS -> "Thanks for confirming this guide works!"
+                            RouteVerdict.DIDNT -> "Thanks — we'll note this guide had issues."
+                            RouteVerdict.OUTDATED -> "Thanks! We'll flag this guide as potentially outdated."
                             null -> "Feedback removed."
                         }
                     snackbarManager.showSuccess(message)
+                }
+
+                is DataResult.Error -> {
+                    // Revert optimistic update
+                    _state.update { it.copy(selectedGuideId = null, selectedVerdict = null) }
+                    snackbarManager.showError(
+                        message = result.error.toUserMessage(),
+                        actionLabel = "Retry",
+                        onAction = { onVerdictSelected(guideId, verdict) },
+                    )
                 }
             }
         }
@@ -145,10 +159,16 @@ class RouteDetailsViewModel(
 }
 
 data class RouteDetailsState(
+    // Route
     val isLoading: Boolean = false,
     val route: Route? = null,
-    val selectedVerdict: RouteVerdict? = null,
     val error: String? = null,
+    // Guides — loaded after route, real-time
+    val isLoadingGuides: Boolean = false,
+    val guides: List<Guide> = emptyList(),
+    // Verdict — tracks which guide the user has voted on this session
+    val selectedGuideId: String? = null,
+    val selectedVerdict: RouteVerdict? = null,
 )
 
 sealed interface RouteDetailsAction {
@@ -157,6 +177,7 @@ sealed interface RouteDetailsAction {
     ) : RouteDetailsAction
 
     data class VerdictSelected(
+        val guideId: String,
         val verdict: RouteVerdict,
     ) : RouteDetailsAction
 

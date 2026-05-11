@@ -70,8 +70,7 @@ fun ResultRouteCard(result: RouteResult, visible: Boolean, modifier: Modifier = 
                         width = 1.dp,
                         color = if (result.isActive) colors.primary else colors.background,
                         shape = RoundedCornerShape(16.dp),
-                    )
-                    .padding(16.dp),
+                    ).padding(16.dp),
         ) {
             // Top row
             Row(

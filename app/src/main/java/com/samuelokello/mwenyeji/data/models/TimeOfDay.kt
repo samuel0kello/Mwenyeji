@@ -1,7 +1,7 @@
 package com.samuelokello.mwenyeji.data.models
 
 /**
- * Time-of-day filter — Step 2 "Best time of day" chips.
+ * Time-of-day filter for guides and feed chips.
  */
 enum class TimeOfDay(
     val displayName: String,
@@ -14,7 +14,7 @@ enum class TimeOfDay(
 }
 
 /**
- * Route tags — Step 4 multi-select chips.
+ * Guide tags — contributor selects all that apply.
  */
 enum class RouteTag(
     val displayName: String,
@@ -27,7 +27,7 @@ enum class RouteTag(
 }
 
 /**
- * A single step in the "How do you do it?" instructions.
+ * A single step in a contributor's guide.
  */
 data class RouteStep(
     val order: Int,
@@ -35,8 +35,7 @@ data class RouteStep(
 )
 
 /**
- * Confidence level derived from community confirmations.
- * Drives the coloured dot on route cards.
+ * Confidence level derived from community verdicts across all guides.
  */
 enum class RouteConfidence {
     HIGH, // green  — many confirmations, no outdated flags
@@ -46,77 +45,55 @@ enum class RouteConfidence {
 }
 
 /**
- * Domain model for a Nairobi matatu route.
+ * A Nairobi matatu route from the Digital Matatus GTFS dataset.
  *
- * Two source types coexist:
+ * This model contains only official route data — GPS coordinates,
+ * stop counts, headway, route number. Community knowledge (steps,
+ * warnings, fare) lives in Guide objects attached to this route.
  *
- *   source = "community"       — contributed by a user through the contribute flow.
- *                                Has steps, warnings, fare, tags from day one.
- *                                Coordinates stored in fromLat/fromLng/toLat/toLng.
- *
- *   source = "digital_matatus" — seeded from the 2018 Digital Matatus GTFS dataset.
- *                                Has routeNumber, stopCount, headway data.
- *                                Coordinates in fromLat/fromLng (resolved from terminus1).
- *                                Community fields start empty — contributors enrich them.
+ * The feed shows BoardableRoute (this model + user's boarding context).
+ * The route detail screen shows this model + its list of Guides.
  */
 data class Route(
     val id: String = "",
-    val from: String = "",
-    val to: String = "",
-    val via: String = "",
-    val fareKsh: Double? = null,
-    // Proximity coordinates — resolved from terminus1 (GTFS) or fromLat (community)
-    val fromLat: Double? = null,
-    val fromLng: Double? = null,
-    val toLat: Double? = null,
-    val toLng: Double? = null,
-    // GTFS-only fields
     val routeNumber: String? = null,
+    val longName: String? = null, // raw GTFS long name
+    val from: String = "", // origin terminus name
+    val to: String = "", // destination terminus name
+    val via: String = "", // middle stages description
+    val terminus1Lat: Double? = null,
+    val terminus1Lng: Double? = null,
+    val terminus1Geohash: String? = null,
+    val terminus2Lat: Double? = null,
+    val terminus2Lng: Double? = null,
+    val terminus2Geohash: String? = null,
+    val firstStopId: String? = null,
+    val lastStopId: String? = null,
     val stopCount: Int = 0,
+    val outboundShapeId: String? = null,
+    val inboundShapeId: String? = null,
     val peakHeadwayMins: Int? = null,
     val offPeakHeadwayMins: Int? = null,
     val searchTerms: List<String> = emptyList(),
-    val sacco: List<String> = emptyList(),
-    val bestTimeOfDay: TimeOfDay = TimeOfDay.ANYTIME,
-    val timingReason: String = "",
-    val steps: List<RouteStep> = emptyList(),
-    val warnings: String = "",
-    val tags: Set<RouteTag> = emptySet(),
-    val contributorId: String = "",
+    // These are totals across ALL guides attached to this route.
+    val guideCount: Int = 0, // how many guides exist
     val confirmedCount: Int = 0,
     val didntWorkCount: Int = 0,
     val outdatedCount: Int = 0,
     val lastConfirmedAt: Long? = null,
     val createdAt: Long = System.currentTimeMillis(),
-    val source: String = "community",
-    val isEnriched: Boolean = false,
 ) {
-    val title: String
-        get() = if (routeNumber != null) "$routeNumber: $from → $to" else "$from → $to"
+    val hasGuides: Boolean
+        get() = guideCount > 0
 
-    val formattedFare: String?
-        get() = fareKsh?.let { "Ksh ${it.toInt()}" }
+    val formattedGuideCount: String
+        get() =
+            when (guideCount) {
+                0 -> "No guides yet"
+                1 -> "1 guide"
+                else -> "$guideCount guides"
+            }
 
-    val isConfirmed: Boolean
-        get() = confirmedCount > 0
-
-    val isGtfsSeed: Boolean
-        get() = source == "digital_matatus"
-
-    /** Community routes that have steps/warnings/fare added on top of GTFS base. */
-    val isCommunityEnriched: Boolean
-        get() = isGtfsSeed && isEnriched
-
-    val hasCoordinates: Boolean
-        get() = fromLat != null && fromLng != null
-
-    val hasSteps: Boolean
-        get() = steps.isNotEmpty()
-
-    /**
-     * Confidence level for the route card dot.
-     * GTFS-only routes (no community feedback) start as UNVERIFIED.
-     */
     val confidence: RouteConfidence
         get() =
             when {
@@ -127,17 +104,17 @@ data class Route(
             }
 
     /**
-     * Subtitle shown on route card below the title.
-     * GTFS routes show stop count and headway. Community routes show via.
+     * Subtitle for the route card — stop count and peak frequency.
+     * Shown below the route number and from → to.
      */
     val subtitle: String
         get() =
             when {
-                isGtfsSeed && stopCount > 0 && peakHeadwayMins != null -> {
+                stopCount > 0 && peakHeadwayMins != null -> {
                     "$stopCount stages · every ${peakHeadwayMins}min peak"
                 }
 
-                isGtfsSeed && stopCount > 0 -> {
+                stopCount > 0 -> {
                     "$stopCount stages"
                 }
 
@@ -148,5 +125,25 @@ data class Route(
                 else -> {
                     ""
                 }
+            }
+
+    /**
+     * Convenience for ProximityEngine — both termini as coordinate pairs.
+     * Returns null for each terminus if coordinates are missing.
+     */
+    val terminus1: Pair<Double, Double>?
+        get() =
+            if (terminus1Lat != null && terminus1Lng != null) {
+                terminus1Lat to terminus1Lng
+            } else {
+                null
+            }
+
+    val terminus2: Pair<Double, Double>?
+        get() =
+            if (terminus2Lat != null && terminus2Lng != null) {
+                terminus2Lat to terminus2Lng
+            } else {
+                null
             }
 }

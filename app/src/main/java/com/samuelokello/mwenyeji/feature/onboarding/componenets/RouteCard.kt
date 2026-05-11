@@ -98,8 +98,7 @@ fun RouteCard(visible: Boolean, modifier: Modifier = Modifier) {
                             1.dp,
                             colors.surfaceContainerLowest.copy(alpha = glowAlpha),
                             RoundedCornerShape(8.dp),
-                        )
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                        ).padding(horizontal = 10.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {

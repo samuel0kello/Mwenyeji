@@ -91,8 +91,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = koinViewModel(), onFinish:
                     .padding(
                         horizontal = MwenyejiTheme.spacing.small,
                         vertical = MwenyejiTheme.spacing.small,
-                    )
-                    .align(Alignment.BottomEnd),
+                    ).align(Alignment.BottomEnd),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             ProgressDots(

@@ -92,17 +92,15 @@ import org.koin.compose.viewmodel.koinViewModel
 fun FeedScreen(
     onNavigateToRouteDetail: (String) -> Unit,
     onNavigateToSeeAll: () -> Unit,
+    onNavigateToContribute: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: FeedViewModel = koinViewModel(),
-    onNavigateToContribute: () -> Unit,
     snackBarManager: SnackBarManager = koinInject(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var backPressedTime by remember { mutableLongStateOf(0L) }
-
     val locationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
-
     var isRefreshing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
@@ -115,17 +113,15 @@ fun FeedScreen(
         }
 
     BackHandler {
-        val currentTime = System.currentTimeMillis()
-
-        if (currentTime - backPressedTime < 2000) {
+        val now = System.currentTimeMillis()
+        if (now - backPressedTime < 2000) {
             (context as? Activity)?.finish()
         } else {
             Toast.makeText(context, "Press back again to exit", Toast.LENGTH_SHORT).show()
-            backPressedTime = currentTime
+            backPressedTime = now
         }
     }
 
-    // Collect one-time effects
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
             when (effect) {
@@ -151,10 +147,7 @@ fun FeedScreen(
                         .addOnSuccessListener { location ->
                             location?.let {
                                 viewModel.onAction(
-                                    FeedAction.LocationReceived(
-                                        it.latitude,
-                                        it.longitude,
-                                    ),
+                                    FeedAction.LocationReceived(it.latitude, it.longitude),
                                 )
                             }
                         }
@@ -168,10 +161,7 @@ fun FeedScreen(
                         )
                     val allGranted =
                         permissions.all {
-                            ContextCompat.checkSelfPermission(
-                                context,
-                                it,
-                            ) == PackageManager.PERMISSION_GRANTED
+                            ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
                         }
                     if (allGranted) {
                         viewModel.onAction(FeedAction.LocationPermissionResult(true))
@@ -196,7 +186,7 @@ fun FeedScreen(
         onRefresh = {
             scope.launch {
                 isRefreshing = true
-                delay(5_000L) // TODO: replace with viewModel.refresh()
+                delay(5_000L)
                 isRefreshing = false
             }
         },
@@ -250,9 +240,7 @@ internal fun FeedScreenContent(
                     emoji = "",
                     onDismiss = { onAction(FeedAction.DismissFabTooltip) },
                 )
-
                 Spacer(modifier = Modifier.height(8.dp))
-
                 FloatingActionButton(
                     onClick = onNavigateToContribute,
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -262,35 +250,28 @@ internal fun FeedScreenContent(
             }
         },
     ) { paddingValues ->
-
         when {
             state.isLoading -> {
                 Box(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
+                    modifier = Modifier.fillMaxSize().padding(paddingValues),
                     contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator(color = colors.primary)
-                }
+                ) { CircularProgressIndicator(color = colors.primary) }
             }
 
             state.error != null -> {
                 Box(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
+                    modifier = Modifier.fillMaxSize().padding(paddingValues),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        text = state.error.toString(),
-                        style = typography.bodyMedium,
-                        color = colors.error,
-                    )
-                    TextButton(onClick = { onAction(FeedAction.RetryClicked) }) {
-                        Text(stringResource(R.string.retry), color = colors.primary)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = state.error.toString(),
+                            style = typography.bodyMedium,
+                            color = colors.error,
+                        )
+                        TextButton(onClick = { onAction(FeedAction.RetryClicked) }) {
+                            Text(stringResource(R.string.retry), color = colors.primary)
+                        }
                     }
                 }
             }
@@ -300,46 +281,32 @@ internal fun FeedScreenContent(
                     isRefreshing = isRefreshing,
                     onRefresh = onRefresh,
                     confirmationText = "Updated • ${state.filteredRoutes.size} routes",
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
+                    modifier = Modifier.fillMaxSize().padding(paddingValues),
                 ) {
                     val cardRotation = 5f * pullProgress.coerceAtMost(1f)
                     val effectiveRotation = if (isRefreshing) 5f else cardRotation
 
                     LazyColumn(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .padding(),
+                        modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         contentPadding = PaddingValues(bottom = 24.dp),
                     ) {
-                        // Time of day filter chips
+                        // Time of day chips
                         item(key = "time_filters") {
                             LazyRow(
                                 modifier = Modifier.fillMaxWidth(),
                                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                items(
-                                    items = TimeOfDay.entries,
-                                    key = { it.name },
-                                ) { timeOfDay ->
+                                items(TimeOfDay.entries, key = { it.name }) { timeOfDay ->
                                     TimeOfDayChip(
                                         title = timeOfDay.displayName,
                                         selected = state.selectedTimeOfDay == timeOfDay,
-                                        onSelected = {
-                                            onAction(FeedAction.SelectTimeOfDay(timeOfDay))
-                                        },
+                                        onSelected = { onAction(FeedAction.SelectTimeOfDay(timeOfDay)) },
                                     )
                                 }
                             }
-                            HorizontalDivider(
-                                color = colors.border,
-                                thickness = 1.dp,
-                            )
+                            HorizontalDivider(color = colors.border, thickness = 1.dp)
                         }
 
                         // Section header
@@ -351,8 +318,14 @@ internal fun FeedScreenContent(
                                         .padding(horizontal = 16.dp, vertical = 4.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
+                                val headerText =
+                                    if (state.userLat != null) {
+                                        "Routes near you"
+                                    } else {
+                                        "All routes"
+                                    }
                                 Text(
-                                    text = "Near CBD Now",
+                                    text = headerText,
                                     style = typography.titleSmall,
                                     color = colors.onSurfaceVariant,
                                     modifier = Modifier.weight(1f),
@@ -370,19 +343,35 @@ internal fun FeedScreenContent(
                             }
                         }
 
-                        indicatorItem()
+                        // Refining proximity indicator
+                        if (state.isRefiningProximity) {
+                            item(key = "refining") {
+                                Text(
+                                    text = "Finding stops near you…",
+                                    style = typography.labelSmall,
+                                    color = colors.onSurfaceVariant,
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                                )
+                            }
+                        }
+
                         // Route cards
                         if (state.filteredRoutes.isEmpty()) {
                             item(key = "empty_state") {
                                 Box(
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 48.dp),
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     Text(
-                                        text = "No routes found for this time.\nTry a different filter.",
+                                        text =
+                                            if (state.userLat != null) {
+                                                "No routes found near you.\nTry searching by stage or route number."
+                                            } else {
+                                                "No routes found.\nAllow location access for nearby routes."
+                                            },
                                         style = typography.bodyMedium,
                                         color = colors.onSurfaceVariant,
                                         textAlign = TextAlign.Center,
@@ -392,8 +381,8 @@ internal fun FeedScreenContent(
                         } else {
                             itemsIndexed(
                                 items = state.filteredRoutes,
-                                key = { _, route -> route.id },
-                            ) { index, route ->
+                                key = { _, br -> "${br.route.id}_${br.tripDirection}" },
+                            ) { index, boardableRoute ->
                                 Box(
                                     modifier =
                                         Modifier
@@ -401,13 +390,12 @@ internal fun FeedScreenContent(
                                             .padding(vertical = 4.dp)
                                             .zIndex((state.filteredRoutes.size - index).toFloat())
                                             .graphicsLayer {
-                                                rotationZ =
-                                                    effectiveRotation * if (index % 2 == 0) 1f else -1f
+                                                rotationZ = effectiveRotation * if (index % 2 == 0) 1f else -1f
                                             },
                                 ) {
                                     RouteCard(
-                                        route = route,
-                                        onClick = { onAction(FeedAction.RouteClicked(route)) },
+                                        boardableRoute = boardableRoute,
+                                        onClick = { onAction(FeedAction.RouteClicked(boardableRoute)) },
                                         modifier = Modifier.padding(horizontal = 16.dp),
                                     )
                                 }
@@ -434,7 +422,6 @@ fun TooltipWithAnimation(show: Boolean, text: String, emoji: String, onDismiss: 
             ),
         label = "bounce",
     )
-
     AnimatedVisibility(
         visible = show,
         enter = fadeIn() + expandVertically() + scaleIn(initialScale = 0.8f),
@@ -444,7 +431,7 @@ fun TooltipWithAnimation(show: Boolean, text: String, emoji: String, onDismiss: 
             text = text,
             emoji = emoji,
             onDismiss = onDismiss,
-            modifier = Modifier.offset(y = offsetY), // Apply the bounce here
+            modifier = Modifier.offset(y = offsetY),
             visible = show,
         )
     }
@@ -455,11 +442,7 @@ fun TooltipWithAnimation(show: Boolean, text: String, emoji: String, onDismiss: 
 private fun FeedScreenContentPreview() {
     MwenyejiAppTheme {
         FeedScreenContent(
-            state =
-                FeedState(
-                    selectedTimeOfDay = TimeOfDay.MORNING_RUSH,
-                    filteredRoutes = emptyList(),
-                ),
+            state = FeedState(selectedTimeOfDay = TimeOfDay.MORNING_RUSH),
             onAction = {},
             onNavigateToContribute = {},
             isRefreshing = false,
@@ -471,24 +454,21 @@ private fun FeedScreenContentPreview() {
 @Composable
 fun TimeOfDayChip(title: String, modifier: Modifier = Modifier, selected: Boolean = false, onSelected: (String) -> Unit = {}) {
     val colors = MwenyejiTheme.colorScheme
-
-    // Animate border and text color transitions
     val borderColor by animateColorAsState(
         targetValue = if (selected) colors.primary else colors.outlineVariant,
-        animationSpec = tween(durationMillis = 150),
+        animationSpec = tween(150),
         label = "chipBorderColor",
     )
     val contentColor by animateColorAsState(
         targetValue = if (selected) colors.primary else colors.onSurface,
-        animationSpec = tween(durationMillis = 150),
+        animationSpec = tween(150),
         label = "chipContentColor",
     )
     val containerColor by animateColorAsState(
         targetValue = if (selected) colors.primaryContainer else colors.surface,
-        animationSpec = tween(durationMillis = 150),
+        animationSpec = tween(150),
         label = "chipContainerColor",
     )
-
     MwenyejiCard(
         modifier = modifier,
         onClick = { onSelected(title) },
@@ -500,74 +480,11 @@ fun TimeOfDayChip(title: String, modifier: Modifier = Modifier, selected: Boolea
             ),
     ) {
         Row(
-            modifier =
-                Modifier
-                    .height(44.dp)
-                    .padding(horizontal = 16.dp),
+            modifier = Modifier.height(44.dp).padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
-            Text(
-                text = title,
-                style = MwenyejiTheme.typography.labelMedium,
-                color = contentColor,
-            )
+            Text(text = title, style = MwenyejiTheme.typography.labelMedium, color = contentColor)
         }
-    }
-}
-
-@Composable
-fun TimeOfDayChipGroup(options: List<String>, selectedOption: String?, onOptionSelected: (String) -> Unit, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        options.forEach { option ->
-            TimeOfDayChip(
-                title = option,
-                selected = option == selectedOption,
-                onSelected = onOptionSelected,
-                modifier = Modifier.weight(1f),
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF0E1210)
-@Composable
-private fun TimeOfDayChipPreview() {
-    MwenyejiAppTheme {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            TimeOfDayChip(
-                title = "Morning rush",
-                selected = true,
-                modifier = Modifier.weight(1f),
-            )
-            TimeOfDayChip(
-                title = "Midday",
-                selected = false,
-                modifier = Modifier.weight(1f),
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF0E1210)
-@Composable
-private fun TimeOfDayChipGroupPreview() {
-    MwenyejiAppTheme {
-        var selected by remember { mutableStateOf("Morning rush") }
-        TimeOfDayChipGroup(
-            options = listOf("Morning rush", "Midday", "Evening", "Late night"),
-            selectedOption = selected,
-            onOptionSelected = { selected = it },
-            modifier = Modifier.padding(16.dp),
-        )
     }
 }

@@ -166,8 +166,7 @@ private fun ContributeFab(isOpen: Boolean, onClick: () -> Unit, modifier: Modifi
                     shape = RoundedCornerShape(14.dp),
                     ambientColor = MwenyejiTheme.colorScheme.primary,
                     spotColor = MwenyejiTheme.colorScheme.primary,
-                )
-                .clip(RoundedCornerShape(14.dp))
+                ).clip(RoundedCornerShape(14.dp))
                 .background(MwenyejiTheme.colorScheme.primary)
                 .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,

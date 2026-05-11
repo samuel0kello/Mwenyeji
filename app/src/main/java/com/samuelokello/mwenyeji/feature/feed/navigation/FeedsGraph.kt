@@ -43,6 +43,9 @@ fun NavGraphBuilder.feedsNavGraph(navController: NavHostController, onRequireAut
             RouteDetailsScreen(
                 routeId = routeId,
                 onNavigateBack = { navController.navigateBack() },
+                onNavigateToContribute = {
+                    onRequireAuth { navController.navigateToContribute() }
+                },
             )
         }
 

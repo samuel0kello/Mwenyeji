@@ -112,8 +112,7 @@ private fun SheetContent(isLoading: Boolean, onGoogleSignIn: () -> Unit, onDismi
                         topStart = cornerRadius.large,
                         topEnd = cornerRadius.large,
                     ),
-                )
-                .background(colors.surface)
+                ).background(colors.surface)
                 .padding(
                     horizontal = spacing.large,
                     vertical = spacing.extraLarge,

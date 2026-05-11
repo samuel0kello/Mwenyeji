@@ -100,8 +100,7 @@ private fun FieldRow(key: String, value: String) {
                     .clip(RoundedCornerShape(8.dp))
                     .background(
                         MwenyejiTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.5f),
-                    )
-                    .border(1.dp, MwenyejiTheme.colorScheme.border, RoundedCornerShape(8.dp))
+                    ).border(1.dp, MwenyejiTheme.colorScheme.border, RoundedCornerShape(8.dp))
                     .padding(horizontal = 12.dp, vertical = 8.dp),
         ) {
             Text(
@@ -125,8 +124,7 @@ private fun Chip(label: String, selected: Boolean) {
                     1.dp,
                     if (selected) MwenyejiTheme.colorScheme.primary else MwenyejiTheme.colorScheme.border,
                     RoundedCornerShape(20.dp),
-                )
-                .padding(horizontal = 12.dp, vertical = 7.dp),
+                ).padding(horizontal = 12.dp, vertical = 7.dp),
     ) {
         Text(
             label,

@@ -1,19 +1,32 @@
 package com.samuelokello.mwenyeji.feature.feed
 
 import com.samuelokello.mwenyeji.data.helpers.DomainError
+import com.samuelokello.mwenyeji.data.models.BoardableRoute
 import com.samuelokello.mwenyeji.data.models.Route
 import com.samuelokello.mwenyeji.data.models.TimeOfDay
 
 data class FeedState(
-    val selectedTimeOfDay: TimeOfDay = TimeOfDay.MORNING_RUSH,
-    val searchQuery: String = "",
+    // Raw GTFS routes from Firestore (full list, unfiltered)
     val routes: List<Route> = emptyList(),
-    val filteredRoutes: List<Route> = emptyList(),
+    // Boardable routes derived from user location + stop cache
+    // This is what the feed actually displays
+    val boardableRoutes: List<BoardableRoute> = emptyList(),
+    // Filtered view of boardableRoutes after search + time-of-day
+    val filteredRoutes: List<BoardableRoute> = emptyList(),
+    // Location state
     val userLat: Double? = null,
     val userLng: Double? = null,
     val locationPermissionGranted: Boolean = false,
+    // True while the stop cache is being prefetched after location arrives.
+    // Feed shows terminus-based sort during this window, then updates.
+    val isRefiningProximity: Boolean = false,
+    // Search and filter
+    val searchQuery: String = "",
+    val selectedTimeOfDay: TimeOfDay = TimeOfDay.MORNING_RUSH,
+    // Loading and error
     val isLoading: Boolean = false,
     val error: DomainError? = null,
+    // Tooltips
     val showFabTooltip: Boolean = false,
     val showTimeFilterTooltip: Boolean = false,
 )
@@ -28,7 +41,7 @@ sealed interface FeedAction {
     ) : FeedAction
 
     data class RouteClicked(
-        val route: Route,
+        val route: BoardableRoute,
     ) : FeedAction
 
     data object SeeAllClicked : FeedAction

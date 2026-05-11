@@ -51,13 +51,11 @@ fun NotificationCard(visible: Boolean, modifier: Modifier = Modifier) {
                         width = 1.dp,
                         color = color.border,
                         shape = RoundedCornerShape(14.dp),
-                    )
-                    .border(
+                    ).border(
                         width = 2.dp,
                         color = color.border,
                         shape = RoundedCornerShape(topStart = 14.dp, bottomStart = 14.dp),
-                    )
-                    .padding(14.dp),
+                    ).padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {

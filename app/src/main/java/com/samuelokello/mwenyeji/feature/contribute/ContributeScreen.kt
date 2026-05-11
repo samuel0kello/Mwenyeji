@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.samuelokello.mwenyeji.feature.contribute.components.StepScaffold
 import com.samuelokello.mwenyeji.feature.contribute.step.InstructionsStepScreen
-import com.samuelokello.mwenyeji.feature.contribute.step.RouteStepScreen
 import com.samuelokello.mwenyeji.feature.contribute.step.TimingStepScreen
 import com.samuelokello.mwenyeji.feature.contribute.step.WarningsStepScreen
 import com.samuelokello.mwenyeji.presentation.designsystem.components.snackbar.SnackBarManager
@@ -59,9 +58,6 @@ fun ContributeScreen(
                         onAction = { snackBarManager.dismiss() },
                     )
                 }
-
-                is ContributeEffect.ShowFieldError -> { // handled per-step via state.errors
-                }
             }
         }
     }
@@ -93,12 +89,12 @@ fun ContributeScreenContent(state: ContributeState, onAction: (ContributeActions
             modifier = modifier.fillMaxSize(),
         ) { step ->
             when (step) {
-                ContributeStep.ROUTE -> {
-                    RouteStepScreen(
-                        state = state,
-                        onAction = onAction,
-                    )
-                }
+//                ContributeStep.TIMING -> {
+//                    RouteStepScreen(
+//                        state = state,
+//                        onAction = onAction,
+//                    )
+//                }
 
                 ContributeStep.TIMING -> {
                     TimingStepScreen(
