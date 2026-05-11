@@ -203,21 +203,19 @@ private fun Long.toRelativeTime(context: Context): String {
     }
 }
 
-private fun Route.getFormattedGuideCount(context: Context): String {
-    return when (guideCount) {
+private fun Route.getFormattedGuideCount(context: Context): String =
+    when (guideCount) {
         0 -> context.getString(R.string.no_guides_yet)
         1 -> context.getString(R.string.one_guide)
         else -> context.getString(R.string.guides_count_format, guideCount)
     }
-}
 
-private fun BoardableRoute.getWalkingLabel(context: Context): String {
-    return when {
+private fun BoardableRoute.getWalkingLabel(context: Context): String =
+    when {
         walkingDistanceMetres < 50 -> context.getString(R.string.right_here)
         walkingDistanceMetres < 200 -> context.getString(R.string.walking_distance_m_format, walkingDistanceMetres)
         else -> context.getString(R.string.walking_distance_km_format, (walkingDistanceKm * 10).toInt() / 10.0)
     }
-}
 
 @Preview(showBackground = true, backgroundColor = 0xFF0E1210)
 @Composable
