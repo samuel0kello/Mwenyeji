@@ -43,6 +43,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.google.common.collect.ImmutableList
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiAppTheme
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
@@ -173,7 +174,7 @@ fun MwenyejiLargeHeaderBar(
     onNavigateBack: (() -> Unit)? = null,
     subtitleColor: Color = MwenyejiTheme.colorScheme.onSurfaceVariant,
     actions: List<AppBarAction> = emptyList(),
-    backgroundColor: Color = MwenyejiTheme.colorScheme.surface,
+    backgroundColor: Color = MwenyejiTheme.colorScheme.background,
     showDivider: Boolean = true,
     bottomPadding: Dp = 16.dp,
     content: @Composable () -> Unit = {},

@@ -24,6 +24,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,15 +40,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -66,6 +69,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
@@ -75,8 +79,11 @@ import com.google.android.gms.location.Priority
 import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.data.models.TimeOfDay
 import com.samuelokello.mwenyeji.feature.feed.components.RouteCard
+import com.samuelokello.mwenyeji.presentation.designsystem.components.MwenyejiEmptyState
 import com.samuelokello.mwenyeji.presentation.designsystem.components.MwenyejiLargeHeaderBar
+import com.samuelokello.mwenyeji.presentation.designsystem.components.MwenyejiSearchBar
 import com.samuelokello.mwenyeji.presentation.designsystem.components.card.MwenyejiCard
+import com.samuelokello.mwenyeji.presentation.designsystem.components.card.MwenyejiOutlinedCard
 import com.samuelokello.mwenyeji.presentation.designsystem.components.pulltorefresh.MwenyejiPullToRefresh
 import com.samuelokello.mwenyeji.presentation.designsystem.components.snackbar.SnackBarManager
 import com.samuelokello.mwenyeji.presentation.designsystem.components.toolTip.MwenyejiTooltip
@@ -218,19 +225,28 @@ internal fun FeedScreenContent(
                 title = stringResource(R.string.where_to),
                 subtitle = stringResource(R.string.find_local_ways_to_move_around_nairobi),
                 content = {
-                    OutlinedTextField(
-                        value = state.searchQuery,
-                        onValueChange = { onAction(FeedAction.SearchQueryChanged(it)) },
-                        placeholder = {
-                            Text(
-                                text = stringResource(R.string.search_area_stage_destination),
-                                style = typography.bodyMedium,
-                                color = colors.onSurfaceVariant,
-                            )
-                        },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        MwenyejiSearchBar(
+                            state = state.searchState,
+                            placeholder = stringResource(R.string.search_area_stage_destination),
+                        )
+
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            items(TimeOfDay.entries, key = { it.name }) { timeOfDay ->
+                                TimeOfDayChip(
+                                    title = timeOfDay.displayName,
+                                    selected = state.selectedTimeOfDay == timeOfDay,
+                                    onSelect = { onAction(FeedAction.SelectTimeOfDay(timeOfDay)) },
+                                )
+                            }
+                        }
+                    }
                 },
             )
         },
@@ -255,14 +271,20 @@ internal fun FeedScreenContent(
         when {
             state.isLoading -> {
                 Box(
-                    modifier = Modifier.fillMaxSize().padding(paddingValues),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
                     contentAlignment = Alignment.Center,
                 ) { CircularProgressIndicator(color = colors.primary) }
             }
 
             state.error != null -> {
                 Box(
-                    modifier = Modifier.fillMaxSize().padding(paddingValues),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
                     contentAlignment = Alignment.Center,
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -283,7 +305,10 @@ internal fun FeedScreenContent(
                     isRefreshing = isRefreshing,
                     onRefresh = onRefresh,
                     confirmationText = stringResource(R.string.updated_routes_format, state.filteredRoutes.size),
-                    modifier = Modifier.fillMaxSize().padding(paddingValues),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
                 ) {
                     val cardRotation = 5f * pullProgress.coerceAtMost(1f)
                     val effectiveRotation = if (isRefreshing) 5f else cardRotation
@@ -293,25 +318,6 @@ internal fun FeedScreenContent(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         contentPadding = PaddingValues(bottom = 24.dp),
                     ) {
-                        // Time of day chips
-                        item(key = "time_filters") {
-                            LazyRow(
-                                modifier = Modifier.fillMaxWidth(),
-                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                items(TimeOfDay.entries, key = { it.name }) { timeOfDay ->
-                                    TimeOfDayChip(
-                                        title = timeOfDay.displayName,
-                                        selected = state.selectedTimeOfDay == timeOfDay,
-                                        onSelected = { onAction(FeedAction.SelectTimeOfDay(timeOfDay)) },
-                                    )
-                                }
-                            }
-                            HorizontalDivider(color = colors.border, thickness = 1.dp)
-                        }
-
-                        // Section header
                         item(key = "section_header") {
                             Row(
                                 modifier =
@@ -361,24 +367,16 @@ internal fun FeedScreenContent(
                         }
 
                         // Route cards
-                        if (state.filteredRoutes.isEmpty()) {
+                        if (state.filteredRoutes.isEmpty() && state.searchQuery.isEmpty()) {
                             item(key = "empty_state") {
-                                Box(
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    Text(
-                                        text =
-                                            if (state.userLat != null) {
-                                                stringResource(R.string.no_routes_found_near_you)
-                                            } else {
-                                                stringResource(R.string.no_routes_found)
-                                            },
-                                        style = typography.bodyMedium,
-                                        color = colors.onSurfaceVariant,
-                                        textAlign = TextAlign.Center,
-                                    )
-                                }
+                                MwenyejiEmptyState(
+                                    icon = Icons.Default.LocationOn,
+                                    heading = "No matatu stages near you",
+                                    body =
+                                        "We couldn't find any stops within 500m of where you are." +
+                                            " Try searching by route number or stage name.",
+                                    hintText = "Or move closer to a road · GPS accuracy ±15m",
+                                )
                             }
                         } else {
                             itemsIndexed(
@@ -392,7 +390,8 @@ internal fun FeedScreenContent(
                                             .padding(vertical = 4.dp)
                                             .zIndex((state.filteredRoutes.size - index).toFloat())
                                             .graphicsLayer {
-                                                rotationZ = effectiveRotation * if (index % 2 == 0) 1f else -1f
+                                                rotationZ =
+                                                    effectiveRotation * if (index % 2 == 0) 1f else -1f
                                             },
                                 ) {
                                     RouteCard(
@@ -411,7 +410,7 @@ internal fun FeedScreenContent(
 }
 
 @Composable
-fun TooltipWithAnimation(show: Boolean, text: String, emoji: String, onDismiss: () -> Unit) {
+fun TooltipWithAnimation(show: Boolean, text: String, emoji: String, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     val infiniteTransition = rememberInfiniteTransition(label = "TooltipBounce")
     val offsetY by infiniteTransition.animateValue(
         initialValue = 0.dp,
@@ -433,7 +432,7 @@ fun TooltipWithAnimation(show: Boolean, text: String, emoji: String, onDismiss: 
             text = text,
             emoji = emoji,
             onDismiss = onDismiss,
-            modifier = Modifier.offset(y = offsetY),
+            modifier = Modifier.offset { IntOffset(y = offsetY.roundToPx(), x = 0) },
             visible = show,
         )
     }
@@ -454,7 +453,7 @@ private fun FeedScreenContentPreview() {
 }
 
 @Composable
-fun TimeOfDayChip(title: String, modifier: Modifier = Modifier, selected: Boolean = false, onSelected: (String) -> Unit = {}) {
+fun TimeOfDayChip(title: String, modifier: Modifier = Modifier, selected: Boolean = false, onSelect: (String) -> Unit = {}) {
     val colors = MwenyejiTheme.colorScheme
     val borderColor by animateColorAsState(
         targetValue = if (selected) colors.primary else colors.outlineVariant,
@@ -463,26 +462,33 @@ fun TimeOfDayChip(title: String, modifier: Modifier = Modifier, selected: Boolea
     )
     val contentColor by animateColorAsState(
         targetValue = if (selected) colors.primary else colors.onSurface,
-        animationSpec = tween(150),
+        animationSpec = tween(350),
         label = "chipContentColor",
     )
     val containerColor by animateColorAsState(
-        targetValue = if (selected) colors.primaryContainer else colors.surface,
+        targetValue = if (selected) colors.secondaryContainer else colors.surface,
         animationSpec = tween(150),
         label = "chipContainerColor",
     )
-    MwenyejiCard(
-        modifier = modifier,
-        onClick = { onSelected(title) },
-        containerColor = containerColor,
+    Surface(
+        modifier =
+            Modifier
+                .clickable(
+                    onClick = { onSelect(title) },
+                ),
+        color = containerColor,
         border =
             BorderStroke(
-                width = if (selected) 1.5.dp else 1.dp,
+                width = if (selected) .8.dp else 0.1.dp,
                 color = borderColor,
             ),
+        shape = RoundedCornerShape(10.dp),
     ) {
         Row(
-            modifier = Modifier.height(44.dp).padding(horizontal = 16.dp),
+            modifier =
+                Modifier
+                    .height(32.dp)
+                    .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {

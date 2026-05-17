@@ -71,7 +71,7 @@ fun WarningsStepScreen(state: ContributeState, onAction: (ContributeActions) -> 
                     TimeOfDayChip(
                         title = tag.displayName,
                         selected = tag in state.selectedTags,
-                        onSelected = { onAction(ContributeActions.TagToggled(tag)) },
+                        onSelect = { onAction(ContributeActions.TagToggled(tag)) },
                     )
                 }
             }

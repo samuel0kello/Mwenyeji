@@ -1,5 +1,7 @@
 package com.samuelokello.mwenyeji.feature.feed
 
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.material3.TextField
 import com.samuelokello.mwenyeji.data.helpers.DomainError
 import com.samuelokello.mwenyeji.data.models.BoardableRoute
 import com.samuelokello.mwenyeji.data.models.Route
@@ -22,6 +24,7 @@ data class FeedState(
     val isRefiningProximity: Boolean = false,
     // Search and filter
     val searchQuery: String = "",
+    val searchState: TextFieldState = TextFieldState(),
     val selectedTimeOfDay: TimeOfDay = TimeOfDay.MORNING_RUSH,
     // Loading and error
     val isLoading: Boolean = false,

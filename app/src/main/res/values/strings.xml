@@ -58,7 +58,7 @@
 
     <string name="all_routes">All routes</string>
     <string name="updated_routes_format">Updated • %1$d routes</string>
-    <string name="routes_near_you">Routes near you</string>
+    <string name="routes_near_you">Routes near you, sorted by walk</string>
     <string name="see_all">See all</string>
     <string name="finding_stops_near_you">Finding stops near you…</string>
     <string name="no_routes_found_near_you">No routes found near you.\nTry searching by stage or route number.</string>

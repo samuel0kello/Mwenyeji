@@ -51,7 +51,7 @@ fun TimingStepScreen(state: ContributeState, onAction: (ContributeActions) -> Un
                 TimeOfDayChip(
                     title = timeOfDay.displayName,
                     selected = state.bestTimeOfDay == timeOfDay,
-                    onSelected = {
+                    onSelect = {
                         val selected =
                             TimeOfDay.entries.first {
                                 it.displayName == timeOfDay.displayName

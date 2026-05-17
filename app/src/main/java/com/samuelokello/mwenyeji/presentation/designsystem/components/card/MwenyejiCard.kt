@@ -39,7 +39,6 @@ fun MwenyejiCard(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     if (onClick != null) {
-        // Clickable variant — M3 Card(onClick) handles ripple + semantics
         Card(
             onClick = onClick,
             modifier = modifier,

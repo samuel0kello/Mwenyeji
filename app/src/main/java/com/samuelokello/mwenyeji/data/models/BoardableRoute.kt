@@ -15,7 +15,7 @@ package com.samuelokello.mwenyeji.data.models
  * @param onwardTerminus    The name of the route's terminus from the boarding point.
  * @param stopsRemaining    Stops between the boarding stop and the terminus.
  *                          Gives a rough sense of journey length.
- * @param tripDirection     "outbound" or "inbound" — which direction of the
+ * @param tripDirection     "outbound" or "inbound" which direction of the
  *                          bidirectional GTFS route goes away from the user.
  */
 data class BoardableRoute(
