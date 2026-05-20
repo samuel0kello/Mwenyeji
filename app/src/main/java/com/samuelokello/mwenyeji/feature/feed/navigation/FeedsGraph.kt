@@ -3,13 +3,14 @@ package com.samuelokello.mwenyeji.feature.feed.navigation
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.samuelokello.mwenyeji.feature.contribute.navigation.navigateToContribute
 import com.samuelokello.mwenyeji.feature.feed.FeedScreen
 import com.samuelokello.mwenyeji.feature.feed.route.AllRoutes
 import com.samuelokello.mwenyeji.feature.feed.route.RouteDetailsScreen
 import com.samuelokello.mwenyeji.navigation.navigateBack
+import com.samuelokello.mwenyeji.navigation.slideScreen
+import com.samuelokello.mwenyeji.navigation.tabScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -28,7 +29,7 @@ data object SeeAllRoutesRoute
 
 fun NavGraphBuilder.feedsNavGraph(navController: NavHostController, onRequireAuth: (onAuthenticated: () -> Unit) -> Unit = {}) {
     navigation<FeedsGraph>(startDestination = FeedsRoute) {
-        composable<FeedsRoute> {
+        tabScreen<FeedsRoute> {
             FeedScreen(
                 onNavigateToRouteDetail = { routeId -> navController.navigateToRouteDetails(routeId) },
                 onNavigateToSeeAll = { navController.navigateToAllRoutes() },
@@ -38,7 +39,7 @@ fun NavGraphBuilder.feedsNavGraph(navController: NavHostController, onRequireAut
             )
         }
 
-        composable<RouteDetailsRoute> { backStackEntry ->
+        slideScreen<RouteDetailsRoute> { backStackEntry ->
             val routeId = backStackEntry.arguments?.getString("routeId") ?: ""
             RouteDetailsScreen(
                 routeId = routeId,
@@ -49,7 +50,7 @@ fun NavGraphBuilder.feedsNavGraph(navController: NavHostController, onRequireAut
             )
         }
 
-        composable<SeeAllRoutesRoute> {
+        slideScreen<SeeAllRoutesRoute> {
             AllRoutes(
                 onNavigateToRouteDetail = { navController.navigateToRouteDetails(it) },
                 onNavigateBack = { navController.navigateBack() },

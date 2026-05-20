@@ -46,7 +46,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -66,7 +65,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -82,8 +80,6 @@ import com.samuelokello.mwenyeji.feature.feed.components.RouteCard
 import com.samuelokello.mwenyeji.presentation.designsystem.components.MwenyejiEmptyState
 import com.samuelokello.mwenyeji.presentation.designsystem.components.MwenyejiLargeHeaderBar
 import com.samuelokello.mwenyeji.presentation.designsystem.components.MwenyejiSearchBar
-import com.samuelokello.mwenyeji.presentation.designsystem.components.card.MwenyejiCard
-import com.samuelokello.mwenyeji.presentation.designsystem.components.card.MwenyejiOutlinedCard
 import com.samuelokello.mwenyeji.presentation.designsystem.components.pulltorefresh.MwenyejiPullToRefresh
 import com.samuelokello.mwenyeji.presentation.designsystem.components.snackbar.SnackBarManager
 import com.samuelokello.mwenyeji.presentation.designsystem.components.toolTip.MwenyejiTooltip
@@ -94,6 +90,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
+@Suppress("EffectKeys")
 @SuppressLint("MissingPermission")
 @Composable
 fun FeedScreen(

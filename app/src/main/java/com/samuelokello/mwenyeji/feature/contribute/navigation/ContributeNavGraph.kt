@@ -3,10 +3,10 @@ package com.samuelokello.mwenyeji.feature.contribute.navigation
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.samuelokello.mwenyeji.feature.contribute.ContributeScreen
 import com.samuelokello.mwenyeji.navigation.navigateBack
+import com.samuelokello.mwenyeji.navigation.screen
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -17,7 +17,7 @@ data object ContributeRoute
 
 fun NavGraphBuilder.contributeNavGraph(navController: NavHostController) {
     navigation<ContributeNavGraph>(startDestination = ContributeRoute) {
-        composable<ContributeRoute> {
+        screen<ContributeRoute> {
             ContributeScreen(
                 onNavigateBack = { navController.navigateBack() },
                 onNavigateToSuccess = { navController.navigateBack() },
