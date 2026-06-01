@@ -7,9 +7,13 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
@@ -28,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Hosts the snackbar — place this at the bottom of your App Scaffold content.
@@ -40,7 +45,7 @@ fun MwenyejiSnackbarHost(manager: SnackBarManager, modifier: Modifier = Modifier
 
     LaunchedEffect(message) {
         if (message != null && message?.actionLabel == null) {
-            delay(autoDismissMs)
+            delay(autoDismissMs.milliseconds)
             manager.dismiss()
         }
     }
@@ -100,7 +105,8 @@ private fun MwenyejiSnackbar(message: SnackBarMessage, onAction: () -> Unit, onD
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .windowInsetsPadding(WindowInsets.navigationBars),
         shape = RoundedCornerShape(12.dp),
         color = containerColor,
         tonalElevation = 4.dp,

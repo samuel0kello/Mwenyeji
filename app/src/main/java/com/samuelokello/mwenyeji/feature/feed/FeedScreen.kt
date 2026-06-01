@@ -89,6 +89,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Duration.Companion.milliseconds
 
 @Suppress("EffectKeys")
 @SuppressLint("MissingPermission")
@@ -181,7 +182,6 @@ fun FeedScreen(
 
     LaunchedEffect(state.showFabTooltip) {
         if (state.showFabTooltip) {
-            delay(5000)
             viewModel.onAction(FeedAction.DismissFabTooltip)
         }
     }
@@ -192,7 +192,7 @@ fun FeedScreen(
         onRefresh = {
             scope.launch {
                 isRefreshing = true
-                delay(5_000L)
+                delay(5_000L.milliseconds)
                 isRefreshing = false
             }
         },
@@ -368,10 +368,11 @@ internal fun FeedScreenContent(
                             item(key = "empty_state") {
                                 MwenyejiEmptyState(
                                     icon = Icons.Default.LocationOn,
-                                    heading = "No matatu stages near you",
+                                    heading = stringResource(R.string.no_matatu_stages_near_you),
                                     body =
-                                        "We couldn't find any stops within 500m of where you are." +
-                                            " Try searching by route number or stage name.",
+                                        stringResource(
+                                            R.string.we_couldn_t_find_any_stops_within_500m,
+                                        ),
                                     hintText = "Or move closer to a road · GPS accuracy ±15m",
                                 )
                             }

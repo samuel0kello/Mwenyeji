@@ -111,4 +111,8 @@
     <string name="error_weak_password">Password is too weak.</string>
     <string name="error_account_disabled">This account has been disabled.</string>
     <string name="error_unknown">Something went wrong. Please try again.</string>
+    <string name="no_matatu_stages_near_you">No matatu stages near you</string>
+    <string name="we_couldn_t_find_any_stops_within_500m">
+        We couldn\'t find any stops within 500m of where you are. Try searching by route number or stage name.
+    </string>
 </resources>
