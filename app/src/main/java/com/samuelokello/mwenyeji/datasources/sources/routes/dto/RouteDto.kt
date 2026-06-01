@@ -2,8 +2,8 @@ package com.samuelokello.mwenyeji.datasources.sources.routes.dto
 
 import androidx.annotation.Keep
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.IgnoreExtraProperties
 import com.google.firebase.firestore.ServerTimestamp
-import com.samuelokello.mwenyeji.data.models.Route
 
 /**
  * Firestore DTO for /routes/{routeId} documents.
@@ -16,10 +16,10 @@ import com.samuelokello.mwenyeji.data.models.Route
  * never throws on documents that are missing optional fields.
  */
 @Keep
+@IgnoreExtraProperties
 data class RouteDto(
     // Identity — populated manually via .copy(id = snapshot.id)
     val id: String = "",
-    // Human readable
     val routeNumber: String? = null,
     val longName: String? = null,
     val from: String = "",
