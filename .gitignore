@@ -13,3 +13,9 @@
 .externalNativeBuild
 .cxx
 local.properties
+.idea
+app/release
+/beta
+./node_modules
+
+seeder/gtfs/*.json

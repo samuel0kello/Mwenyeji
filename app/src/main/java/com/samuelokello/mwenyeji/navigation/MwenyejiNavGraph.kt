@@ -9,9 +9,9 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.samuelokello.mwenyeji.datasources.preference.MwenyejiPrefs
+import com.samuelokello.mwenyeji.feature.contribute.navigation.contributeNavGraph
 import com.samuelokello.mwenyeji.feature.feed.navigation.FeedsGraph
 import com.samuelokello.mwenyeji.feature.feed.navigation.feedsNavGraph
 import com.samuelokello.mwenyeji.feature.onboarding.navigation.OnBoarding
@@ -21,8 +21,7 @@ import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 
 @Composable
-fun MwenyejiNavGraph(navController: NavHostController) {
-
+fun MwenyejiNavGraph(navController: NavHostController, onRequireAuth: (onAuthenticated: () -> Unit) -> Unit = {}) {
     val prefs: MwenyejiPrefs = koinInject()
     var startDestination by remember { mutableStateOf<Any?>(null) }
 
@@ -34,36 +33,29 @@ fun MwenyejiNavGraph(navController: NavHostController) {
     startDestination?.let { destination ->
         NavHost(
             navController = navController,
-            startDestination = destination
+            startDestination = destination,
         ) {
-            mainGraph(navController)
-
-            onBoarding(
-                navController
-            )
+            mainGraph(navController, onRequireAuth)
+            onBoarding(navController)
         }
     }
 }
 
-fun NavGraphBuilder.mainGraph(
-    navController: NavHostController
-) {
-    navigation<Main>(
-        startDestination = FeedsGraph
-    ) {
-        feedsNavGraph(navController)
-
-        composable<BottomScreenRoutes.Contribute> {
-
-        }
+fun NavGraphBuilder.mainGraph(navController: NavHostController, onRequireAuth: (onAuthenticated: () -> Unit) -> Unit = {}) {
+    navigation<Main>(startDestination = FeedsGraph) {
+        feedsNavGraph(navController, onRequireAuth)
+        contributeNavGraph(navController)
     }
 }
-
 
 @Serializable
 data object Main
 
-
-fun NavHostController.navigateToManin() {
-    navigate(Main)
+fun NavHostController.navigateToMain() {
+    navigate(Main) {
+        popUpTo(graph.startDestinationId) {
+            inclusive = true
+        }
+        launchSingleTop = true
+    }
 }

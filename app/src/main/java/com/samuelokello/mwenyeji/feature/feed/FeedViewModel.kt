@@ -2,161 +2,320 @@ package com.samuelokello.mwenyeji.feature.feed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.samuelokello.mwenyeji.data.helpers.DataResult
+import com.samuelokello.mwenyeji.data.helpers.DomainError
+import com.samuelokello.mwenyeji.data.helpers.ProximityEngine
+import com.samuelokello.mwenyeji.data.helpers.toUserMessage
+import com.samuelokello.mwenyeji.data.models.BoardableRoute
 import com.samuelokello.mwenyeji.data.models.Route
-import com.samuelokello.mwenyeji.data.models.RouteStep
-import com.samuelokello.mwenyeji.data.models.RouteTag
+import com.samuelokello.mwenyeji.data.models.RouteStop
 import com.samuelokello.mwenyeji.data.models.TimeOfDay
+import com.samuelokello.mwenyeji.data.models.TripDirection
+import com.samuelokello.mwenyeji.data.repository.RoutesRepository
+import com.samuelokello.mwenyeji.datasources.preference.MwenyejiPrefs
+import com.samuelokello.mwenyeji.presentation.designsystem.components.toolTip.TooltipKey
+import com.samuelokello.mwenyeji.presentation.designsystem.components.toolTip.TooltipManager
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class FeedViewModel : ViewModel() {
-
+class FeedViewModel(
+    private val routeRepository: RoutesRepository,
+    private val prefs: MwenyejiPrefs,
+    private val tooltipManager: TooltipManager,
+) : ViewModel() {
     private val _state = MutableStateFlow(FeedState())
     val state: StateFlow<FeedState> = _state.asStateFlow()
 
-    // Channel for one-time effects (navigation, toasts)
     private val _effects = Channel<FeedEffect>(Channel.BUFFERED)
     val effects = _effects.receiveAsFlow()
 
+    /**
+     * Stop list cache: routeId → outbound ordered stops.
+     * Populated once after location is received.
+     * ProximityEngine uses all intermediate stops — not just termini —
+     * so a route passing through the user's location ranks correctly.
+     */
+    private val routeStopsCache = mutableMapOf<String, List<RouteStop>>()
+
     init {
-        loadRoutes()
+        initializeFeed()
     }
 
-    // Intent handler
+    private fun initializeFeed() {
+        viewModelScope.launch {
+            // Time-of-day preference drives the chip default.
+            // The actual feed no longer filters by time at the route level —
+            // bestTimeOfDay lives on Guide now, not Route.
+            // The chip selection is preserved in state for when guide-level
+            // filtering is implemented on the route detail screen.
+            val savedTimeName = prefs.getDefaultTimeOfDay().first()
+            val defaultTime =
+                TimeOfDay.entries.firstOrNull { it.name == savedTimeName }
+                    ?: TimeOfDay.MORNING_RUSH
+            _state.update { it.copy(selectedTimeOfDay = defaultTime) }
 
-    fun onIntent(intent: FeedIntent) {
-        when (intent) {
-            is FeedIntent.SelectTimeOfDay    -> onTimeOfDaySelected(intent.timeOfDay)
-            is FeedIntent.SearchQueryChanged -> onSearchQueryChanged(intent.query)
-            is FeedIntent.RouteClicked       -> onRouteClicked(intent.route)
-            is FeedIntent.SeeAllClicked      -> onSeeAllClicked()
-            is FeedIntent.RetryClicked       -> loadRoutes()
+            launch { requestLocation() }
+            launch { loadRoutes() }
+            observeTooltips()
         }
     }
 
-    // Private handlers
+    fun onAction(action: FeedAction) {
+        when (action) {
+            is FeedAction.SelectTimeOfDay -> {
+                onTimeOfDaySelected(action.timeOfDay)
+            }
 
-    private fun loadRoutes() {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
-            try {
-                // TODO: replace with real repository call
-                // val routes = routeRepository.getRoutes()
-                val routes = mockRoutes()
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        routes = routes,
-                        filteredRoutes = routes.filterByTimeOfDay(it.selectedTimeOfDay),
-                    )
+            is FeedAction.SearchQueryChanged -> {
+                onSearchQueryChanged(action.query)
+            }
+
+            is FeedAction.RouteClicked -> {
+                onRouteClicked(action.route)
+            }
+
+            is FeedAction.SeeAllClicked -> {
+                onSeeAllClicked()
+            }
+
+            is FeedAction.RetryClicked -> {
+                viewModelScope.launch { loadRoutes() }
+            }
+
+            is FeedAction.RequestLocationPermission -> {
+                requestLocation()
+            }
+
+            is FeedAction.LocationPermissionResult -> {
+                onPermissionResult(action.granted)
+            }
+
+            is FeedAction.LocationReceived -> {
+                onLocationReceived(action.lat, action.lng)
+            }
+
+            is FeedAction.DismissFabTooltip -> {
+                viewModelScope.launch {
+                    tooltipManager.markShown(TooltipKey.FAB_CONTRIBUTE)
                 }
-            } catch (e: Exception) {
-                _state.update {
-                    it.copy(isLoading = false, error = e.message ?: "Something went wrong")
+            }
+
+            is FeedAction.DismissTimeFilterTooltip -> {
+                viewModelScope.launch {
+                    tooltipManager.markShown(TooltipKey.TIME_OF_DAY_CHIPS)
                 }
-                _effects.send(FeedEffect.ShowError(e.message ?: "Failed to load routes"))
             }
         }
     }
 
-    private fun onTimeOfDaySelected(timeOfDay: TimeOfDay) {
-        _state.update { current ->
-            current.copy(
-                selectedTimeOfDay = timeOfDay,
-                filteredRoutes = current.routes.filterByTimeOfDay(timeOfDay),
+    // ── Route loading ─────────────────────────────────────────────────────────
+
+    private fun loadRoutes() {
+        viewModelScope.launch {
+            routeRepository
+                .observeRoutes()
+                .onStart { _state.update { it.copy(isLoading = true, error = null) } }
+                .catch { e ->
+                    val error = DomainError.Unknown(e.message ?: "Unknown error")
+                    _state.update { it.copy(isLoading = false, error = error) }
+                    _effects.send(FeedEffect.ShowError(e.message ?: "Failed to load routes"))
+                }.collect { result ->
+                    when (result) {
+                        is DataResult.Success -> {
+                            onRoutesLoaded(result.data)
+                        }
+
+                        is DataResult.Error -> {
+                            _state.update { it.copy(isLoading = false, error = result.error) }
+                            _effects.send(FeedEffect.ShowError(result.error.toUserMessage()))
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun onRoutesLoaded(routes: List<Route>) {
+        // All routes from Firestore are GTFS routes — no source filter needed.
+        _state.update { it.copy(routes = routes, isLoading = false) }
+        recomputeBoardable()
+    }
+
+    // ── Stop cache prefetch ───────────────────────────────────────────────────
+
+    private suspend fun prefetchRouteStops(routes: List<Route>) {
+        val uncached = routes.filter { it.id !in routeStopsCache }
+        if (uncached.isEmpty()) return
+
+        _state.update { it.copy(isRefiningProximity = true) }
+
+        uncached.chunked(20).forEach { batch ->
+            batch
+                .map { route ->
+                    viewModelScope.async {
+                        when (val result = routeRepository.getRouteStops(route.id)) {
+                            is DataResult.Success -> {
+                                if (result.data.isNotEmpty()) {
+                                    routeStopsCache[route.id] = result.data
+                                }
+                            }
+
+                            is DataResult.Error -> {
+                                Unit
+                            }
+                        }
+                    }
+                }.awaitAll()
+        }
+
+        _state.update { it.copy(isRefiningProximity = false) }
+    }
+
+    // ── Boardable route computation ───────────────────────────────────────────
+
+    private fun recomputeBoardable() {
+        val current = _state.value
+        val userLat = current.userLat
+        val userLng = current.userLng
+        val routes = current.routes
+
+        val boardable =
+            if (userLat != null && userLng != null) {
+                ProximityEngine.computeBoardable(
+                    routes = routes,
+                    stopsCache = routeStopsCache,
+                    userLat = userLat,
+                    userLng = userLng,
+                )
+            } else {
+                // No location yet — wrap all routes using terminus1 as the boarding point.
+                // Sorted by confirmedCount (Firestore order).
+                routes.map { route ->
+                    BoardableRoute(
+                        route = route,
+                        boardingStop =
+                            RouteStop(
+                                stopId = route.firstStopId ?: "",
+                                name = route.from,
+                                lat = route.terminus1Lat ?: 0.0,
+                                lng = route.terminus1Lng ?: 0.0,
+                                sequence = 1,
+                            ),
+                        walkingDistanceKm = Double.MAX_VALUE,
+                        onwardTerminus = route.to,
+                        stopsRemaining = route.stopCount,
+                        tripDirection = TripDirection.OUTBOUND,
+                    )
+                }
+            }
+
+        val filtered = boardable.filterBySearch(current.searchQuery)
+
+        _state.update {
+            it.copy(
+                boardableRoutes = boardable,
+                filteredRoutes = filtered,
             )
         }
+    }
+
+    // ── Filtering ─────────────────────────────────────────────────────────────
+
+    /**
+     * Feed filtering is search-only.
+     *
+     * Time-of-day is no longer a route-level field — it lives on Guide.
+     * The chip selection is persisted in state and will be used when the
+     * route detail screen filters guides by time of day.
+     */
+    private fun List<BoardableRoute>.filterBySearch(query: String): List<BoardableRoute> {
+        if (query.isBlank()) return this
+        val q = query.trim().lowercase()
+        return filter { br ->
+            val route = br.route
+            route.searchTerms.any { it.contains(q) } ||
+                route.from.contains(q, ignoreCase = true) ||
+                route.to.contains(q, ignoreCase = true) ||
+                route.via.contains(q, ignoreCase = true) ||
+                route.routeNumber?.contains(q, ignoreCase = true) == true ||
+                br.boardingStop.name.contains(q, ignoreCase = true) ||
+                br.onwardTerminus.contains(q, ignoreCase = true)
+        }
+    }
+
+    private fun onTimeOfDaySelected(timeOfDay: TimeOfDay) {
+        // Persists selection for route detail guide filtering.
+        // Does not re-filter the feed — time is a guide-level field.
+        _state.update { it.copy(selectedTimeOfDay = timeOfDay) }
     }
 
     private fun onSearchQueryChanged(query: String) {
         _state.update { current ->
             current.copy(
                 searchQuery = query,
-                filteredRoutes = if (query.isBlank()) {
-                    current.routes.filterByTimeOfDay(current.selectedTimeOfDay)
-                } else {
-                    current.routes.filter { route ->
-                        route.from.contains(query, ignoreCase = true) ||
-                        route.to.contains(query, ignoreCase = true) ||
-                        route.via.contains(query, ignoreCase = true)
-                    }
-                },
+                filteredRoutes = current.boardableRoutes.filterBySearch(query),
             )
         }
     }
 
-    private fun onRouteClicked(route: Route) {
+    // ── Location ──────────────────────────────────────────────────────────────
+
+    private fun requestLocation() {
+        viewModelScope.launch { _effects.send(FeedEffect.RequestLocationPermission) }
+    }
+
+    private fun onPermissionResult(granted: Boolean) {
+        _state.update { it.copy(locationPermissionGranted = granted) }
+        if (granted) viewModelScope.launch { _effects.send(FeedEffect.GetLocation) }
+    }
+
+    private fun onLocationReceived(lat: Double, lng: Double) {
+        _state.update { it.copy(userLat = lat, userLng = lng) }
+
+        // Phase 1: immediate sort using termini from route documents
+        recomputeBoardable()
+
+        // Phase 2: fetch all stop lists in background, then re-sort
+        // using full intermediate stop data for accurate proximity
         viewModelScope.launch {
-            _effects.send(FeedEffect.NavigateToRouteDetail(route))
+            prefetchRouteStops(_state.value.routes)
+            recomputeBoardable()
+        }
+    }
+
+    // ── Navigation ────────────────────────────────────────────────────────────
+
+    private fun onRouteClicked(route: BoardableRoute) {
+        viewModelScope.launch {
+            _effects.send(FeedEffect.NavigateToRouteDetail(route.route))
         }
     }
 
     private fun onSeeAllClicked() {
-        viewModelScope.launch {
-            _effects.send(FeedEffect.NavigateToSeeAll)
-        }
+        viewModelScope.launch { _effects.send(FeedEffect.NavigateToSeeAll) }
     }
 
-    //  Helpers
+    // ── Tooltips ──────────────────────────────────────────────────────────────
 
-    private fun List<Route>.filterByTimeOfDay(timeOfDay: TimeOfDay): List<Route> =
-        if (timeOfDay == TimeOfDay.ANYTIME) this
-        else filter { it.bestTimeOfDay == timeOfDay || it.bestTimeOfDay == TimeOfDay.ANYTIME }
+    private fun observeTooltips() {
+        viewModelScope.launch {
+            tooltipManager.shouldShow(TooltipKey.FAB_CONTRIBUTE).collect { show ->
+                _state.update { it.copy(showFabTooltip = show) }
+            }
+        }
+        viewModelScope.launch {
+            tooltipManager.shouldShow(TooltipKey.TIME_OF_DAY_CHIPS).collect { show ->
+                _state.update { it.copy(showTimeFilterTooltip = show) }
+            }
+        }
+    }
 }
-
-// Mock data — replace with repository
-fun mockRoutes() = listOf(
-    Route(
-        id = "1",
-        from = "CBD",
-        to = "Westlands",
-        via = "via Uhuru Highway",
-        fareKsh = 50.0,
-        bestTimeOfDay = TimeOfDay.MORNING_RUSH,
-        steps = listOf(
-            RouteStep(
-                1,
-                "Board at Kencom, avoid Archives matatus during rush. Quick connection at Westlands roundabout."
-            ),
-            RouteStep(2, "Tell conductor 'Westlands roundabout' so you don't miss the stop."),
-        ),
-        tags = setOf(RouteTag.FAST),
-        confirmedCount = 47,
-        lastConfirmedAt = System.currentTimeMillis() - 7_200_000L,
-        warnings = "Do not use this route from 5-4pm"
-    ),
-    Route(
-        id = "2",
-        from = "CBD",
-        to = "Westlands",
-        via = "via Ngara shortcut",
-        fareKsh = 40.0,
-        bestTimeOfDay = TimeOfDay.MIDDAY,
-        timingReason = "Morning (7-9) before highway gets packed",
-        steps = listOf(
-            RouteStep(1, "Less known route through Ngara. Cheaper but needs one connection. Works great midday."),
-        ),
-        tags = setOf(RouteTag.CHEAP, RouteTag.LESS_CROWDED),
-        confirmedCount = 12,
-        lastConfirmedAt = System.currentTimeMillis() - 18_000_000L,
-    ),
-    Route(
-        id = "3",
-        from = "CBD",
-        to = "Eastleigh",
-        via = "along River Road",
-        fareKsh = 50.0,
-        bestTimeOfDay = TimeOfDay.MORNING_RUSH,
-        steps = listOf(
-            RouteStep(1, "Walk to University Way first, catch from there. Skips worst of CBD chaos."),
-        ),
-        tags = setOf(RouteTag.RELIABLE),
-        confirmedCount = 8,
-        lastConfirmedAt = System.currentTimeMillis() - 86_400_000L,
-    ),
-)

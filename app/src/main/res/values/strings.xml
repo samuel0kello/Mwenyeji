@@ -8,4 +8,111 @@
     <string name="onboarding_desc_2">Where to board, what to avoid, when to connect</string>
     <string name="onboarding_title_3">Shared and confirmed by locals</string>
     <string name="onboarding_desc_3">Advice stays fresh through community confirmation</string>
+    <string name="karen">Karen</string>
+    <string name="_3_people_confirmed_this_route">3 people confirmed this route</string>
+    <string name="confidence">Confidence</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="fare">Fare</string>
+    <string name="morning_rush">Morning rush</string>
+    <string name="midday">Midday</string>
+    <string name="evening">Evening</string>
+    <string name="discover">DISCOVER</string>
+    <string name="find_your_route_instantly">Find your route\ninstantly</string>
+    <string name="search_any_destination_step_by_step_matatu_directions_with_fares">Search any destination. Step-by-step matatu directions with fares.</string>
+    <string name="see_how_it_works">See how it works</string>
+    <string name="verify">VERIFY</string>
+    <string name="community_confirms_it">Community\nconfirms it</string>
+    <string name="every_route_verified_by_fellow_commuters_trust_the_collective">Every route verified by fellow commuters. Trust the collective.</string>
+    <string name="explore_routes">Explore Routes</string>
+    <string name="mwenyeji">MWENYEJI</string>
+    <string name="know_nairobi_like_a_local">Know Nairobi\nlike a local</string>
+    <string name="real_routes_real_fares_from_people_who_ride_daily">Real routes. Real fares. From people who ride daily.</string>
+    <string name="let_s_go">Let\'s go</string>
+    <string name="mwenyeji_7_04_am">MWENYEJI · 7:04 AM</string>
+    <string name="need_to_get_to_westlands">Need to get to Westlands?</string>
+    <string name="cursor">cursor</string>
+    <string name="cursor_blink">cursor blink</string>
+    <string name="time">TIME</string>
+    <string name="confirmed_2h_ago_3_locals">Confirmed 2h ago · 3 locals</string>
+    <string name="contribute">CONTRIBUTE</string>
+    <string name="share_what_you_know">Share what\nyou know</string>
+    <string name="add_a_route_in_under_2_minutes_help_the_next_commuter">Add a route in under 2 minutes. Help the next commuter.</string>
+    <string name="i_want_to_contribute">I want to contribute</string>
+    <string name="contributing_requires_a_google_account_so_the_community_knows_who_to_trust">Contributing requires a Google account so the community knows who to trust.</string>
+    <string name="your_routes_your_identity">Your routes, your identity</string>
+    <string name="contributions_are_linked_to_your_account_so_you_get_credit_for_your_knowledge">Contributions are linked to your account so you get credit for your knowledge.</string>
+    <string name="trusted_community">Trusted community</string>
+    <string name="signed_in_contributors_build_reputation_over_time_the_community_knows_who_to_trust">Signed-in contributors build reputation over time. The community knows who to trust.</string>
+    <string name="browsing_stays_free">Browsing stays free</string>
+    <string name="no_account_needed_to_read_routes_sign_in_only_when_you_want_to_contribute">No account needed to read routes. Sign in only when you want to contribute.</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="maybe_later">Maybe later</string>
+    <string name="sign_in_to_share_your_knowledge">Sign in to share your knowledge</string>
+    <string name="where_to">Where to?</string>
+    <string name="find_local_ways_to_move_around_nairobi">Find local ways to move around Nairobi</string>
+    <string name="search_area_stage_destination">Search area, stage, destination...</string>
+    <string name="know_a_route_add_it_here">Know a route? Add it here</string>
+    <string name="retry">Retry</string>
+    <string name="real_routes_fares"><![CDATA[Real routes & fares]]></string>
+
+    <string name="all_routes">All routes</string>
+    <string name="updated_routes_format">Updated • %1$d routes</string>
+    <string name="routes_near_you">Routes near you, sorted by walk</string>
+    <string name="see_all">See all</string>
+    <string name="finding_stops_near_you">Finding stops near you…</string>
+    <string name="no_routes_found_near_you">No routes found near you.\nTry searching by stage or route number.</string>
+    <string name="no_routes_found">No routes found.\nAllow location access for nearby routes.</string>
+    <string name="press_back_again_to_exit">Press back again to exit</string>
+    <string name="dismiss">Dismiss</string>
+
+    <!-- Route Card Strings -->
+    <string name="stops_remaining_format">%1$d stops</string>
+    <string name="peak_headway_format">every %1$dmin peak</string>
+    <string name="confirmed_at_format">Confirmed %1$s</string>
+    <string name="recently">recently</string>
+    <string name="just_now">just now</string>
+    <string name="minutes_ago_short">%1$dm ago</string>
+    <string name="hours_ago_short">%1$dh ago</string>
+    <string name="days_ago_short">%1$dd ago</string>
+    <string name="right_here">Right here</string>
+    <string name="walking_distance_m_format">%1$dm walk</string>
+    <string name="walking_distance_km_format">%1$.1fkm walk</string>
+    <string name="no_guides_yet">No guides yet</string>
+    <string name="one_guide">1 guide</string>
+    <string name="guides_count_format">%1$d guides</string>
+    <string name="stages_format">%1$d stages</string>
+    <string name="stages_and_frequency_format">%1$d stages · every %2$dmin peak</string>
+    <string name="via_format">via %1$s</string>
+
+    <!-- Time of Day -->
+    <string name="time_morning_rush">Morning rush</string>
+    <string name="time_midday">Midday</string>
+    <string name="time_evening_rush">Evening rush</string>
+    <string name="time_late_night">Late night</string>
+    <string name="time_anytime">Anytime</string>
+
+    <!-- Route Tags -->
+    <string name="tag_cheap">Cheap</string>
+    <string name="tag_fast">Fast</string>
+    <string name="tag_less_crowded">Less crowded</string>
+    <string name="tag_avoid_cbd">Avoid CBD</string>
+    <string name="tag_reliable">Reliable</string>
+
+    <!-- Domain Error Messages -->
+    <string name="error_no_connection">No internet connection. Check your network and try again.</string>
+    <string name="error_no_google_account">No Google account found on this device.</string>
+    <string name="error_service_unavailable">Service is temporarily unavailable. Try again in a moment.</string>
+    <string name="error_not_authorized">You don\'t have access to do that.</string>
+    <string name="error_session_expired">Your session expired. Please sign in again.</string>
+    <string name="error_invalid_credentials">Invalid credentials.</string>
+    <string name="error_user_not_found">No account found with that email.</string>
+    <string name="error_email_already_in_use">That email is already registered.</string>
+    <string name="error_weak_password">Password is too weak.</string>
+    <string name="error_account_disabled">This account has been disabled.</string>
+    <string name="error_unknown">Something went wrong. Please try again.</string>
+    <string name="no_matatu_stages_near_you">No matatu stages near you</string>
+    <string name="we_couldn_t_find_any_stops_within_500m">
+        We couldn\'t find any stops within 500m of where you are. Try searching by route number or stage name.
+    </string>
 </resources>
