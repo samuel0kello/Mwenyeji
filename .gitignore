@@ -18,4 +18,4 @@ app/release
 /beta
 ./node_modules
 
-seeder/gtfs/*.json
+seeder/*.json
