@@ -23,10 +23,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Groups
-import androidx.compose.material.icons.outlined.Route
-import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -37,7 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -225,7 +221,7 @@ private fun BenefitsList(benefits: List<Benefit>) {
 }
 
 @Composable
-private fun SignInBenefit(icon: ImageVector, title: String, body: String) {
+private fun SignInBenefit(icon: Int, title: String, body: String) {
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
     val spacing = MwenyejiTheme.spacing
@@ -237,7 +233,7 @@ private fun SignInBenefit(icon: ImageVector, title: String, body: String) {
         verticalAlignment = Alignment.Top,
     ) {
         Icon(
-            imageVector = icon,
+            painterResource(icon),
             contentDescription = null,
             tint = colors.primary,
             modifier = Modifier.size(sizes.iconSmall),
@@ -252,7 +248,7 @@ private fun SignInBenefit(icon: ImageVector, title: String, body: String) {
 
 @Immutable
 private data class Benefit(
-    val icon: ImageVector,
+    val icon: Int,
     val titleRes: Int,
     val bodyRes: Int,
 )
@@ -262,17 +258,17 @@ private fun rememberBenefits(): List<Benefit> =
     remember {
         listOf(
             Benefit(
-                icon = Icons.Outlined.Route,
+                icon = R.drawable.ic_outline_route,
                 titleRes = R.string.your_routes_your_identity,
                 bodyRes = R.string.contributions_are_linked_to_your_account_so_you_get_credit_for_your_knowledge,
             ),
             Benefit(
-                icon = Icons.Outlined.Verified,
+                icon = R.drawable.ic_outline_verified,
                 titleRes = R.string.trusted_community,
                 bodyRes = R.string.signed_in_contributors_build_reputation_over_time_the_community_knows_who_to_trust,
             ),
             Benefit(
-                icon = Icons.Outlined.Groups,
+                icon = R.drawable.ic_outline_groups,
                 titleRes = R.string.browsing_stays_free,
                 bodyRes = R.string.no_account_needed_to_read_routes_sign_in_only_when_you_want_to_contribute,
             ),

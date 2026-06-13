@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -37,13 +35,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.feature.feed.navigation.FeedsGraph
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
@@ -159,6 +158,7 @@ private fun ContributeFab(isOpen: Boolean, onClick: () -> Unit, modifier: Modifi
         modifier =
             modifier
                 .size(48.dp)
+                .clickable(onClick = onClick)
                 // Lifts the FAB above the bar visually
                 .offset(y = (-10).dp)
                 .shadow(
@@ -167,12 +167,11 @@ private fun ContributeFab(isOpen: Boolean, onClick: () -> Unit, modifier: Modifi
                     ambientColor = MwenyejiTheme.colorScheme.primary,
                     spotColor = MwenyejiTheme.colorScheme.primary,
                 ).clip(RoundedCornerShape(14.dp))
-                .background(MwenyejiTheme.colorScheme.primary)
-                .clickable(onClick = onClick),
+                .background(MwenyejiTheme.colorScheme.primary),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            imageVector = Icons.Default.Add,
+            painter = painterResource(R.drawable.ic_outline_add),
             contentDescription = if (isOpen) "Close contribute sheet" else "Contribute a guide",
             tint = MwenyejiTheme.colorScheme.onPrimary,
             modifier =
@@ -186,8 +185,8 @@ private fun ContributeFab(isOpen: Boolean, onClick: () -> Unit, modifier: Modifi
 @Composable
 fun RowScope.AppBottomNavigationBarItem(
     modifier: Modifier = Modifier,
-    icon: ImageVector,
-    selectedIcon: ImageVector,
+    icon: Int,
+    selectedIcon: Int,
     label: String,
     selected: Boolean,
     onClick: () -> Unit,
@@ -229,7 +228,14 @@ fun RowScope.AppBottomNavigationBarItem(
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector = if (isShowingSelected) selectedIcon else icon,
+                painter =
+                    if (isShowingSelected) {
+                        painterResource(selectedIcon)
+                    } else {
+                        painterResource(
+                            icon,
+                        )
+                    },
                 contentDescription = label,
                 tint = color,
                 modifier =

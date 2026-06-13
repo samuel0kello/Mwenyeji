@@ -16,11 +16,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.samuelokello.mwenyeji.presentation.designsystem.components.button.MwenyejiButton
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 /**
@@ -42,7 +41,7 @@ import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
  */
 @Composable
 fun MwenyejiEmptyState(
-    icon: ImageVector,
+    icon: Int,
     heading: String,
     body: String,
     modifier: Modifier = Modifier,
@@ -72,7 +71,7 @@ fun MwenyejiEmptyState(
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector = icon,
+                painter = painterResource(icon),
                 contentDescription = null,
                 tint = iconTint,
                 modifier = Modifier.size(iconSize),

@@ -1,5 +1,6 @@
 package com.samuelokello.mwenyeji.feature.feed.route
 
+import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,12 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.StarOutline
-import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -36,12 +31,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.data.models.Guide
-import com.samuelokello.mwenyeji.data.models.Route
 import com.samuelokello.mwenyeji.data.models.RouteStep
 import com.samuelokello.mwenyeji.data.models.RouteTag
 import com.samuelokello.mwenyeji.feature.feed.components.RouteTagChip
@@ -89,7 +86,10 @@ fun RouteDetailsScreen(
 
         state.route == null -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Route not found", color = MwenyejiTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    text = stringResource(R.string.route_not_found),
+                    color = MwenyejiTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
 
@@ -116,7 +116,7 @@ fun RouteDetailsScreenContent(
 ) {
     val route = state.route ?: return
     val colors = MwenyejiTheme.colorScheme
-    val typography = MwenyejiTheme.typography
+    MwenyejiTheme.typography
 
     Scaffold(
         modifier = modifier,
@@ -136,10 +136,16 @@ fun RouteDetailsScreenContent(
                     ) {
                         route.routeNumber?.let { RouteTagChip(label = it, isPrimary = true) }
                         if (route.stopCount > 0) {
-                            RouteTagChip(label = "${route.stopCount} stages")
+                            RouteTagChip(
+                                label =
+                                    stringResource(
+                                        R.string.stages_format,
+                                        route.stopCount,
+                                    ),
+                            )
                         }
                         route.peakHeadwayMins?.let {
-                            RouteTagChip(label = "Every ${it}min peak")
+                            RouteTagChip(label = stringResource(R.string.peak_headway_format, it))
                         }
                     }
                 },
@@ -153,7 +159,10 @@ fun RouteDetailsScreenContent(
         },
     ) { paddingValues ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding =
                 androidx.compose.foundation.layout.PaddingValues(
@@ -163,7 +172,10 @@ fun RouteDetailsScreenContent(
             if (state.isLoading) {
                 item(key = "guides_loading") {
                     Box(
-                        modifier = Modifier.fillMaxWidth().padding(32.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp),
                         contentAlignment = Alignment.Center,
                     ) { CircularProgressIndicator(color = colors.primary) }
                 }
@@ -225,7 +237,10 @@ private fun GuideCard(
         containerColor = colors.surfaceContainer,
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             // Guide header — number + contributor + confidence
@@ -235,7 +250,12 @@ private fun GuideCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = if (totalGuides > 1) "Guide $guideNumber of $totalGuides" else "Community guide",
+                    text =
+                        if (totalGuides > 1) {
+                            stringResource(R.string.guide_count_of_total, guideNumber, totalGuides)
+                        } else {
+                            stringResource(R.string.community_guide)
+                        },
                     style = typography.labelSmall,
                     color = colors.onSurfaceVariant,
                 )
@@ -244,13 +264,17 @@ private fun GuideCard(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.StarOutline,
+                        painter = painterResource(R.drawable.ic_outline_star),
                         contentDescription = null,
                         tint = colors.onSurfaceVariant,
                         modifier = Modifier.size(12.dp),
                     )
                     Text(
-                        text = "Confirmed ${guide.confirmedCount}×",
+                        text =
+                            stringResource(
+                                R.string.confirmed_count_format,
+                                guide.confirmedCount,
+                            ),
                         style = typography.labelSmall,
                         color = colors.onSurfaceVariant,
                     )
@@ -297,24 +321,24 @@ private fun GuideCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 FeedbackButton(
-                    label = "Works",
-                    icon = Icons.Outlined.Check,
+                    label = stringResource(R.string.verdict_works),
+                    icon = R.drawable.ic_outline_check_circle,
                     accentColor = colors.success,
                     isSelected = selectedVerdict == RouteVerdict.WORKS,
                     onClick = { onVerdictSelected(RouteVerdict.WORKS) },
                     modifier = Modifier.weight(1f),
                 )
                 FeedbackButton(
-                    label = "Didn't",
-                    icon = Icons.Outlined.Close,
+                    label = stringResource(R.string.verdict_didnt),
+                    icon = R.drawable.ic_outline_close,
                     accentColor = colors.error,
                     isSelected = selectedVerdict == RouteVerdict.DIDNT,
                     onClick = { onVerdictSelected(RouteVerdict.DIDNT) },
                     modifier = Modifier.weight(1f),
                 )
                 FeedbackButton(
-                    label = "Outdated",
-                    icon = Icons.Outlined.Warning,
+                    label = stringResource(R.string.verdict_outdated),
+                    icon = R.drawable.ic_outline_warning,
                     accentColor = colors.warning,
                     isSelected = selectedVerdict == RouteVerdict.OUTDATED,
                     onClick = { onVerdictSelected(RouteVerdict.OUTDATED) },
@@ -335,20 +359,24 @@ private fun NoGuidesYet(routeNumber: String?, onNavigateToContribute: () -> Unit
         containerColor = colors.surfaceContainer,
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(24.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = "No local guides yet",
+                text = stringResource(R.string.no_local_guides_yet),
                 style = MwenyejiTheme.typography.titleMedium,
                 color = colors.onSurface,
                 textAlign = TextAlign.Center,
             )
+            val routeDesc =
+                routeNumber?.let { stringResource(R.string.route_number_format, it) }
+                    ?: stringResource(R.string.this_route)
             Text(
-                text = "Be the first to share how to navigate${
-                    routeNumber?.let { " route $it" } ?: " this route"
-                }.",
+                text = stringResource(R.string.be_the_first_to_share_format, routeDesc),
                 style = MwenyejiTheme.typography.bodyMedium,
                 color = colors.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -364,13 +392,13 @@ private fun NoGuidesYet(routeNumber: String?, onNavigateToContribute: () -> Unit
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.Add,
+                        painter = painterResource(R.drawable.ic_outline_add),
                         contentDescription = null,
                         tint = colors.onPrimary,
                         modifier = Modifier.size(16.dp),
                     )
                     Text(
-                        text = "Add the first guide",
+                        text = stringResource(R.string.add_the_first_guide),
                         style = MwenyejiTheme.typography.labelMedium,
                         color = colors.onPrimary,
                     )
@@ -383,6 +411,7 @@ private fun NoGuidesYet(routeNumber: String?, onNavigateToContribute: () -> Unit
 @Composable
 private fun RouteDetailBottomBar(guideCount: Int, onNavigateToContribute: () -> Unit, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
+    LocalContext.current
     Column(
         modifier =
             modifier
@@ -392,29 +421,33 @@ private fun RouteDetailBottomBar(guideCount: Int, onNavigateToContribute: () -> 
     ) {
         HorizontalDivider(color = colors.border, thickness = 1.dp)
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
+            val guideCountText =
+                when (guideCount) {
+                    0 -> stringResource(R.string.no_guides_yet)
+                    1 -> stringResource(R.string.one_guide)
+                    else -> stringResource(R.string.guides_count_format, guideCount)
+                }
             Text(
-                text =
-                    if (guideCount > 0) {
-                        "$guideCount guide${if (guideCount > 1) "s" else ""}"
-                    } else {
-                        "No guides yet"
-                    },
+                text = guideCountText,
                 style = MwenyejiTheme.typography.labelMedium,
                 color = colors.onSurfaceVariant,
             )
             TextButton(onClick = onNavigateToContribute) {
                 Icon(
-                    imageVector = Icons.Outlined.Add,
+                    painter = painterResource(R.drawable.ic_outline_add),
                     contentDescription = null,
                     tint = colors.primary,
                     modifier = Modifier.size(16.dp),
                 )
                 Spacer(Modifier.size(4.dp))
-                Text(text = "Add guide", color = colors.primary)
+                Text(text = stringResource(R.string.add_guide), color = colors.primary)
             }
         }
     }
@@ -423,7 +456,7 @@ private fun RouteDetailBottomBar(guideCount: Int, onNavigateToContribute: () -> 
 @Composable
 private fun FeedbackButton(
     label: String,
-    icon: ImageVector,
+    icon: Int,
     accentColor: Color,
     isSelected: Boolean,
     onClick: () -> Unit,
@@ -442,11 +475,19 @@ private fun FeedbackButton(
         elevation = MwenyejiTheme.elevation.level0,
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Icon(imageVector = icon, contentDescription = label, tint = accentColor, modifier = Modifier.size(18.dp))
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = label,
+                tint = accentColor,
+                modifier = Modifier.size(18.dp),
+            )
             Text(text = label, style = MwenyejiTheme.typography.labelMedium, color = accentColor, textAlign = TextAlign.Center)
         }
     }
@@ -456,7 +497,11 @@ private fun FeedbackButton(
 fun RouteHint(reason: String, modifier: Modifier = Modifier) {
     val colors = MwenyejiTheme.colorScheme
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(text = "WORKS BEST WHEN", style = MwenyejiTheme.typography.labelSmall, color = colors.primary)
+        Text(
+            text = stringResource(R.string.works_best_when),
+            style = MwenyejiTheme.typography.labelSmall,
+            color = colors.primary,
+        )
         Text(text = reason, style = MwenyejiTheme.typography.bodyMedium, color = colors.onSurface)
     }
 }
@@ -464,7 +509,11 @@ fun RouteHint(reason: String, modifier: Modifier = Modifier) {
 @Composable
 fun HowToNavigate(steps: List<RouteStep>, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(text = "HOW TO DO IT", style = MwenyejiTheme.typography.labelSmall, color = MwenyejiTheme.colorScheme.onSurfaceVariant)
+        Text(
+            text = stringResource(R.string.how_to_do_it),
+            style = MwenyejiTheme.typography.labelSmall,
+            color = MwenyejiTheme.colorScheme.onSurfaceVariant,
+        )
         steps.forEach { step -> Step(stepNumber = "${step.order}", stepDescription = step.instruction) }
     }
 }
@@ -478,7 +527,10 @@ fun Step(stepNumber: String, stepDescription: String, modifier: Modifier = Modif
         verticalAlignment = Alignment.Top,
     ) {
         Box(
-            modifier = Modifier.size(28.dp).background(color = colors.primary, shape = CircleShape),
+            modifier =
+                Modifier
+                    .size(28.dp)
+                    .background(color = colors.primary, shape = CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Text(text = stepNumber, style = MwenyejiTheme.typography.labelMedium, color = colors.onPrimary, textAlign = TextAlign.Center)
@@ -496,15 +548,25 @@ fun Warning(warning: String, modifier: Modifier = Modifier) {
         elevation = MwenyejiTheme.elevation.level0,
         containerColor = colors.warningContainer.copy(alpha = 0.15f),
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    imageVector = Icons.Outlined.Warning,
+                    painter = painterResource(R.drawable.ic_outline_warning),
                     contentDescription = null,
                     tint = colors.warning,
                     modifier = Modifier.size(14.dp),
                 )
-                Text(text = "LOCAL WARNINGS", style = MwenyejiTheme.typography.labelSmall, color = colors.warning)
+                Text(
+                    text = stringResource(R.string.local_warnings),
+                    style = MwenyejiTheme.typography.labelSmall,
+                    color = colors.warning,
+                )
             }
             warning.lines().filter { it.isNotBlank() }.forEach { line ->
                 Text(text = "• $line", style = MwenyejiTheme.typography.bodyMedium, color = colors.onWarningContainer)
@@ -513,15 +575,15 @@ fun Warning(warning: String, modifier: Modifier = Modifier) {
     }
 }
 
-private fun Long.toRelativeTime(): String {
+private fun Long.toRelativeTime(context: Context): String {
     val diff = System.currentTimeMillis() - this
     val minutes = diff / 60_000
-    val hours = diff / 3_600_000
+    val hours = diff / 3_360_000
     val days = diff / 86_400_000
     return when {
-        minutes < 1 -> "just now"
-        minutes < 60 -> "${minutes}m ago"
-        hours < 24 -> "${hours}h ago"
-        else -> "${days}d ago"
+        minutes < 1 -> context.getString(R.string.just_now)
+        minutes < 60 -> context.getString(R.string.minutes_ago_short, minutes.toInt())
+        hours < 24 -> context.getString(R.string.hours_ago_short, hours.toInt())
+        else -> context.getString(R.string.days_ago_short, days.toInt())
     }
 }

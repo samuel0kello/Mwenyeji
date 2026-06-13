@@ -9,16 +9,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -28,8 +23,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
@@ -80,7 +77,7 @@ private fun MwenyejiSnackbar(message: SnackBarMessage, onAction: () -> Unit, onD
                 Triple(
                     colors.success,
                     colors.onSuccess,
-                    Icons.Outlined.Check,
+                    R.drawable.ic_outline_check_circle,
                 )
             }
 
@@ -88,7 +85,7 @@ private fun MwenyejiSnackbar(message: SnackBarMessage, onAction: () -> Unit, onD
                 Triple(
                     colors.error,
                     colors.onErrorContainer,
-                    Icons.Outlined.ErrorOutline,
+                    R.drawable.ic_outline_error,
                 )
             }
 
@@ -96,7 +93,7 @@ private fun MwenyejiSnackbar(message: SnackBarMessage, onAction: () -> Unit, onD
                 Triple(
                     colors.info,
                     colors.onInfoContainer,
-                    Icons.Outlined.Info,
+                    R.drawable.ic_outline_info,
                 )
             }
         }
@@ -122,7 +119,7 @@ private fun MwenyejiSnackbar(message: SnackBarMessage, onAction: () -> Unit, onD
         ) {
             // Type icon
             Icon(
-                imageVector = icon,
+                painter = painterResource(icon),
                 contentDescription = null,
                 tint = contentColor,
                 modifier = Modifier.size(18.dp),

@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.samuelokello.mwenyeji.core.InAppUpdateManager
 import com.samuelokello.mwenyeji.presentation.designsystem.components.snackbar.SnackBarManager
+import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiAppTheme
 import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
@@ -42,7 +43,7 @@ class MainActivity : ComponentActivity() {
             }
 
         setContent {
-            _root_ide_package_.com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiAppTheme {
+            MwenyejiAppTheme {
                 App(snackbarManager = snackbarManager)
             }
         }

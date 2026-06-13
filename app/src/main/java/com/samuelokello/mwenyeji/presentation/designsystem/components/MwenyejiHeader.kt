@@ -11,17 +11,12 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
@@ -38,12 +33,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.google.common.collect.ImmutableList
+import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiAppTheme
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
@@ -189,7 +185,10 @@ fun MwenyejiLargeHeaderBar(
                 .windowInsetsPadding(WindowInsets.statusBars),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
             verticalAlignment = Alignment.Top,
         ) {
             if (onNavigateBack != null) {
@@ -259,7 +258,10 @@ fun MwenyejiRouteBar(
     val colors = MwenyejiTheme.colorScheme
 
     Column(
-        modifier = modifier.fillMaxWidth().background(backgroundColor),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(backgroundColor),
         verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
         TopAppBar(
@@ -334,7 +336,10 @@ fun MwenyejiStepBar(
     val colors = MwenyejiTheme.colorScheme
 
     Column(
-        modifier = modifier.fillMaxWidth().background(backgroundColor),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(backgroundColor),
     ) {
         // Top app bar row keeps the same height as other top bars.
         TopAppBar(
@@ -397,7 +402,7 @@ private fun BackIconButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
             ),
     ) {
         Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            painter = painterResource(R.drawable.ic_outline_arrow_back),
             contentDescription = "Navigate back",
         )
     }

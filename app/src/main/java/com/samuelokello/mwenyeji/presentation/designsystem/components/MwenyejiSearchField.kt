@@ -16,9 +16,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -27,12 +24,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiAppTheme
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
-import com.samuelokello.mwenyeji.presentation.ui.theme.typography.TextStyles
 
 @Composable
 fun MwenyejiSearchBar(state: TextFieldState, placeholder: String, modifier: Modifier = Modifier, onSearchAction: () -> Unit = {}) {
@@ -62,7 +60,7 @@ fun MwenyejiSearchBar(state: TextFieldState, placeholder: String, modifier: Modi
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                    imageVector = Icons.Default.Search,
+                    painter = painterResource(R.drawable.ic_outline_search),
                     contentDescription = null,
                     tint = MwenyejiTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp),
@@ -87,7 +85,7 @@ fun MwenyejiSearchBar(state: TextFieldState, placeholder: String, modifier: Modi
                         modifier = Modifier.size(20.dp),
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Close,
+                            painter = painterResource(R.drawable.ic_outline_close),
                             contentDescription = "Clear search",
                             tint = MwenyejiTheme.colorScheme.onSurfaceVariant,
                         )

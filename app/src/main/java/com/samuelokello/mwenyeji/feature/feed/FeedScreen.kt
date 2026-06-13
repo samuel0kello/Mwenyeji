@@ -41,10 +41,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -64,6 +60,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -79,6 +76,7 @@ import com.samuelokello.mwenyeji.data.models.TimeOfDay
 import com.samuelokello.mwenyeji.feature.feed.components.RouteCard
 import com.samuelokello.mwenyeji.presentation.designsystem.components.MwenyejiEmptyState
 import com.samuelokello.mwenyeji.presentation.designsystem.components.MwenyejiLargeHeaderBar
+import com.samuelokello.mwenyeji.presentation.designsystem.components.MwenyejiLoadingIndicator
 import com.samuelokello.mwenyeji.presentation.designsystem.components.MwenyejiSearchBar
 import com.samuelokello.mwenyeji.presentation.designsystem.components.pulltorefresh.MwenyejiPullToRefresh
 import com.samuelokello.mwenyeji.presentation.designsystem.components.snackbar.SnackBarManager
@@ -129,7 +127,7 @@ fun FeedScreen(
     }
 
     val dismissLabel = stringResource(R.string.dismiss)
-    LaunchedEffect(Unit) {
+    LaunchedEffect(onNavigateToRouteDetail, onNavigateToSeeAll) {
         viewModel.effects.collect { effect ->
             when (effect) {
                 is FeedEffect.NavigateToRouteDetail -> {
@@ -260,7 +258,7 @@ internal fun FeedScreenContent(
                     onClick = onNavigateToContribute,
                     containerColor = MaterialTheme.colorScheme.primary,
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = null)
+                    Icon(painterResource(R.drawable.ic_outline_add), contentDescription = null)
                 }
             }
         },
@@ -273,7 +271,7 @@ internal fun FeedScreenContent(
                             .fillMaxSize()
                             .padding(paddingValues),
                     contentAlignment = Alignment.Center,
-                ) { CircularProgressIndicator(color = colors.primary) }
+                ) { MwenyejiLoadingIndicator() }
             }
 
             state.error != null -> {
@@ -367,7 +365,7 @@ internal fun FeedScreenContent(
                         if (state.filteredRoutes.isEmpty() && state.searchQuery.isEmpty()) {
                             item(key = "empty_state") {
                                 MwenyejiEmptyState(
-                                    icon = Icons.Default.LocationOn,
+                                    icon = R.drawable.ic_outline_location_on,
                                     heading = stringResource(R.string.no_matatu_stages_near_you),
                                     body =
                                         stringResource(

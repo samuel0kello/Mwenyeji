@@ -17,10 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Commute
-import androidx.compose.material.icons.outlined.DataExploration
-import androidx.compose.material.icons.outlined.Earbuds
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,8 +27,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.data.models.TimeOfDay
 import com.samuelokello.mwenyeji.feature.onboarding.animation.OnboardingPage
 import com.samuelokello.mwenyeji.feature.onboarding.animation.RememberTimelineRunner
@@ -41,25 +38,25 @@ import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 enum class UserType(
     val label: String,
-    val icon: ImageVector,
+    val icon: Int,
     val description: String,
     val defaultTimeOfDay: TimeOfDay,
 ) {
     DAILY_COMMUTER(
         label = "Daily commuter",
-        icon = Icons.Default.Commute,
+        icon = R.drawable.ic_outline_commute,
         description = "I know my routes, just want to stay updated",
         defaultTimeOfDay = TimeOfDay.MORNING_RUSH,
     ),
     EXPLORING(
         label = "Exploring Nairobi",
-        icon = Icons.Outlined.DataExploration,
+        icon = R.drawable.ic_outline_data_exploration,
         description = "I need help navigating the city",
         defaultTimeOfDay = TimeOfDay.MIDDAY,
     ),
     CONTRIBUTOR(
         label = "Local expert",
-        icon = Icons.Outlined.Earbuds,
+        icon = R.drawable.ic_outline_earbuds,
         description = "I want to share what I know with others",
         defaultTimeOfDay = TimeOfDay.ANYTIME,
     ),
@@ -148,7 +145,7 @@ private fun UserTypeOption(userType: UserType, isSelected: Boolean, onClick: () 
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        Icon(userType.icon, contentDescription = null)
+        Icon(painter = painterResource(userType.icon), contentDescription = null)
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = userType.label,

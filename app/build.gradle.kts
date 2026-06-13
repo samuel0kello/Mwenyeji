@@ -19,7 +19,7 @@ val localProperties =
 
 android {
     namespace = "com.samuelokello.mwenyeji"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.samuelokello.mwenyeji"
@@ -103,15 +103,23 @@ android {
 }
 
 dependencies {
+
+    // Core Compose & Lifecycle
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.navigation.compose)
+
     implementation(platform(libs.androidx.compose.bom))
+    // MATERIAL 3 EXPRESSIVE
+
+    //  UI Foundation
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.material3)
 
     implementation(libs.googleid)
     testImplementation(libs.junit)
@@ -122,9 +130,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    implementation(libs.androidx.core.splashscreen)
-    implementation(libs.androidx.material.icons.extended)
-    implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
 
 //    koin
@@ -132,8 +137,6 @@ dependencies {
     implementation(libs.bundles.koin)
 
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.composable.core)
-    implementation(libs.material)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)

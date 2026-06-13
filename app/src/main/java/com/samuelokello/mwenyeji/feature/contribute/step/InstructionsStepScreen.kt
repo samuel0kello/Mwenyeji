@@ -8,9 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -18,8 +15,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.feature.contribute.ContributeActions
 import com.samuelokello.mwenyeji.feature.contribute.ContributeState
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
@@ -69,7 +68,7 @@ fun InstructionsStepScreen(state: ContributeState, onAction: (ContributeActions)
                         modifier = Modifier.size(36.dp),
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Close,
+                            painter = painterResource(R.drawable.ic_outline_close),
                             contentDescription = "Remove step ${index + 1}",
                             tint = colors.onSurfaceVariant,
                             modifier = Modifier.size(16.dp),
@@ -84,7 +83,7 @@ fun InstructionsStepScreen(state: ContributeState, onAction: (ContributeActions)
             onClick = { onAction(ContributeActions.AddStep) },
         ) {
             Icon(
-                imageVector = Icons.Outlined.Add,
+                painter = painterResource(R.drawable.ic_outline_add),
                 contentDescription = null,
                 tint = colors.primary,
                 modifier = Modifier.size(16.dp),

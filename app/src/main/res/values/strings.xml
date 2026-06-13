@@ -115,4 +115,30 @@
     <string name="we_couldn_t_find_any_stops_within_500m">
         We couldn\'t find any stops within 500m of where you are. Try searching by route number or stage name.
     </string>
+
+    <!-- Route Details -->
+    <string name="route_not_found">Route not found</string>
+    <string name="guide_count_of_total">Guide %1$d of %2$d</string>
+    <string name="community_guide">Community guide</string>
+    <string name="confirmed_count_format">Confirmed %1$d×</string>
+    <string name="verdict_works">Works</string>
+    <string name="verdict_didnt">Didn\'t</string>
+    <string name="verdict_outdated">Outdated</string>
+    <string name="no_local_guides_yet">No local guides yet</string>
+    <string name="be_the_first_to_share_format">Be the first to share how to navigate %1$s.</string>
+    <string name="this_route">this route</string>
+    <string name="route_number_format">route %1$s</string>
+    <string name="add_the_first_guide">Add the first guide</string>
+    <string name="add_guide">Add guide</string>
+    <string name="works_best_when">WORKS BEST WHEN</string>
+    <string name="how_to_do_it">HOW TO DO IT</string>
+    <string name="local_warnings">LOCAL WARNINGS</string>
+
+    <!-- Feedback Messages -->
+    <string name="feedback_works">Thanks for confirming this guide works!</string>
+    <string name="feedback_didnt_work">Thanks — we\'ll note this guide had issues.</string>
+    <string name="feedback_outdated">Thanks! We\'ll flag this guide as potentially outdated.</string>
+    <string name="feedback_removed">Feedback removed.</string>
+    <string name="failed_to_load_route">Failed to load route</string>
+    <string name="failed_to_load_guides">Failed to load guides</string>
 </resources>
