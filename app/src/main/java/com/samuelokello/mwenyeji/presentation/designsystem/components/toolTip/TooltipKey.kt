@@ -29,7 +29,13 @@ enum class TooltipKey {
  * Tap it to dismiss early.
  */
 @Composable
-fun MwenyejiTooltip(visible: Boolean, text: String, modifier: Modifier = Modifier, emoji: String = "💡", onDismiss: () -> Unit = {}) {
+fun MwenyejiTooltip(
+    visible: Boolean,
+    text: String,
+    modifier: Modifier = Modifier,
+    emoji: String = "💡",
+    onDismiss: () -> Unit = {},
+) {
     val colors = MwenyejiTheme.colorScheme
 
     if (!visible) return

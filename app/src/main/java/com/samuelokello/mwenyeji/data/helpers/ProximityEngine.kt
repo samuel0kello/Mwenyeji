@@ -1,5 +1,7 @@
 package com.samuelokello.mwenyeji.data.helpers
 
+import com.samuelokello.mwenyeji.data.helpers.ProximityEngine.BOARDING_RADIUS_KM
+import com.samuelokello.mwenyeji.data.helpers.ProximityEngine.MIN_STOPS_REMAINING
 import com.samuelokello.mwenyeji.data.models.BoardableRoute
 import com.samuelokello.mwenyeji.data.models.Route
 import com.samuelokello.mwenyeji.data.models.RouteStop
@@ -99,7 +101,11 @@ object ProximityEngine {
      *
      * Returns null if no boardable stop exists within radius.
      */
-    private fun findBoardingPoint(stops: List<RouteStop>, userLat: Double, userLng: Double): BoardingPoint? {
+    private fun findBoardingPoint(
+        stops: List<RouteStop>,
+        userLat: Double,
+        userLng: Double,
+    ): BoardingPoint? {
         var nearestStop: RouteStop? = null
         var nearestDist = Double.MAX_VALUE
         var nearestIndex = -1
@@ -133,7 +139,12 @@ object ProximityEngine {
         val terminus: String,
     )
 
-    private fun haversineKm(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Double {
+    private fun haversineKm(
+        lat1: Double,
+        lng1: Double,
+        lat2: Double,
+        lng2: Double,
+    ): Double {
         val r = 6371.0
         val dLat = Math.toRadians(lat2 - lat1)
         val dLng = Math.toRadians(lng2 - lng1)

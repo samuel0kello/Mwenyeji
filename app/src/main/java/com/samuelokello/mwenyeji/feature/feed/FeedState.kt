@@ -32,6 +32,7 @@ data class FeedState(
     // Tooltips
     val showFabTooltip: Boolean = false,
     val showTimeFilterTooltip: Boolean = false,
+    val suggestedRoute: BoardableRoute? = null,
 )
 
 sealed interface FeedAction {
@@ -70,7 +71,9 @@ sealed interface FeedAction {
 // Effect — one-time events (navigation, toasts)
 sealed interface FeedEffect {
     data class NavigateToRouteDetail(
-        val route: Route,
+        val routeId: String,
+        val from: String,
+        val to: String,
     ) : FeedEffect
 
     data object NavigateToSeeAll : FeedEffect

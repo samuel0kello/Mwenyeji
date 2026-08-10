@@ -33,7 +33,10 @@ import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.TextSecon
 import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.TextTertiary
 
 @Composable
-fun ConfidenceSection(animate: Boolean, modifier: Modifier = Modifier) {
+fun ConfidenceSection(
+    animate: Boolean,
+    modifier: Modifier = Modifier,
+) {
     val barProgress by animateFloatAsState(
         targetValue = if (animate) 0.8f else 0f,
         animationSpec =

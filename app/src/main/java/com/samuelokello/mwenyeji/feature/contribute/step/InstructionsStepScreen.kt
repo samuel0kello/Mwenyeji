@@ -24,7 +24,11 @@ import com.samuelokello.mwenyeji.feature.contribute.ContributeState
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 @Composable
-fun InstructionsStepScreen(state: ContributeState, onAction: (ContributeActions) -> Unit, modifier: Modifier = Modifier) {
+fun InstructionsStepScreen(
+    state: ContributeState,
+    onAction: (ContributeActions) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
 

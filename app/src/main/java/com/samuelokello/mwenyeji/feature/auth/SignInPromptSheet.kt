@@ -1,10 +1,5 @@
 package com.samuelokello.mwenyeji.feature.auth
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -39,6 +34,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.R
+import com.samuelokello.mwenyeji.presentation.designsystem.animation.FadeAnimatedVisibility
+import com.samuelokello.mwenyeji.presentation.designsystem.animation.SlideAnimatedVisibility
 import com.samuelokello.mwenyeji.presentation.designsystem.components.button.MwenyejiButton
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiAppTheme
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
@@ -58,10 +55,8 @@ fun SignInPromptSheet(
             dismissEnabled = !isLoading,
         )
 
-        AnimatedVisibility(
+        SlideAnimatedVisibility(
             visible = visible,
-            enter = slideInVertically { it } + fadeIn(),
-            exit = slideOutVertically { it } + fadeOut(),
             modifier = Modifier.align(Alignment.BottomCenter),
         ) {
             SheetContent(
@@ -74,8 +69,12 @@ fun SignInPromptSheet(
 }
 
 @Composable
-private fun Scrim(visible: Boolean, onDismiss: () -> Unit, dismissEnabled: Boolean) {
-    AnimatedVisibility(visible = visible, enter = fadeIn(), exit = fadeOut()) {
+private fun Scrim(
+    visible: Boolean,
+    onDismiss: () -> Unit,
+    dismissEnabled: Boolean,
+) {
+    FadeAnimatedVisibility(visible = visible) {
         Box(
             modifier =
                 Modifier
@@ -92,7 +91,11 @@ private fun Scrim(visible: Boolean, onDismiss: () -> Unit, dismissEnabled: Boole
 }
 
 @Composable
-private fun SheetContent(isLoading: Boolean, onGoogleSignIn: () -> Unit, onDismiss: () -> Unit) {
+private fun SheetContent(
+    isLoading: Boolean,
+    onGoogleSignIn: () -> Unit,
+    onDismiss: () -> Unit,
+) {
     val colors =
         MwenyejiTheme.colorScheme
     val typography =
@@ -111,11 +114,13 @@ private fun SheetContent(isLoading: Boolean, onGoogleSignIn: () -> Unit, onDismi
                         topStart = cornerRadius.large,
                         topEnd = cornerRadius.large,
                     ),
-                ).background(colors.surface)
+                )
+                .background(colors.surface)
                 .padding(
                     horizontal = spacing.large,
                     vertical = spacing.extraLarge,
-                ).windowInsetsPadding(WindowInsets.navigationBars),
+                )
+                .windowInsetsPadding(WindowInsets.navigationBars),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         DragHandle()
@@ -143,10 +148,10 @@ private fun SheetContent(isLoading: Boolean, onGoogleSignIn: () -> Unit, onDismi
 
         Spacer(Modifier.height(spacing.extraLarge))
 
-        SignInButton(
-            isLoading = isLoading,
-            onClick = onGoogleSignIn,
-        )
+//        SignInButton(
+//            isLoading = isLoading,
+//            onClick = onGoogleSignIn,
+//        )
 
         Spacer(Modifier.height(spacing.large))
 
@@ -164,7 +169,10 @@ private fun SheetContent(isLoading: Boolean, onGoogleSignIn: () -> Unit, onDismi
 }
 
 @Composable
-private fun SignInButton(isLoading: Boolean, onClick: () -> Unit) {
+private fun SignInButton(
+    isLoading: Boolean,
+    onClick: () -> Unit,
+) {
     val colors =
         MwenyejiTheme.colorScheme
     val sizes =
@@ -221,7 +229,11 @@ private fun BenefitsList(benefits: List<Benefit>) {
 }
 
 @Composable
-private fun SignInBenefit(icon: Int, title: String, body: String) {
+private fun SignInBenefit(
+    icon: Int,
+    title: String,
+    body: String,
+) {
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
     val spacing = MwenyejiTheme.spacing

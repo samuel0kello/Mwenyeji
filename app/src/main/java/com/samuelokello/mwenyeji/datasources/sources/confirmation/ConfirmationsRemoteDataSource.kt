@@ -10,9 +10,16 @@ import com.samuelokello.mwenyeji.datasources.sources.routes.RoutesSchema
 import kotlinx.coroutines.tasks.await
 
 interface ConfirmationsRemoteDataSource {
-    suspend fun submitVerdict(routeId: String, userId: String, verdict: Verdict): NetworkResult<Unit>
+    suspend fun submitVerdict(
+        routeId: String,
+        userId: String,
+        verdict: Verdict,
+    ): NetworkResult<Unit>
 
-    suspend fun getUserVerdict(routeId: String, userId: String): NetworkResult<Verdict?>
+    suspend fun getUserVerdict(
+        routeId: String,
+        userId: String,
+    ): NetworkResult<Verdict?>
 }
 
 internal class FirebaseConfirmationsRemoteDataSource(
@@ -20,7 +27,11 @@ internal class FirebaseConfirmationsRemoteDataSource(
 ) : ConfirmationsRemoteDataSource {
     private val routes get() = firestore.collection(RoutesSchema.COLLECTION)
 
-    override suspend fun submitVerdict(routeId: String, userId: String, verdict: Verdict): NetworkResult<Unit> =
+    override suspend fun submitVerdict(
+        routeId: String,
+        userId: String,
+        verdict: Verdict,
+    ): NetworkResult<Unit> =
         safeFirebaseCall {
             val routeRef = routes.document(routeId)
             val confirmationRef =
@@ -68,7 +79,10 @@ internal class FirebaseConfirmationsRemoteDataSource(
                 }.await()
         }
 
-    override suspend fun getUserVerdict(routeId: String, userId: String): NetworkResult<Verdict?> =
+    override suspend fun getUserVerdict(
+        routeId: String,
+        userId: String,
+    ): NetworkResult<Verdict?> =
         safeFirebaseCall {
             routes
                 .document(routeId)

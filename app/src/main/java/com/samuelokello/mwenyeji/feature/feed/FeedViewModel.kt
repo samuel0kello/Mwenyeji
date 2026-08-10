@@ -2,6 +2,7 @@ package com.samuelokello.mwenyeji.feature.feed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.samuelokello.mwenyeji.core.ml.GuideSuggestionEngine
 import com.samuelokello.mwenyeji.data.helpers.DataResult
 import com.samuelokello.mwenyeji.data.helpers.DomainError
 import com.samuelokello.mwenyeji.data.helpers.ProximityEngine
@@ -27,11 +28,13 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 class FeedViewModel(
     private val routeRepository: RoutesRepository,
     private val prefs: MwenyejiPrefs,
     private val tooltipManager: TooltipManager,
+    private val suggestionEngine: GuideSuggestionEngine,
 ) : ViewModel() {
     private val _state = MutableStateFlow(FeedState())
     val state: StateFlow<FeedState> = _state.asStateFlow()
@@ -226,6 +229,26 @@ class FeedViewModel(
                 filteredRoutes = filtered,
             )
         }
+
+        generateSuggestion()
+    }
+
+    private fun generateSuggestion() {
+        val current = _state.value
+        val nearestRoute = current.boardableRoutes.firstOrNull { it.walkingDistanceKm < 0.5 } ?: return
+
+        val calendar = Calendar.getInstance()
+        val arrivalMinutes = (calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)).toFloat()
+
+        val suggestedRouteId =
+            suggestionEngine.suggestGuide(
+                stopId = nearestRoute.boardingStop.stopId,
+                arrivalMinutes = arrivalMinutes,
+                stopSequence = nearestRoute.boardingStop.sequence.toFloat(),
+            )
+
+        val suggestedBoardable = current.boardableRoutes.find { it.route.id == suggestedRouteId }
+        _state.update { it.copy(suggestedRoute = suggestedBoardable) }
     }
 
     // ── Filtering ─────────────────────────────────────────────────────────────
@@ -278,7 +301,10 @@ class FeedViewModel(
         if (granted) viewModelScope.launch { _effects.send(FeedEffect.GetLocation) }
     }
 
-    private fun onLocationReceived(lat: Double, lng: Double) {
+    private fun onLocationReceived(
+        lat: Double,
+        lng: Double,
+    ) {
         _state.update { it.copy(userLat = lat, userLng = lng) }
 
         // Phase 1: immediate sort using termini from route documents
@@ -296,7 +322,13 @@ class FeedViewModel(
 
     private fun onRouteClicked(route: BoardableRoute) {
         viewModelScope.launch {
-            _effects.send(FeedEffect.NavigateToRouteDetail(route.route))
+            _effects.send(
+                FeedEffect.NavigateToRouteDetail(
+                    routeId = route.route.id,
+                    from = route.boardingStop.name,
+                    to = route.onwardTerminus,
+                ),
+            )
         }
     }
 

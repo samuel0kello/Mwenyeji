@@ -21,7 +21,10 @@ import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 
 @Composable
-fun MwenyejiNavGraph(navController: NavHostController, onRequireAuth: (onAuthenticated: () -> Unit) -> Unit = {}) {
+fun MwenyejiNavGraph(
+    navController: NavHostController,
+    onRequireAuth: (onAuthenticated: () -> Unit) -> Unit = {},
+) {
     val prefs: MwenyejiPrefs = koinInject()
     var startDestination by remember { mutableStateOf<Any?>(null) }
 
@@ -41,7 +44,10 @@ fun MwenyejiNavGraph(navController: NavHostController, onRequireAuth: (onAuthent
     }
 }
 
-fun NavGraphBuilder.mainGraph(navController: NavHostController, onRequireAuth: (onAuthenticated: () -> Unit) -> Unit = {}) {
+fun NavGraphBuilder.mainGraph(
+    navController: NavHostController,
+    onRequireAuth: (onAuthenticated: () -> Unit) -> Unit = {},
+) {
     navigation<Main>(startDestination = FeedsGraph) {
         feedsNavGraph(navController, onRequireAuth)
         contributeNavGraph(navController)

@@ -10,7 +10,12 @@ import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 @Composable
-fun ScreenBottom(label: String, title: String, subtitle: String, modifier: Modifier = Modifier) {
+fun ScreenBottom(
+    label: String,
+    title: String,
+    subtitle: String,
+    modifier: Modifier = Modifier,
+) {
     Column(modifier = modifier) {
         Text(
             text = label,

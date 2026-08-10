@@ -70,7 +70,11 @@ fun ContributeScreen(
 }
 
 @Composable
-fun ContributeScreenContent(state: ContributeState, onAction: (ContributeActions) -> Unit, modifier: Modifier = Modifier) {
+fun ContributeScreenContent(
+    state: ContributeState,
+    onAction: (ContributeActions) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     StepScaffold(
         state = state,
         onAction = onAction,

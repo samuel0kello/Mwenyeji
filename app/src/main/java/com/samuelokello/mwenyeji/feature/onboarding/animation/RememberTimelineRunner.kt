@@ -8,7 +8,12 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 
 @Composable
-fun <E> RememberTimelineRunner(isActive: Boolean, timeline: List<TimelineStep<E>>, onEvent: (E) -> Unit, onReset: () -> Unit) {
+fun <E> rememberTimelineRunner(
+    isActive: Boolean,
+    timeline: List<TimelineStep<E>>,
+    onEvent: (E) -> Unit,
+    onReset: () -> Unit,
+) {
     LaunchedEffect(isActive) {
         if (!isActive) {
             onReset()

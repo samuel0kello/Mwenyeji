@@ -10,11 +10,17 @@ data class TimelineStep<E>(
 class TimelineBuilder<E> {
     private val steps = mutableListOf<TimelineStep<E>>()
 
-    fun step(delayMillis: Long, action: suspend (emit: suspend (E) -> Unit) -> Unit) {
+    fun step(
+        delayMillis: Long,
+        action: suspend (emit: suspend (E) -> Unit) -> Unit,
+    ) {
         steps += TimelineStep(delayMillis, listOf(action))
     }
 
-    fun parallel(delayMillis: Long, vararg actions: suspend (emit: suspend (E) -> Unit) -> Unit) {
+    fun parallel(
+        delayMillis: Long,
+        vararg actions: suspend (emit: suspend (E) -> Unit) -> Unit,
+    ) {
         steps += TimelineStep(delayMillis, actions.toList())
     }
 

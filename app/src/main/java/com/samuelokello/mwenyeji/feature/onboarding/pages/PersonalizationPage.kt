@@ -1,11 +1,5 @@
 package com.samuelokello.mwenyeji.feature.onboarding.pages
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -32,8 +26,9 @@ import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.data.models.TimeOfDay
 import com.samuelokello.mwenyeji.feature.onboarding.animation.OnboardingPage
-import com.samuelokello.mwenyeji.feature.onboarding.animation.RememberTimelineRunner
+import com.samuelokello.mwenyeji.feature.onboarding.animation.rememberTimelineRunner
 import com.samuelokello.mwenyeji.feature.onboarding.animation.timeline
+import com.samuelokello.mwenyeji.presentation.designsystem.animation.SlideAnimatedVisibility
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 enum class UserType(
@@ -67,7 +62,11 @@ sealed interface PersonalizationEvent {
 }
 
 @Composable
-fun PersonalizationPage(isActive: Boolean, selectedUserType: UserType?, onUserTypeSelected: (UserType) -> Unit) {
+fun PersonalizationPage(
+    isActive: Boolean,
+    selectedUserType: UserType?,
+    onUserTypeSelected: (UserType) -> Unit,
+) {
     var showOptions by remember { mutableStateOf(false) }
     val duration = MwenyejiTheme.duration
 
@@ -77,7 +76,7 @@ fun PersonalizationPage(isActive: Boolean, selectedUserType: UserType?, onUserTy
                 step(300) { emit -> emit(PersonalizationEvent.ShowOptions) }
             }
         }
-    RememberTimelineRunner(
+    rememberTimelineRunner(
         isActive = isActive,
         timeline = personalizationTimeline,
         onReset = { showOptions = false },
@@ -94,23 +93,8 @@ fun PersonalizationPage(isActive: Boolean, selectedUserType: UserType?, onUserTy
         title = "One quick question",
         subtitle = "We'll personalise your experience based on how you Navigate",
     ) {
-        AnimatedVisibility(
+        SlideAnimatedVisibility(
             visible = showOptions,
-            enter =
-                slideInVertically(
-                    animationSpec =
-                        spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessMediumLow,
-                        ),
-                    initialOffsetY = { it / 2 },
-                ) +
-                    fadeIn(
-                        tween(
-                            durationMillis = duration.NORMAL,
-                            easing = MwenyejiTheme.easing.decelerated,
-                        ),
-                    ),
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 UserType.entries.forEach { type ->
@@ -126,7 +110,11 @@ fun PersonalizationPage(isActive: Boolean, selectedUserType: UserType?, onUserTy
 }
 
 @Composable
-private fun UserTypeOption(userType: UserType, isSelected: Boolean, onClick: () -> Unit) {
+private fun UserTypeOption(
+    userType: UserType,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
     val colors = MwenyejiTheme.colorScheme
     val borderColor = if (isSelected) colors.primary else colors.border
     val containerColor =

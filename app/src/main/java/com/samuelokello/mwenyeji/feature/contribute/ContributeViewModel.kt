@@ -126,7 +126,10 @@ class ContributeViewModel(
         _state.update { it.copy(currentStep = it.currentStep - 1, errors = emptyMap()) }
     }
 
-    private fun onStepChanged(index: Int, value: String) {
+    private fun onStepChanged(
+        index: Int,
+        value: String,
+    ) {
         val updated = _state.value.steps.toMutableList()
         if (index in updated.indices) {
             updated[index] = value

@@ -30,9 +30,15 @@ interface AuthRepository {
 
     suspend fun signInAnonymously(): DataResult<String>
 
-    suspend fun signInWithEmail(email: String, password: String): DataResult<String>
+    suspend fun signInWithEmail(
+        email: String,
+        password: String,
+    ): DataResult<String>
 
-    suspend fun createAccountWithEmail(email: String, password: String): DataResult<String>
+    suspend fun createAccountWithEmail(
+        email: String,
+        password: String,
+    ): DataResult<String>
 
     suspend fun signInWithGoogle(context: Context): DataResult<String>
 
@@ -50,11 +56,15 @@ internal class AuthRepositoryImpl(
 
     override suspend fun signInAnonymously(): DataResult<String> = authRemoteDataSource.signInAnonymously().toDataResult()
 
-    override suspend fun signInWithEmail(email: String, password: String): DataResult<String> =
-        authRemoteDataSource.signInWithEmail(email, password).toDataResult()
+    override suspend fun signInWithEmail(
+        email: String,
+        password: String,
+    ): DataResult<String> = authRemoteDataSource.signInWithEmail(email, password).toDataResult()
 
-    override suspend fun createAccountWithEmail(email: String, password: String): DataResult<String> =
-        authRemoteDataSource.createAccountWithEmail(email, password).toDataResult()
+    override suspend fun createAccountWithEmail(
+        email: String,
+        password: String,
+    ): DataResult<String> = authRemoteDataSource.createAccountWithEmail(email, password).toDataResult()
 
     override suspend fun signInWithGoogle(context: Context): DataResult<String> {
         val idToken =

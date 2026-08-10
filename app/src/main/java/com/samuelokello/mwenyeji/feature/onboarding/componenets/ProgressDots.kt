@@ -19,7 +19,11 @@ import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 @Composable
-fun ProgressDots(total: Int, current: Int, modifier: Modifier = Modifier) {
+fun ProgressDots(
+    total: Int,
+    current: Int,
+    modifier: Modifier = Modifier,
+) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(6.dp),

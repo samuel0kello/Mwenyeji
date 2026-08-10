@@ -13,7 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.feature.onboarding.animation.OnboardingPage
-import com.samuelokello.mwenyeji.feature.onboarding.animation.RememberTimelineRunner
+import com.samuelokello.mwenyeji.feature.onboarding.animation.rememberTimelineRunner
 import com.samuelokello.mwenyeji.feature.onboarding.animation.timeline
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.NotificationCard
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.RouteCard
@@ -46,7 +46,7 @@ fun KnowNairobiPage(isActive: Boolean) {
             }
         }
 
-    RememberTimelineRunner(
+    rememberTimelineRunner(
         isActive = isActive,
         timeline = knowNairobiTimeline,
         onReset = {

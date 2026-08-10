@@ -15,7 +15,13 @@ import com.samuelokello.mwenyeji.feature.onboarding.componenets.GridBackground
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.ScreenBottom
 
 @Composable
-fun OnboardingPage(isActive: Boolean, label: String, title: String, subtitle: String, content: @Composable (Boolean) -> Unit) {
+fun OnboardingPage(
+    isActive: Boolean,
+    label: String,
+    title: String,
+    subtitle: String,
+    content: @Composable (Boolean) -> Unit,
+) {
     Box(Modifier.fillMaxSize()) {
         GridBackground(modifier = Modifier.fillMaxSize())
 

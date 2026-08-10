@@ -391,7 +391,10 @@ fun MwenyejiStepBar(
 }
 
 @Composable
-private fun BackIconButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun BackIconButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     FilledTonalIconButton(
         onClick = onClick,
         modifier = modifier,
@@ -409,7 +412,10 @@ private fun BackIconButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun AppBarIconButton(action: AppBarAction, modifier: Modifier = Modifier) {
+private fun AppBarIconButton(
+    action: AppBarAction,
+    modifier: Modifier = Modifier,
+) {
     Box(
         modifier =
             modifier

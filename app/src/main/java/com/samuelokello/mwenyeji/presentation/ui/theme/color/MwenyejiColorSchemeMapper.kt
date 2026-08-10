@@ -111,7 +111,10 @@ fun MwenyejiColorScheme.toMaterialColorScheme(darkTheme: Boolean): ColorScheme =
  * Usage: call from [MwenyejiAppTheme] when [dynamicColor] = true.
  */
 @Composable
-fun resolveMaterialColorScheme(darkTheme: Boolean, dynamicColor: Boolean): ColorScheme =
+fun resolveMaterialColorScheme(
+    darkTheme: Boolean,
+    dynamicColor: Boolean,
+): ColorScheme =
     when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
@@ -142,7 +145,10 @@ fun resolveMaterialColorScheme(darkTheme: Boolean, dynamicColor: Boolean): Color
  * On API < 31 this just returns [DarkColorScheme] or [LightColorScheme] as-is.
  */
 @Composable
-fun resolveAppColorScheme(darkTheme: Boolean, dynamicColor: Boolean): MwenyejiColorScheme {
+fun resolveAppColorScheme(
+    darkTheme: Boolean,
+    dynamicColor: Boolean,
+): MwenyejiColorScheme {
     if (!dynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
         return if (darkTheme) DarkColorScheme else LightColorScheme
     }

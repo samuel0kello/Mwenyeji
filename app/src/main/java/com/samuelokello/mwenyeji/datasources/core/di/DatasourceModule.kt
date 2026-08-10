@@ -4,6 +4,8 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.PersistentCacheSettings
 import com.google.firebase.firestore.firestore
 import com.samuelokello.mwenyeji.datasources.core.network.helpers.createHttpClient
 import io.ktor.client.HttpClient
@@ -17,7 +19,15 @@ val coreDataSourceModule =
         single<CoroutineContext> { Dispatchers.IO }
 
         single<FirebaseAuth> { Firebase.auth }
-        single<FirebaseFirestore> { Firebase.firestore }
+        single<FirebaseFirestore> {
+            Firebase.firestore.apply {
+                firestoreSettings =
+                    FirebaseFirestoreSettings
+                        .Builder()
+                        .setLocalCacheSettings(PersistentCacheSettings.newBuilder().build())
+                        .build()
+            }
+        }
 
         single<HttpClient> { createHttpClient(engine = Android) }
     }

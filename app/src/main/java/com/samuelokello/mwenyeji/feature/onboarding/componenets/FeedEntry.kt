@@ -1,15 +1,10 @@
 package com.samuelokello.mwenyeji.feature.onboarding.componenets
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +26,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.samuelokello.mwenyeji.presentation.designsystem.animation.MwenyejiAnimatedVisibility
+import com.samuelokello.mwenyeji.presentation.designsystem.animation.MwenyejiAnimations
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.AmberWarm
 import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.DangerRed
@@ -52,7 +49,11 @@ data class FeedEntry(
 )
 
 @Composable
-fun LiveFeedCard(entries: List<FeedEntry>, visibleCount: Int, modifier: Modifier = Modifier) {
+fun LiveFeedCard(
+    entries: List<FeedEntry>,
+    visibleCount: Int,
+    modifier: Modifier = Modifier,
+) {
     val infiniteTransition = rememberInfiniteTransition(label = "live")
     val liveDotAlpha by infiniteTransition.animateFloat(
         initialValue = 1f,
@@ -109,18 +110,10 @@ fun LiveFeedCard(entries: List<FeedEntry>, visibleCount: Int, modifier: Modifier
 
         // Feed rows
         entries.forEachIndexed { index, entry ->
-            AnimatedVisibility(
+            MwenyejiAnimatedVisibility(
                 visible = index < visibleCount,
-                enter =
-                    slideInHorizontally(
-                        animationSpec =
-                            spring(
-                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                stiffness = Spring.StiffnessMediumLow,
-                            ),
-                        initialOffsetX = { it / 2 },
-                    ) +
-                        fadeIn(tween(300)),
+                enter = MwenyejiAnimations.slideInEnd,
+                exit = MwenyejiAnimations.slideOutEnd,
             ) {
                 Column {
                     Row(

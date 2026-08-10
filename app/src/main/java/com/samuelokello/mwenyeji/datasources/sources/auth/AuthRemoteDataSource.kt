@@ -19,15 +19,24 @@ interface AuthRemoteDataSource {
 
     suspend fun signInAnonymously(): NetworkResult<String>
 
-    suspend fun signInWithEmail(email: String, password: String): NetworkResult<String>
+    suspend fun signInWithEmail(
+        email: String,
+        password: String,
+    ): NetworkResult<String>
 
-    suspend fun createAccountWithEmail(email: String, password: String): NetworkResult<String>
+    suspend fun createAccountWithEmail(
+        email: String,
+        password: String,
+    ): NetworkResult<String>
 
     suspend fun signInWithGoogle(idToken: String): NetworkResult<String>
 
     suspend fun sendPasswordResetEmail(email: String): NetworkResult<Unit>
 
-    suspend fun confirmPasswordReset(code: String, newPassword: String): NetworkResult<Unit>
+    suspend fun confirmPasswordReset(
+        code: String,
+        newPassword: String,
+    ): NetworkResult<Unit>
 
     suspend fun getIdToken(forceRefresh: Boolean = false): NetworkResult<String>
 
@@ -70,7 +79,10 @@ internal class FirebaseAuthRemoteDataSource(
                 ?: error("Anonymous sign-in returned null user")
         }
 
-    override suspend fun signInWithEmail(email: String, password: String): NetworkResult<String> =
+    override suspend fun signInWithEmail(
+        email: String,
+        password: String,
+    ): NetworkResult<String> =
         safeFirebaseCall {
             auth
                 .signInWithEmailAndPassword(email, password)
@@ -82,7 +94,10 @@ internal class FirebaseAuthRemoteDataSource(
                 ?: error("Sign-in returned null token")
         }
 
-    override suspend fun createAccountWithEmail(email: String, password: String): NetworkResult<String> =
+    override suspend fun createAccountWithEmail(
+        email: String,
+        password: String,
+    ): NetworkResult<String> =
         safeFirebaseCall {
             auth
                 .createUserWithEmailAndPassword(email, password)
@@ -127,7 +142,10 @@ internal class FirebaseAuthRemoteDataSource(
     override suspend fun sendPasswordResetEmail(email: String): NetworkResult<Unit> =
         safeFirebaseCall { auth.sendPasswordResetEmail(email).await() }
 
-    override suspend fun confirmPasswordReset(code: String, newPassword: String): NetworkResult<Unit> =
+    override suspend fun confirmPasswordReset(
+        code: String,
+        newPassword: String,
+    ): NetworkResult<Unit> =
         safeFirebaseCall {
             auth.confirmPasswordReset(code, newPassword).await()
         }

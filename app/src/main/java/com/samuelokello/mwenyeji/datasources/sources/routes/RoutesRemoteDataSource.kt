@@ -40,7 +40,10 @@ interface RoutesRemoteDataSource {
      * Submits a new guide to /routes/{routeId}/guides.
      * Returns the new guide document ID.
      */
-    suspend fun submitGuide(routeId: String, dto: GuideDto): NetworkResult<String>
+    suspend fun submitGuide(
+        routeId: String,
+        dto: GuideDto,
+    ): NetworkResult<String>
 }
 
 internal class FirebaseRoutesRemoteDataSource(
@@ -119,7 +122,10 @@ internal class FirebaseRoutesRemoteDataSource(
             awaitClose { listener.remove() }
         }
 
-    override suspend fun submitGuide(routeId: String, dto: GuideDto): NetworkResult<String> =
+    override suspend fun submitGuide(
+        routeId: String,
+        dto: GuideDto,
+    ): NetworkResult<String> =
         safeFirebaseCall {
             val ref = guidesCollection(routeId).document()
             ref.set(dto.copy(id = ref.id, routeId = routeId)).await()

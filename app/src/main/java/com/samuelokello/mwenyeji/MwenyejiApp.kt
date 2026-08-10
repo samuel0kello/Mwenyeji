@@ -9,14 +9,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
+import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 
 class MwenyejiApp : Application() {
-    private val authRemoteDataSource: AuthRemoteDataSource by inject()
+    private lateinit var authRemoteDataSource: AuthRemoteDataSource
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -28,6 +28,8 @@ class MwenyejiApp : Application() {
             androidContext(this@MwenyejiApp)
             modules(mwenyejiModules)
         }
+
+        authRemoteDataSource = get()
 
         bootstrapAnonymousSession()
     }

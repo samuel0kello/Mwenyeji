@@ -1,11 +1,5 @@
 package com.samuelokello.mwenyeji.feature.onboarding.componenets
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -27,24 +21,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.samuelokello.mwenyeji.R
+import com.samuelokello.mwenyeji.presentation.designsystem.animation.SlideAnimatedVisibility
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 import com.samuelokello.mwenyeji.presentation.ui.theme.typography.JetBrainsFamily
 
 @Composable
-fun ContribCard(visible: Boolean, modifier: Modifier = Modifier) {
+fun ContribCard(
+    visible: Boolean,
+    modifier: Modifier = Modifier,
+) {
     val colors = MwenyejiTheme.colorScheme
-    AnimatedVisibility(
+    SlideAnimatedVisibility(
         visible = visible,
-        enter =
-            slideInVertically(
-                animationSpec =
-                    spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessMediumLow,
-                    ),
-                initialOffsetY = { it / 3 },
-            ) +
-                fadeIn(tween(400)),
         modifier = modifier,
     ) {
         Column(
@@ -82,7 +70,10 @@ fun ContribCard(visible: Boolean, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun FieldRow(key: String, value: String) {
+private fun FieldRow(
+    key: String,
+    value: String,
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -100,7 +91,8 @@ private fun FieldRow(key: String, value: String) {
                     .clip(RoundedCornerShape(8.dp))
                     .background(
                         MwenyejiTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.5f),
-                    ).border(1.dp, MwenyejiTheme.colorScheme.border, RoundedCornerShape(8.dp))
+                    )
+                    .border(1.dp, MwenyejiTheme.colorScheme.border, RoundedCornerShape(8.dp))
                     .padding(horizontal = 12.dp, vertical = 8.dp),
         ) {
             Text(
@@ -114,7 +106,10 @@ private fun FieldRow(key: String, value: String) {
 }
 
 @Composable
-private fun Chip(label: String, selected: Boolean) {
+private fun Chip(
+    label: String,
+    selected: Boolean,
+) {
     Box(
         modifier =
             Modifier
@@ -124,7 +119,8 @@ private fun Chip(label: String, selected: Boolean) {
                     1.dp,
                     if (selected) MwenyejiTheme.colorScheme.primary else MwenyejiTheme.colorScheme.border,
                     RoundedCornerShape(20.dp),
-                ).padding(horizontal = 12.dp, vertical = 7.dp),
+                )
+                .padding(horizontal = 12.dp, vertical = 7.dp),
     ) {
         Text(
             label,

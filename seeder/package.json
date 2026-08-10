@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "csv-parse": "^6.2.1",
-    "firebase-admin": "^13.8.0",
-    "ngeohash": "^0.6.3"
+    "firebase-admin": "^13.10.0",
+    "google-auth-library": "^10.9.0",
+    "ngeohash": "^0.6.3",
+    "node-fetch": "^2.7.0"
   }
 }

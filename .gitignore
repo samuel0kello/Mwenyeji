@@ -19,3 +19,7 @@ app/release
 ./node_modules
 
 seeder/*.json
+seeder/.venv
+seeder/node_modules
+node_modules
+*.tflite

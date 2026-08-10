@@ -13,7 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.feature.onboarding.animation.OnboardingPage
-import com.samuelokello.mwenyeji.feature.onboarding.animation.RememberTimelineRunner
+import com.samuelokello.mwenyeji.feature.onboarding.animation.rememberTimelineRunner
 import com.samuelokello.mwenyeji.feature.onboarding.animation.timeline
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.ResultRouteCard
 import com.samuelokello.mwenyeji.feature.onboarding.componenets.RouteResult
@@ -83,7 +83,7 @@ fun FindRoutePage(isActive: Boolean) {
             )
         }
 
-    RememberTimelineRunner(
+    rememberTimelineRunner(
         isActive = isActive,
         timeline = findRouteTimeline,
         onReset = {
