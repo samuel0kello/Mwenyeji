@@ -22,16 +22,23 @@ data object FeedsRoute
 @Serializable
 data class RouteDetailsRoute(
     val routeId: String,
+    val from: String? = null,
+    val to: String? = null,
 )
 
 @Serializable
 data object SeeAllRoutesRoute
 
-fun NavGraphBuilder.feedsNavGraph(navController: NavHostController, onRequireAuth: (onAuthenticated: () -> Unit) -> Unit = {}) {
+fun NavGraphBuilder.feedsNavGraph(
+    navController: NavHostController,
+    onRequireAuth: (onAuthenticated: () -> Unit) -> Unit = {},
+) {
     navigation<FeedsGraph>(startDestination = FeedsRoute) {
         tabScreen<FeedsRoute> {
             FeedScreen(
-                onNavigateToRouteDetail = { routeId -> navController.navigateToRouteDetails(routeId) },
+                onNavigateToRouteDetail = { routeId, from, to ->
+                    navController.navigateToRouteDetails(routeId, from, to)
+                },
                 onNavigateToSeeAll = { navController.navigateToAllRoutes() },
                 onNavigateToContribute = {
                     onRequireAuth { navController.navigateToContribute() }
@@ -40,9 +47,14 @@ fun NavGraphBuilder.feedsNavGraph(navController: NavHostController, onRequireAut
         }
 
         slideScreen<RouteDetailsRoute> { backStackEntry ->
-            val routeId = backStackEntry.arguments?.getString("routeId") ?: ""
+            val args = backStackEntry.arguments
+            val routeId = args?.getString("routeId") ?: ""
+            val from = args?.getString("from")
+            val to = args?.getString("to")
             RouteDetailsScreen(
                 routeId = routeId,
+                from = from,
+                to = to,
                 onNavigateBack = { navController.navigateBack() },
                 onNavigateToContribute = {
                     onRequireAuth { navController.navigateToContribute() }
@@ -63,8 +75,12 @@ fun NavController.navigateToFeeds() {
     navigate(FeedsGraph)
 }
 
-fun NavController.navigateToRouteDetails(routeId: String) {
-    navigate(RouteDetailsRoute(routeId))
+fun NavController.navigateToRouteDetails(
+    routeId: String,
+    from: String? = null,
+    to: String? = null,
+) {
+    navigate(RouteDetailsRoute(routeId, from, to))
 }
 
 fun NavController.navigateToAllRoutes() {

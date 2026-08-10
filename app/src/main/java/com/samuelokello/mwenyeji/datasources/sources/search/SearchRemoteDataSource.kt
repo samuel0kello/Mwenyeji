@@ -83,7 +83,10 @@ internal class MapboxSearchRemoteDataSource(
                     request.query,
                     options,
                     object : SearchSuggestionsCallback {
-                        override fun onSuggestions(suggestions: List<SearchSuggestion>, responseInfo: ResponseInfo) {
+                        override fun onSuggestions(
+                            suggestions: List<SearchSuggestion>,
+                            responseInfo: ResponseInfo,
+                        ) {
                             val filtered =
                                 suggestions.filter { it.type !is SearchSuggestionType.Category }
                             if (cont.isActive) cont.resume(filtered)
@@ -103,11 +106,19 @@ internal class MapboxSearchRemoteDataSource(
                 engine.select(
                     suggestion,
                     object : SearchSelectionCallback {
-                        override fun onResult(suggestion: SearchSuggestion, result: SearchResult, responseInfo: ResponseInfo) {
+                        override fun onResult(
+                            suggestion: SearchSuggestion,
+                            result: SearchResult,
+                            responseInfo: ResponseInfo,
+                        ) {
                             if (cont.isActive) cont.resume(result.toDto())
                         }
 
-                        override fun onResults(suggestion: SearchSuggestion, results: List<SearchResult>, responseInfo: ResponseInfo) {
+                        override fun onResults(
+                            suggestion: SearchSuggestion,
+                            results: List<SearchResult>,
+                            responseInfo: ResponseInfo,
+                        ) {
                             val first = results.firstOrNull()
                             if (cont.isActive) {
                                 if (first != null) {
@@ -118,7 +129,10 @@ internal class MapboxSearchRemoteDataSource(
                             }
                         }
 
-                        override fun onSuggestions(suggestions: List<SearchSuggestion>, responseInfo: ResponseInfo) {
+                        override fun onSuggestions(
+                            suggestions: List<SearchSuggestion>,
+                            responseInfo: ResponseInfo,
+                        ) {
                         }
 
                         override fun onError(e: Exception) {

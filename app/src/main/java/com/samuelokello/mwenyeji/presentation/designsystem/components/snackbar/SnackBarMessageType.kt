@@ -13,11 +13,31 @@ data class SnackBarMessage(
     val onAction: (() -> Unit)? = null,
 )
 
-class SnackBarManager {
-    private val _currentMessage = MutableStateFlow<SnackBarMessage?>(null)
-    val currentMessage: StateFlow<SnackBarMessage?> = _currentMessage.asStateFlow()
+interface SnackBarManager {
+    val currentMessage: StateFlow<SnackBarMessage?>
 
-    fun showSuccess(message: String) {
+    fun showSuccess(message: String)
+
+    fun showError(
+        message: String,
+        actionLabel: String? = "Dismiss",
+        onAction: (() -> Unit)? = null,
+    )
+
+    fun showInfo(
+        message: String,
+        actionLabel: String? = null,
+        onAction: (() -> Unit)? = null,
+    )
+
+    fun dismiss()
+}
+
+class SnackBarManagerImpl : SnackBarManager {
+    private val _currentMessage = MutableStateFlow<SnackBarMessage?>(null)
+    override val currentMessage: StateFlow<SnackBarMessage?> = _currentMessage.asStateFlow()
+
+    override fun showSuccess(message: String) {
         _currentMessage.value =
             SnackBarMessage(
                 message = message,
@@ -25,7 +45,11 @@ class SnackBarManager {
             )
     }
 
-    fun showError(message: String, actionLabel: String? = "Dismiss", onAction: (() -> Unit)? = null) {
+    override fun showError(
+        message: String,
+        actionLabel: String?,
+        onAction: (() -> Unit)?,
+    ) {
         _currentMessage.value =
             SnackBarMessage(
                 message = message,
@@ -35,7 +59,11 @@ class SnackBarManager {
             )
     }
 
-    fun showInfo(message: String, actionLabel: String? = null, onAction: (() -> Unit)? = null) {
+    override fun showInfo(
+        message: String,
+        actionLabel: String?,
+        onAction: (() -> Unit)?,
+    ) {
         _currentMessage.value =
             SnackBarMessage(
                 message = message,
@@ -45,7 +73,7 @@ class SnackBarManager {
             )
     }
 
-    fun dismiss() {
+    override fun dismiss() {
         _currentMessage.value = null
     }
 }

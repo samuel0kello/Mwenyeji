@@ -17,7 +17,10 @@ import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 @Composable
-fun RippleLoadingIndicator(modifier: Modifier = Modifier, color: Color = MwenyejiTheme.colorScheme.primary) {
+fun RippleLoadingIndicator(
+    modifier: Modifier = Modifier,
+    color: Color = MwenyejiTheme.colorScheme.primary,
+) {
     val infiniteTransition = rememberInfiniteTransition(label = "ripple")
     val time by infiniteTransition.animateFloat(
         initialValue = 0f,

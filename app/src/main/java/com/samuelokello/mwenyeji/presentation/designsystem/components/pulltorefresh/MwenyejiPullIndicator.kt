@@ -31,7 +31,12 @@ private val INDICATOR_HEIGHT = 120.dp
 private const val OFFSCREEN_X = -200f
 
 @Composable
-internal fun MwenyejiPullIndicator(pullProgress: Float, isRefreshing: Boolean, statusText: String, modifier: Modifier = Modifier) {
+internal fun MwenyejiPullIndicator(
+    pullProgress: Float,
+    isRefreshing: Boolean,
+    statusText: String,
+    modifier: Modifier = Modifier,
+) {
     val targetHeight =
         when {
             isRefreshing -> INDICATOR_HEIGHT
@@ -69,7 +74,10 @@ internal fun MwenyejiPullIndicator(pullProgress: Float, isRefreshing: Boolean, s
 }
 
 @Composable
-private fun PinIllustration(progress: Float, isRefreshing: Boolean) {
+private fun PinIllustration(
+    progress: Float,
+    isRefreshing: Boolean,
+) {
     val isEngaged = isRefreshing || progress >= 1f
     val targetOffsetX = if (isEngaged) 0.dp else (OFFSCREEN_X * (1f - progress)).dp
 

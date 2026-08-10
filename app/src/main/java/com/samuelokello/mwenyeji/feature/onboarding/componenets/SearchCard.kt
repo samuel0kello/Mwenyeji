@@ -1,10 +1,5 @@
 package com.samuelokello.mwenyeji.feature.onboarding.componenets
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -22,23 +17,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.R
+import com.samuelokello.mwenyeji.presentation.designsystem.animation.MwenyejiAnimatedVisibility
+import com.samuelokello.mwenyeji.presentation.designsystem.animation.MwenyejiAnimations
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 @Composable
-fun SearchCard(visible: Boolean, modifier: Modifier = Modifier) {
+fun SearchCard(
+    visible: Boolean,
+    modifier: Modifier = Modifier,
+) {
     val colors = MwenyejiTheme.colorScheme
-    AnimatedVisibility(
+    MwenyejiAnimatedVisibility(
         visible = visible,
-        enter =
-            slideInVertically(
-                animationSpec =
-                    spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessMediumLow,
-                    ),
-                initialOffsetY = { -it / 2 },
-            ) +
-                fadeIn(),
+        enter = MwenyejiAnimations.slideDownEnter,
+        exit = MwenyejiAnimations.slideUpExit,
         modifier = modifier,
     ) {
         Row(

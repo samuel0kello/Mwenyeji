@@ -1,16 +1,11 @@
 package com.samuelokello.mwenyeji.feature.onboarding.componenets
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.EaseInOutSine
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +27,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.samuelokello.mwenyeji.presentation.designsystem.animation.SlideAnimatedVisibility
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.GreenLight
 import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.TextSecondary
@@ -39,7 +35,10 @@ import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.TextTerti
 import com.samuelokello.mwenyeji.presentation.ui.theme.typography.JetBrainsFamily
 
 @Composable
-fun LeaderBoard(visible: Boolean, modifier: Modifier = Modifier) {
+fun LeaderBoard(
+    visible: Boolean,
+    modifier: Modifier = Modifier,
+) {
     val infiniteTransition = rememberInfiniteTransition(label = "you_row")
     val youAlpha by infiniteTransition.animateFloat(
         initialValue = 0.4f,
@@ -53,18 +52,8 @@ fun LeaderBoard(visible: Boolean, modifier: Modifier = Modifier) {
     )
     val colors = MwenyejiTheme.colorScheme
 
-    AnimatedVisibility(
+    SlideAnimatedVisibility(
         visible = visible,
-        enter =
-            slideInVertically(
-                animationSpec =
-                    spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessMediumLow,
-                    ),
-                initialOffsetY = { it / 2 },
-            ) +
-                fadeIn(tween(400, 200)),
         modifier = modifier,
     ) {
         Column(
@@ -140,7 +129,12 @@ fun LeaderBoard(visible: Boolean, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun LeaderRow(rank: String, name: String, pts: String, badge: String) {
+private fun LeaderRow(
+    rank: String,
+    name: String,
+    pts: String,
+    badge: String,
+) {
     Row(
         modifier =
             Modifier

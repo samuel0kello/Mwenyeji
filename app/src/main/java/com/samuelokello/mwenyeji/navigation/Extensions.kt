@@ -95,3 +95,6 @@ inline fun <reified T : Any> NavGraphBuilder.fadeScreen(noinline content: @Compo
 
 inline fun <reified T : Any> NavGraphBuilder.tabScreen(noinline content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit) =
     screen<T>(motion = NavMotions.dynamicTab, content = content)
+
+inline fun <reified T : Any> NavGraphBuilder.sheetScreen(noinline content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit) =
+    screen<T>(motion = NavMotions.sheetUp, content = content)

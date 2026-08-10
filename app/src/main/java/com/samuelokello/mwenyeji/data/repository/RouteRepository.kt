@@ -34,11 +34,21 @@ interface RoutesRepository {
      * Submits a new guide under /routes/{routeId}/guides.
      * Returns the new guide document ID.
      */
-    suspend fun submitGuide(routeId: String, guide: Guide): DataResult<String>
+    suspend fun submitGuide(
+        routeId: String,
+        guide: Guide,
+    ): DataResult<String>
 
-    suspend fun submitVerdict(routeId: String, userId: String, verdict: Verdict): DataResult<Unit>
+    suspend fun submitVerdict(
+        routeId: String,
+        userId: String,
+        verdict: Verdict,
+    ): DataResult<Unit>
 
-    suspend fun getUserVerdict(routeId: String, userId: String): DataResult<Verdict?>
+    suspend fun getUserVerdict(
+        routeId: String,
+        userId: String,
+    ): DataResult<Verdict?>
 }
 
 internal class RoutesRepositoryImpl(
@@ -65,12 +75,19 @@ internal class RoutesRepositoryImpl(
             dtos.map { it.toDomain() }
         }
 
-    override suspend fun submitGuide(routeId: String, guide: Guide): DataResult<String> =
-        routesDataSource.submitGuide(routeId, guide.toDto()).toDataResult()
+    override suspend fun submitGuide(
+        routeId: String,
+        guide: Guide,
+    ): DataResult<String> = routesDataSource.submitGuide(routeId, guide.toDto()).toDataResult()
 
-    override suspend fun submitVerdict(routeId: String, userId: String, verdict: Verdict): DataResult<Unit> =
-        confirmationsDataSource.submitVerdict(routeId, userId, verdict).toDataResult()
+    override suspend fun submitVerdict(
+        routeId: String,
+        userId: String,
+        verdict: Verdict,
+    ): DataResult<Unit> = confirmationsDataSource.submitVerdict(routeId, userId, verdict).toDataResult()
 
-    override suspend fun getUserVerdict(routeId: String, userId: String): DataResult<Verdict?> =
-        confirmationsDataSource.getUserVerdict(routeId, userId).toDataResult()
+    override suspend fun getUserVerdict(
+        routeId: String,
+        userId: String,
+    ): DataResult<Verdict?> = confirmationsDataSource.getUserVerdict(routeId, userId).toDataResult()
 }

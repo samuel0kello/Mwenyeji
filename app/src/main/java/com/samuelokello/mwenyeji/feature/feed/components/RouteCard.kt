@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,12 +23,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,7 +39,11 @@ import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiAppTheme
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 @Composable
-fun RouteCard(boardableRoute: BoardableRoute, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun RouteCard(
+    boardableRoute: BoardableRoute,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val route = boardableRoute.route
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
@@ -193,7 +192,11 @@ fun RouteCard(boardableRoute: BoardableRoute, onClick: () -> Unit, modifier: Mod
 }
 
 @Composable
-private fun RouteNumberBadge(number: String, color: Color, modifier: Modifier = Modifier) {
+private fun RouteNumberBadge(
+    number: String,
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
     Box(
         modifier =
             modifier
@@ -215,7 +218,12 @@ private fun RouteNumberBadge(number: String, color: Color, modifier: Modifier = 
 }
 
 @Composable
-private fun WalkDistanceHero(boardableRoute: BoardableRoute, primaryColor: Color, context: Context, modifier: Modifier = Modifier) {
+private fun WalkDistanceHero(
+    boardableRoute: BoardableRoute,
+    primaryColor: Color,
+    context: Context,
+    modifier: Modifier = Modifier,
+) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.End,
@@ -247,7 +255,10 @@ private fun WalkDistanceHero(boardableRoute: BoardableRoute, primaryColor: Color
 // ── Dashed divider ────────────────────────────────────────────────────────────
 
 @Composable
-private fun DashedDivider(color: Color, modifier: Modifier = Modifier) {
+private fun DashedDivider(
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
     val dashColor = color
     Box(
         modifier =
@@ -265,14 +276,18 @@ private fun DashedDivider(color: Color, modifier: Modifier = Modifier) {
                         strokeWidth = strokeWidth,
                         pathEffect = PathEffect.dashPathEffect(floatArrayOf(dashWidth, gapWidth), 0f),
                     )
-                }.then(Modifier.size(width = 0.dp, height = 1.dp)),
+                }
+                .then(Modifier.size(width = 0.dp, height = 1.dp)),
     )
 }
 
 // ── Confidence dot ────────────────────────────────────────────────────────────
 
 @Composable
-private fun ConfidenceDot(confidence: RouteConfidence, modifier: Modifier = Modifier) {
+private fun ConfidenceDot(
+    confidence: RouteConfidence,
+    modifier: Modifier = Modifier,
+) {
     val colors = MwenyejiTheme.colorScheme
     val color =
         when (confidence) {
@@ -327,7 +342,11 @@ internal fun Route.getFormattedGuideCount(context: Context): String =
 // ── Tag chip (used by other screens) ─────────────────────────────────────────
 
 @Composable
-internal fun RouteTagChip(label: String, modifier: Modifier = Modifier, isPrimary: Boolean = false) {
+internal fun RouteTagChip(
+    label: String,
+    modifier: Modifier = Modifier,
+    isPrimary: Boolean = false,
+) {
     val colors = MwenyejiTheme.colorScheme
     Box(
         modifier =

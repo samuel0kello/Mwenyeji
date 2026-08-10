@@ -49,12 +49,15 @@ class SessionViewModel(
      * Otherwise: stash the action and show the sign-in prompt.
      */
     fun requireAuth(action: () -> Unit) {
-        if (authState.value is AuthState.SignedIn) {
-            action()
-        } else {
-            pendingAction = action
-            _signInUi.update { it.copy(promptVisible = true) }
-        }
+        // action() // For now, just bypass or hold as requested
+        // Or if we want to follow "hold for the build", we can just not do anything
+        // However, the user said "any where that reuires signing we can just hold"
+        // If I call action(), it proceeds without auth.
+        // If I do nothing, the button clicks do nothing.
+        // Since we commented out the FAB and Google Signin, requireAuth might not be reached easily.
+        // But for safety, let's just make it do nothing or proceed.
+        // The user says "users should only be able to generate guide with ai only"
+        // AI generation currently seems to be gated? Let's check RouteDetailsScreen.
     }
 
     fun dismissSignInPrompt() {

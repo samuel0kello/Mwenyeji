@@ -1,10 +1,5 @@
 package com.samuelokello.mwenyeji.presentation.designsystem.components.snackbar
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -27,6 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.samuelokello.mwenyeji.R
+import com.samuelokello.mwenyeji.presentation.designsystem.animation.SlideAnimatedVisibility
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
@@ -37,7 +33,11 @@ import kotlin.time.Duration.Companion.milliseconds
  * Auto-dismisses after [autoDismissMs] unless it has an action button.
  */
 @Composable
-fun MwenyejiSnackbarHost(manager: SnackBarManager, modifier: Modifier = Modifier, autoDismissMs: Long = 3000L) {
+fun MwenyejiSnackbarHost(
+    manager: SnackBarManager,
+    modifier: Modifier = Modifier,
+    autoDismissMs: Long = 3000L,
+) {
     val message by manager.currentMessage.collectAsStateWithLifecycle()
 
     LaunchedEffect(message) {
@@ -47,10 +47,8 @@ fun MwenyejiSnackbarHost(manager: SnackBarManager, modifier: Modifier = Modifier
         }
     }
 
-    AnimatedVisibility(
+    SlideAnimatedVisibility(
         visible = message != null,
-        enter = slideInVertically { it } + fadeIn(),
-        exit = slideOutVertically { it } + fadeOut(),
         modifier = modifier,
     ) {
         message?.let { msg ->
@@ -67,7 +65,12 @@ fun MwenyejiSnackbarHost(manager: SnackBarManager, modifier: Modifier = Modifier
 }
 
 @Composable
-private fun MwenyejiSnackbar(message: SnackBarMessage, onAction: () -> Unit, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
+private fun MwenyejiSnackbar(
+    message: SnackBarMessage,
+    onAction: () -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
 

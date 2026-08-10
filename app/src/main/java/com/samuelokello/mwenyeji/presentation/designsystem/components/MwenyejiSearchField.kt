@@ -29,11 +29,17 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.samuelokello.mwenyeji.R
+import com.samuelokello.mwenyeji.presentation.designsystem.animation.FadeAnimatedVisibility
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiAppTheme
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 @Composable
-fun MwenyejiSearchBar(state: TextFieldState, placeholder: String, modifier: Modifier = Modifier, onSearchAction: () -> Unit = {}) {
+fun MwenyejiSearchBar(
+    state: TextFieldState,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    onSearchAction: () -> Unit = {},
+) {
     BasicTextField(
         state = state,
         textStyle =
@@ -79,7 +85,9 @@ fun MwenyejiSearchBar(state: TextFieldState, placeholder: String, modifier: Modi
                     innerTextField()
                 }
 
-                if (state.text.isNotEmpty()) {
+                FadeAnimatedVisibility(
+                    visible = state.text.isNotEmpty(),
+                ) {
                     IconButton(
                         onClick = { state.clearText() },
                         modifier = Modifier.size(20.dp),

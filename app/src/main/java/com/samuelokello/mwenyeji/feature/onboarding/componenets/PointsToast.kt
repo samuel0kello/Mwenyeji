@@ -1,12 +1,5 @@
 package com.samuelokello.mwenyeji.feature.onboarding.componenets
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -20,24 +13,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.samuelokello.mwenyeji.presentation.designsystem.animation.MwenyejiAnimatedVisibility
+import com.samuelokello.mwenyeji.presentation.designsystem.animation.MwenyejiAnimations
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 import com.samuelokello.mwenyeji.presentation.ui.theme.color.AppColors.GreenLight
 
 @Composable
-fun PointsToast(visible: Boolean, modifier: Modifier = Modifier) {
-    AnimatedVisibility(
+fun PointsToast(
+    visible: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    MwenyejiAnimatedVisibility(
         visible = visible,
-        enter =
-            slideInHorizontally(
-                animationSpec =
-                    spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessMedium,
-                    ),
-                initialOffsetX = { it },
-            ) +
-                fadeIn(),
-        exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut(),
+        enter = MwenyejiAnimations.slideInEnd,
+        exit = MwenyejiAnimations.slideOutEnd,
         modifier = modifier,
     ) {
         Row(

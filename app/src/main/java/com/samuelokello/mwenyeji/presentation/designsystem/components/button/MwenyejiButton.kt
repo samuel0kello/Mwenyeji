@@ -66,7 +66,13 @@ fun MwenyejiButton(
  * Convenience function for button with text only
  */
 @Composable
-fun MwenyejiButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, icon: ImageVector? = null) {
+fun MwenyejiButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    icon: ImageVector? = null,
+) {
     MwenyejiButton(
         onClick = onClick,
         enabled = enabled,

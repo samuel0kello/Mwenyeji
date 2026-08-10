@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -17,13 +16,8 @@ import androidx.compose.animation.core.animateValue
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,14 +35,12 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -60,7 +52,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -69,11 +60,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.data.models.TimeOfDay
 import com.samuelokello.mwenyeji.feature.feed.components.RouteCard
+import com.samuelokello.mwenyeji.presentation.designsystem.animation.MwenyejiAnimatedVisibility
+import com.samuelokello.mwenyeji.presentation.designsystem.animation.MwenyejiAnimations
 import com.samuelokello.mwenyeji.presentation.designsystem.components.MwenyejiEmptyState
 import com.samuelokello.mwenyeji.presentation.designsystem.components.MwenyejiLargeHeaderBar
 import com.samuelokello.mwenyeji.presentation.designsystem.components.MwenyejiLoadingIndicator
@@ -93,7 +89,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @SuppressLint("MissingPermission")
 @Composable
 fun FeedScreen(
-    onNavigateToRouteDetail: (String) -> Unit,
+    onNavigateToRouteDetail: (String, String?, String?) -> Unit,
     onNavigateToSeeAll: () -> Unit,
     onNavigateToContribute: () -> Unit,
     modifier: Modifier = Modifier,
@@ -103,7 +99,66 @@ fun FeedScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var backPressedTime by remember { mutableLongStateOf(0L) }
+
     val locationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+
+    DisposableEffect(state.locationPermissionGranted) {
+        val locationRequest =
+            LocationRequest
+                .Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000)
+                .setMinUpdateIntervalMillis(5000)
+                .build()
+
+        val locationCallback =
+            object : LocationCallback() {
+                override fun onLocationResult(locationResult: LocationResult) {
+                    locationResult.lastLocation?.let { location ->
+                        viewModel.onAction(FeedAction.LocationReceived(location.latitude, location.longitude))
+                    }
+                }
+            }
+
+        if (state.locationPermissionGranted) {
+            try {
+                locationClient.requestLocationUpdates(locationRequest, locationCallback, context.mainLooper)
+            } catch (e: SecurityException) {
+                // Handle exception
+            }
+        }
+
+        onDispose {
+            locationClient.removeLocationUpdates(locationCallback)
+        }
+    }
+
+    DisposableEffect(state.locationPermissionGranted) {
+        val locationRequest =
+            LocationRequest
+                .Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000)
+                .setMinUpdateIntervalMillis(5000)
+                .build()
+
+        val locationCallback =
+            object : LocationCallback() {
+                override fun onLocationResult(locationResult: LocationResult) {
+                    locationResult.lastLocation?.let { location ->
+                        viewModel.onAction(FeedAction.LocationReceived(location.latitude, location.longitude))
+                    }
+                }
+            }
+
+        if (state.locationPermissionGranted) {
+            try {
+                locationClient.requestLocationUpdates(locationRequest, locationCallback, context.mainLooper)
+            } catch (e: SecurityException) {
+                // Handle exception
+            }
+        }
+
+        onDispose {
+            locationClient.removeLocationUpdates(locationCallback)
+        }
+    }
     var isRefreshing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
@@ -131,7 +186,7 @@ fun FeedScreen(
         viewModel.effects.collect { effect ->
             when (effect) {
                 is FeedEffect.NavigateToRouteDetail -> {
-                    onNavigateToRouteDetail(effect.route.id)
+                    onNavigateToRouteDetail(effect.routeId, effect.from, effect.to)
                 }
 
                 is FeedEffect.NavigateToSeeAll -> {
@@ -245,23 +300,23 @@ internal fun FeedScreenContent(
                 },
             )
         },
-        floatingActionButton = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                TooltipWithAnimation(
-                    show = state.showFabTooltip,
-                    text = stringResource(R.string.know_a_route_add_it_here),
-                    emoji = "",
-                    onDismiss = { onAction(FeedAction.DismissFabTooltip) },
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                FloatingActionButton(
-                    onClick = onNavigateToContribute,
-                    containerColor = MaterialTheme.colorScheme.primary,
-                ) {
-                    Icon(painterResource(R.drawable.ic_outline_add), contentDescription = null)
-                }
-            }
-        },
+//        floatingActionButton = {
+//            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+//                TooltipWithAnimation(
+//                    show = state.showFabTooltip,
+//                    text = stringResource(R.string.know_a_route_add_it_here),
+//                    emoji = "",
+//                    onDismiss = { onAction(FeedAction.DismissFabTooltip) },
+//                )
+//                Spacer(modifier = Modifier.height(8.dp))
+//                FloatingActionButton(
+//                    onClick = onNavigateToContribute,
+//                    containerColor = MaterialTheme.colorScheme.primary,
+//                ) {
+//                    Icon(painterResource(R.drawable.ic_outline_add), contentDescription = null)
+//                }
+//            }
+//        },
     ) { paddingValues ->
         when {
             state.isLoading -> {
@@ -300,19 +355,50 @@ internal fun FeedScreenContent(
                     isRefreshing = isRefreshing,
                     onRefresh = onRefresh,
                     confirmationText = stringResource(R.string.updated_routes_format, state.filteredRoutes.size),
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
+                    modifier = Modifier.fillMaxSize(),
                 ) {
                     val cardRotation = 5f * pullProgress.coerceAtMost(1f)
                     val effectiveRotation = if (isRefreshing) 5f else cardRotation
 
                     LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .graphicsLayer(clip = false),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
-                        contentPadding = PaddingValues(bottom = 24.dp),
+                        contentPadding =
+                            PaddingValues(
+                                top = paddingValues.calculateTopPadding() + 12.dp,
+                                bottom = paddingValues.calculateBottomPadding() + 24.dp,
+                            ),
                     ) {
+                        // Suggested Route
+                        state.suggestedRoute?.let { suggested ->
+                            item(key = "suggestion_header") {
+                                Text(
+                                    text = "Quick Suggestion",
+                                    style = typography.titleSmall,
+                                    color = colors.primary,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                                )
+                            }
+                            item(key = "suggestion_card") {
+                                RouteCard(
+                                    boardableRoute = suggested,
+                                    onClick = { onAction(FeedAction.RouteClicked(suggested)) },
+                                    modifier =
+                                        Modifier
+                                            .padding(horizontal = 16.dp)
+                                            .animateItem()
+                                            .background(
+                                                color = colors.primary.copy(alpha = 0.05f),
+                                                shape = RoundedCornerShape(12.dp),
+                                            ),
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+                        }
+
                         item(key = "section_header") {
                             Row(
                                 modifier =
@@ -364,15 +450,17 @@ internal fun FeedScreenContent(
                         // Route cards
                         if (state.filteredRoutes.isEmpty() && state.searchQuery.isEmpty()) {
                             item(key = "empty_state") {
-                                MwenyejiEmptyState(
-                                    icon = R.drawable.ic_outline_location_on,
-                                    heading = stringResource(R.string.no_matatu_stages_near_you),
-                                    body =
-                                        stringResource(
-                                            R.string.we_couldn_t_find_any_stops_within_500m,
-                                        ),
-                                    hintText = "Or move closer to a road · GPS accuracy ±15m",
-                                )
+                                Box(modifier = Modifier.animateItem()) {
+                                    MwenyejiEmptyState(
+                                        icon = R.drawable.ic_outline_location_on,
+                                        heading = stringResource(R.string.no_matatu_stages_near_you),
+                                        body =
+                                            stringResource(
+                                                R.string.we_couldn_t_find_any_stops_within_500m,
+                                            ),
+                                        hintText = "Or move closer to a road · GPS accuracy ±15m",
+                                    )
+                                }
                             }
                         } else {
                             itemsIndexed(
@@ -385,6 +473,7 @@ internal fun FeedScreenContent(
                                             .fillMaxWidth()
                                             .padding(vertical = 4.dp)
                                             .zIndex((state.filteredRoutes.size - index).toFloat())
+                                            .animateItem()
                                             .graphicsLayer {
                                                 rotationZ =
                                                     effectiveRotation * if (index % 2 == 0) 1f else -1f
@@ -406,7 +495,13 @@ internal fun FeedScreenContent(
 }
 
 @Composable
-fun TooltipWithAnimation(show: Boolean, text: String, emoji: String, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
+fun TooltipWithAnimation(
+    show: Boolean,
+    text: String,
+    emoji: String,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val infiniteTransition = rememberInfiniteTransition(label = "TooltipBounce")
     val offsetY by infiniteTransition.animateValue(
         initialValue = 0.dp,
@@ -419,10 +514,16 @@ fun TooltipWithAnimation(show: Boolean, text: String, emoji: String, onDismiss: 
             ),
         label = "bounce",
     )
-    AnimatedVisibility(
+    MwenyejiAnimatedVisibility(
         visible = show,
-        enter = fadeIn() + expandVertically() + scaleIn(initialScale = 0.8f),
-        exit = fadeOut() + shrinkVertically() + scaleOut(targetScale = 0.8f),
+        enter =
+            MwenyejiAnimations.fadeIn +
+                MwenyejiAnimations.expandVertically +
+                MwenyejiAnimations.scaleIn,
+        exit =
+            MwenyejiAnimations.fadeOut +
+                MwenyejiAnimations.shrinkVertically +
+                MwenyejiAnimations.scaleOut,
     ) {
         MwenyejiTooltip(
             text = text,
@@ -449,7 +550,12 @@ private fun FeedScreenContentPreview() {
 }
 
 @Composable
-fun TimeOfDayChip(title: String, modifier: Modifier = Modifier, selected: Boolean = false, onSelect: (String) -> Unit = {}) {
+fun TimeOfDayChip(
+    title: String,
+    modifier: Modifier = Modifier,
+    selected: Boolean = false,
+    onSelect: (String) -> Unit = {},
+) {
     val colors = MwenyejiTheme.colorScheme
     val borderColor by animateColorAsState(
         targetValue = if (selected) colors.primary else colors.outlineVariant,

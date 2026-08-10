@@ -3,80 +3,78 @@ package com.samuelokello.mwenyeji.navigation
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.navigation.NavBackStackEntry
+import com.samuelokello.mwenyeji.presentation.ui.theme.animation.AppEasing
+import com.samuelokello.mwenyeji.presentation.ui.theme.animation.Duration
+import com.samuelokello.mwenyeji.presentation.ui.theme.animation.appTween
 
 /**
  * Centralized navigation transitions. All graphs reference these by name —
  * change a duration here, and every screen using that preset updates together.
  */
 object NavAnimations {
-    private const val DURATION_STANDARD = 500
-    private const val DURATION_FAST = 300
-    private const val DURATION_SLOW = 600
-
     //  Horizontal slide (default for forward navigation)
     val slideForwardEnter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
         {
             slideIntoContainer(
                 towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                animationSpec = tween(DURATION_STANDARD),
+                animationSpec = appTween(Duration.LONG, AppEasing.emphasized),
             ) +
-                fadeIn(animationSpec = tween(DURATION_STANDARD))
+                fadeIn(animationSpec = appTween(Duration.NORMAL))
         }
 
     val slideForwardExit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
         slideOutOfContainer(
             towards = AnimatedContentTransitionScope.SlideDirection.Start,
-            animationSpec = tween(DURATION_STANDARD),
+            animationSpec = appTween(Duration.LONG, AppEasing.emphasized),
         ) +
-            fadeOut(animationSpec = tween(DURATION_STANDARD))
+            fadeOut(animationSpec = appTween(Duration.NORMAL))
     }
 
     val slideForwardPopEnter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
         {
             slideIntoContainer(
                 towards = AnimatedContentTransitionScope.SlideDirection.End,
-                animationSpec = tween(DURATION_STANDARD),
+                animationSpec = appTween(Duration.LONG, AppEasing.emphasized),
             ) +
-                fadeIn(animationSpec = tween(DURATION_STANDARD))
+                fadeIn(animationSpec = appTween(Duration.NORMAL))
         }
 
     val slideForwardPopExit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition =
         {
             slideOutOfContainer(
                 towards = AnimatedContentTransitionScope.SlideDirection.End,
-                animationSpec = tween(DURATION_STANDARD),
+                animationSpec = appTween(Duration.LONG, AppEasing.emphasized),
             ) +
-                fadeOut(animationSpec = tween(DURATION_STANDARD))
+                fadeOut(animationSpec = appTween(Duration.NORMAL))
         }
 
     //  Vertical slide (modals, bottom-sheet-like screens)
     val slideUpEnter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
         slideIntoContainer(
             towards = AnimatedContentTransitionScope.SlideDirection.Up,
-            animationSpec = tween(DURATION_STANDARD),
+            animationSpec = appTween(Duration.LONG, AppEasing.emphasized),
         ) +
-            fadeIn(animationSpec = tween(DURATION_FAST))
+            fadeIn(animationSpec = appTween(Duration.NORMAL))
     }
 
     val slideDownExit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
         slideOutOfContainer(
             towards = AnimatedContentTransitionScope.SlideDirection.Down,
-            animationSpec = tween(DURATION_STANDARD),
+            animationSpec = appTween(Duration.LONG, AppEasing.emphasized),
         ) +
-            fadeOut(animationSpec = tween(DURATION_FAST))
+            fadeOut(animationSpec = appTween(Duration.NORMAL))
     }
 
     //  Fade (auth flows, root-level transitions, tab switches)
     val fadeEnter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
-        fadeIn(animationSpec = tween(DURATION_SLOW))
+        fadeIn(animationSpec = appTween(Duration.NORMAL))
     }
 
     val fadeExit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
-        fadeOut(animationSpec = tween(DURATION_SLOW))
+        fadeOut(animationSpec = appTween(Duration.NORMAL))
     }
 
     //  None (instant — for tabbed bottom-nav siblings)
@@ -101,9 +99,9 @@ object NavAnimations {
 
             slideIntoContainer(
                 towards = direction,
-                animationSpec = tween(DURATION_STANDARD),
+                animationSpec = appTween(Duration.LONG, AppEasing.emphasized),
             ) +
-                fadeIn(animationSpec = tween(DURATION_STANDARD))
+                fadeIn(animationSpec = appTween(Duration.NORMAL))
         }
 
     // Dynamic Tab Transitions based on relative index positioning
@@ -121,8 +119,8 @@ object NavAnimations {
 
             slideOutOfContainer(
                 towards = direction,
-                animationSpec = tween(DURATION_STANDARD),
+                animationSpec = appTween(Duration.LONG, AppEasing.emphasized),
             ) +
-                fadeOut(animationSpec = tween(DURATION_STANDARD))
+                fadeOut(animationSpec = appTween(Duration.NORMAL))
         }
 }

@@ -79,7 +79,11 @@ object MwenyejiTheme {
 }
 
 @Composable
-fun MwenyejiAppTheme(darkTheme: Boolean = isSystemInDarkTheme(), dynamicColor: Boolean = false, content: @Composable () -> Unit) {
+fun MwenyejiAppTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = false,
+    content: @Composable () -> Unit,
+) {
     val appColors = resolveAppColorScheme(darkTheme, dynamicColor)
     val materialColors = resolveMaterialColorScheme(darkTheme, dynamicColor)
 

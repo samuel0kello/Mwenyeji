@@ -1,10 +1,5 @@
 package com.samuelokello.mwenyeji.feature.onboarding.componenets
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -22,23 +17,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.samuelokello.mwenyeji.R
+import com.samuelokello.mwenyeji.presentation.designsystem.animation.MwenyejiAnimatedVisibility
+import com.samuelokello.mwenyeji.presentation.designsystem.animation.MwenyejiAnimations
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
 @Composable
-fun NotificationCard(visible: Boolean, modifier: Modifier = Modifier) {
+fun NotificationCard(
+    visible: Boolean,
+    modifier: Modifier = Modifier,
+) {
     val color = MwenyejiTheme.colorScheme
-    AnimatedVisibility(
+    MwenyejiAnimatedVisibility(
         visible = visible,
-        enter =
-            slideInVertically(
-                animationSpec =
-                    spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessMediumLow,
-                    ),
-                initialOffsetY = { -it },
-            ) +
-                fadeIn(),
+        enter = MwenyejiAnimations.slideDownEnter,
+        exit = MwenyejiAnimations.slideUpExit,
         modifier = modifier,
     ) {
         Row(
@@ -51,11 +43,13 @@ fun NotificationCard(visible: Boolean, modifier: Modifier = Modifier) {
                         width = 1.dp,
                         color = color.border,
                         shape = RoundedCornerShape(14.dp),
-                    ).border(
+                    )
+                    .border(
                         width = 2.dp,
                         color = color.border,
                         shape = RoundedCornerShape(topStart = 14.dp, bottomStart = 14.dp),
-                    ).padding(14.dp),
+                    )
+                    .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {

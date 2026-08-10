@@ -141,4 +141,5 @@
     <string name="feedback_removed">Feedback removed.</string>
     <string name="failed_to_load_route">Failed to load route</string>
     <string name="failed_to_load_guides">Failed to load guides</string>
+    <string name="ai_disclaimer">AI suggestions are generated from travel patterns and may not always be accurate. Please verify with locals where possible.</string>
 </resources>

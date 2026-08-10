@@ -32,7 +32,10 @@ import org.koin.compose.viewmodel.koinViewModel
 private const val TOTAL_PAGES = 5
 
 @Composable
-fun OnboardingScreen(viewModel: OnboardingViewModel = koinViewModel(), onFinish: () -> Unit) {
+fun OnboardingScreen(
+    viewModel: OnboardingViewModel = koinViewModel(),
+    onFinish: () -> Unit,
+) {
     val state by viewModel.state.collectAsState()
     val pagerState = rememberPagerState { TOTAL_PAGES }
     val scope = rememberCoroutineScope()
@@ -91,7 +94,8 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = koinViewModel(), onFinish:
                     .padding(
                         horizontal = MwenyejiTheme.spacing.small,
                         vertical = MwenyejiTheme.spacing.small,
-                    ).align(Alignment.BottomEnd),
+                    )
+                    .align(Alignment.BottomEnd),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             ProgressDots(

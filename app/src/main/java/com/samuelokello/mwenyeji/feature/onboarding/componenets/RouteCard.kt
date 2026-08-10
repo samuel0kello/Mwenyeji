@@ -1,16 +1,11 @@
 package com.samuelokello.mwenyeji.feature.onboarding.componenets
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.EaseInOutSine
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -31,11 +26,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.samuelokello.mwenyeji.R
+import com.samuelokello.mwenyeji.presentation.designsystem.animation.SlideAnimatedVisibility
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 import com.samuelokello.mwenyeji.presentation.ui.theme.typography.JetBrainsFamily
 
 @Composable
-fun RouteCard(visible: Boolean, modifier: Modifier = Modifier) {
+fun RouteCard(
+    visible: Boolean,
+    modifier: Modifier = Modifier,
+) {
     val infiniteTransition = rememberInfiniteTransition(label = "badge")
     val glowAlpha by infiniteTransition.animateFloat(
         initialValue = 0.15f,
@@ -49,18 +48,8 @@ fun RouteCard(visible: Boolean, modifier: Modifier = Modifier) {
     )
     val colors = MwenyejiTheme.colorScheme
 
-    AnimatedVisibility(
+    SlideAnimatedVisibility(
         visible = visible,
-        enter =
-            slideInVertically(
-                animationSpec =
-                    spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessMediumLow,
-                    ),
-                initialOffsetY = { it / 2 },
-            ) +
-                fadeIn(tween(400)),
         modifier = modifier,
     ) {
         Column(
@@ -98,7 +87,8 @@ fun RouteCard(visible: Boolean, modifier: Modifier = Modifier) {
                             1.dp,
                             colors.surfaceContainerLowest.copy(alpha = glowAlpha),
                             RoundedCornerShape(8.dp),
-                        ).padding(horizontal = 10.dp, vertical = 6.dp),
+                        )
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -114,7 +104,10 @@ fun RouteCard(visible: Boolean, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun MetaItem(label: String, value: String) {
+private fun MetaItem(
+    label: String,
+    value: String,
+) {
     val colors = MwenyejiTheme.colorScheme
 
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {

@@ -95,11 +95,12 @@ android {
         compose = true
         buildConfig = true
         resValues = true
+        mlModelBinding = true
     }
+}
 
-    room {
-        schemaDirectory("$projectDir/schemas")
-    }
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {
@@ -123,6 +124,7 @@ dependencies {
 
     implementation(libs.googleid)
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -134,6 +136,7 @@ dependencies {
 
 //    koin
     implementation(platform(libs.koin.bom))
+    implementation(libs.koin.android)
     implementation(libs.bundles.koin)
 
     implementation(libs.androidx.datastore.preferences)
@@ -165,4 +168,14 @@ dependencies {
     // play update
     implementation(libs.app.update)
     implementation(libs.app.update.ktx)
+
+    // ML & TFLite
+    implementation(libs.play.services.tflite.java)
+    implementation(libs.tensorflow.lite)
+
+    implementation(libs.tensorflow.lite.support)
+    implementation(libs.tensorflow.tensorflow.lite.metadata)
+
+    // kotlinDL
+    implementation(libs.kotlin.deeplearning.api)
 }

@@ -11,12 +11,12 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.samuelokello.mwenyeji.core.InAppUpdateManager
 import com.samuelokello.mwenyeji.presentation.designsystem.components.snackbar.SnackBarManager
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiAppTheme
-import org.koin.android.ext.android.inject
+import org.koin.android.ext.android.get
 
 class MainActivity : ComponentActivity() {
     private lateinit var inAppUpdateManager: InAppUpdateManager
 
-    private val snackbarManager: SnackBarManager by inject<SnackBarManager>()
+    private lateinit var snackbarManager: SnackBarManager
 
     private val updateLauncher =
         registerForActivityResult(
@@ -35,12 +35,13 @@ class MainActivity : ComponentActivity() {
             window.isNavigationBarContrastEnforced = false
         }
 
-        inAppUpdateManager =
-            InAppUpdateManager(this).apply {
-                onUpdateDownloaded = { showUpdateReadySnackbar() }
-                registerListener()
-                checkForUpdate(updateLauncher)
-            }
+        snackbarManager = get()
+        inAppUpdateManager = InAppUpdateManager(this)
+        inAppUpdateManager.apply {
+            onUpdateDownloaded = { showUpdateReadySnackbar() }
+            registerListener()
+            checkForUpdate(updateLauncher)
+        }
 
         setContent {
             MwenyejiAppTheme {
