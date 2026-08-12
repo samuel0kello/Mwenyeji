@@ -17,6 +17,13 @@ val localProperties =
         }
     }
 
+val versionProperties =
+    Properties().apply {
+        rootProject.file("versions.properties").takeIf { it.exists() }?.let {
+            load(it.inputStream())
+        }
+    }
+
 android {
     namespace = "com.samuelokello.mwenyeji"
     compileSdk = 37
@@ -25,8 +32,8 @@ android {
         applicationId = "com.samuelokello.mwenyeji"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1010
-        versionName = "1.0.0"
+        versionCode = versionProperties.getProperty("versionCode", "1").toIntOrNull() ?: 1
+        versionName = versionProperties.getProperty("versionName", "1.0.0.0")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField(
@@ -66,6 +73,7 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            isDebuggable = false
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -96,6 +104,12 @@ android {
         buildConfig = true
         resValues = true
         mlModelBinding = true
+    }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
 }
 
@@ -178,4 +192,105 @@ dependencies {
 
     // kotlinDL
     implementation(libs.kotlin.deeplearning.api)
+}
+
+// Define bumper tasks
+
+abstract class VersionBumperTask : DefaultTask() {
+    @get:Internal
+    abstract val versionFile: RegularFileProperty
+
+    @get:Internal
+    abstract val projectDirectory: DirectoryProperty
+
+    @get:Internal
+    abstract val bumpType: Property<String>
+
+    @TaskAction
+    fun bump() {
+        val propertiesFile = versionFile.get().asFile
+        val workingDir = projectDirectory.get().asFile
+        val type = bumpType.get()
+
+        if (!propertiesFile.exists()) {
+            propertiesFile.createNewFile()
+            propertiesFile.writeText("versionCode=1\nversionName=1.0.0.0")
+        }
+
+        val properties = Properties().apply {
+            propertiesFile.inputStream().use { load(it) }
+        }
+
+        val currentVersionName = properties.getProperty("versionName", "1.0.0.0")
+        val currentVersionCode = properties.getProperty("versionCode", "1").toInt()
+
+        val cleanVersionName = currentVersionName.split("-")[0]
+        val parts = cleanVersionName.split(".")
+
+        val major = parts.getOrNull(0)?.toIntOrNull() ?: 1
+        val minor = parts.getOrNull(1)?.toIntOrNull() ?: 0
+        val patch = parts.getOrNull(2)?.toIntOrNull() ?: 0
+        val hotfix = parts.getOrNull(3)?.toIntOrNull() ?: 0
+
+        val newVersionName = when (type) {
+            "major" -> "${major + 1}.0.0.0"
+            "minor" -> "$major.${minor + 1}.0.0"
+            "patch" -> "$major.$minor.${patch + 1}.0"
+            "hotfix" -> "$major.$minor.$patch.${hotfix + 1}"
+            else -> throw IllegalArgumentException("Unknown bump type: $type")
+        }
+        val newVersionCode = currentVersionCode + 1
+
+        properties["versionName"] = newVersionName
+        properties["versionCode"] = newVersionCode.toString()
+
+        propertiesFile.outputStream().use { properties.store(it, null) }
+
+        val addExitCode = ProcessBuilder("git", "add", propertiesFile.absolutePath)
+            .directory(workingDir)
+            .inheritIO()
+            .start()
+            .waitFor()
+
+        if (addExitCode != 0) {
+            println("❌ 'git add' failed with exit code $addExitCode")
+            return
+        }
+
+        val commitExitCode = ProcessBuilder("git", "commit", "-m", "Bump version to $newVersionName ($newVersionCode)")
+            .directory(workingDir)
+            .inheritIO()
+            .start()
+            .waitFor()
+
+        if (commitExitCode != 0) {
+            println("⚠️ 'git commit' failed with exit code $commitExitCode. You might need to commit manually.")
+        } else {
+            println("✅ Version bumped to $newVersionName (code: $newVersionCode)")
+        }
+    }
+}
+
+tasks.register<VersionBumperTask>("bumperVersionMajor") {
+    versionFile.set(rootProject.layout.projectDirectory.file("versions.properties"))
+    projectDirectory.set(project.layout.projectDirectory)
+    bumpType.set("major")
+}
+
+tasks.register<VersionBumperTask>("bumperVersionMinor") {
+    versionFile.set(rootProject.layout.projectDirectory.file("versions.properties"))
+    projectDirectory.set(project.layout.projectDirectory)
+    bumpType.set("minor")
+}
+
+tasks.register<VersionBumperTask>("bumperVersionPatch") {
+    versionFile.set(rootProject.layout.projectDirectory.file("versions.properties"))
+    projectDirectory.set(project.layout.projectDirectory)
+    bumpType.set("patch")
+}
+
+tasks.register<VersionBumperTask>("bumperVersionHotFix") {
+    versionFile.set(rootProject.layout.projectDirectory.file("versions.properties"))
+    projectDirectory.set(project.layout.projectDirectory)
+    bumpType.set("hotfix")
 }
