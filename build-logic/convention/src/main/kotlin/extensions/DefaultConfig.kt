@@ -2,10 +2,10 @@ package extensions
 
 import org.gradle.api.Project
 
-fun Project.configureDefaultConfig(extensionType: ExtensionType){
+fun Project.configureDefaultConfig(extensionType: ExtensionType) {
     val versionProperties = loadProperties("versions.properties")
 
-    when(extensionType){
+    when (extensionType) {
         ExtensionType.APPLICATION -> {
             androidApplication {
                 defaultConfig {
@@ -16,7 +16,6 @@ fun Project.configureDefaultConfig(extensionType: ExtensionType){
                     versionName = versionProperties.getProperty("versionName", "1.0.0.0")
                     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
                     multiDexEnabled = true
-
                 }
             }
         }
@@ -33,5 +32,4 @@ fun Project.configureDefaultConfig(extensionType: ExtensionType){
             }
         }
     }
-
 }

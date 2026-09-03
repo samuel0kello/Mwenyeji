@@ -3,16 +3,16 @@ package extensions
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
 
-
 fun Project.configureCompose(extensionType: ExtensionType) {
     pluginManager.apply("org.jetbrains.kotlin.plugin.compose")
 
-    when(extensionType){
+    when (extensionType) {
         ExtensionType.APPLICATION -> {
             androidApplication {
                 buildFeatures.compose = true
             }
         }
+
         ExtensionType.LIBRARY -> {
             androidLibrary {
                 buildFeatures.compose = true

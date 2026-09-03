@@ -5,7 +5,7 @@ import org.gradle.api.Project
 
 class AndroidComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
-        with(target){
+        with(target) {
             val extensionType = if (pluginManager.hasPlugin("com.android.application")) {
                 ExtensionType.APPLICATION
             } else {

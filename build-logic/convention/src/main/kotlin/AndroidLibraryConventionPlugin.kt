@@ -3,10 +3,10 @@ import helpers.configureKotlinAndroid
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
-class AndroidLibraryConventionPlugin: Plugin<Project> {
+class AndroidLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
-        with(target){
-            pluginManager.apply{
+        with(target) {
+            pluginManager.apply {
                 apply("com.android.library")
             }
 

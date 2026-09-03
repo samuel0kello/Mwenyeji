@@ -16,16 +16,16 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        register("androidApplication"){
+        register("androidApplication") {
             id = "com.samuelokello.build-logic.application"
             implementationClass = "AndroidApplicationConventionPlugin"
         }
-        register("androidLibrary"){
+        register("androidLibrary") {
             id = "com.samuelokello.build-logic.library"
             implementationClass = "AndroidLibraryConventionPlugin"
         }
 
-        register("androidCompose"){
+        register("androidCompose") {
             id = "com.samuelokello.build-logic.compose"
             implementationClass = "AndroidComposeConventionPlugin"
         }

@@ -6,15 +6,13 @@ import extensions.androidApplication
 import extensions.androidExtension
 import extensions.androidLibrary
 import extensions.configureDefaultConfig
-import extensions.loadProperties
-import extensions.libs
 import extensions.kotlinOptions
+import extensions.libs
+import extensions.loadProperties
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 
-internal fun Project.configureKotlinAndroid(
-    extension: ExtensionType
-) {
+internal fun Project.configureKotlinAndroid(extension: ExtensionType) {
     configureDefaultConfig(extension)
     androidExtension {
         compileSdk = libs.findVersion("compileSdk").get().requiredVersion.toInt()
@@ -29,7 +27,7 @@ internal fun Project.configureKotlinAndroid(
 
     val localProperties = loadProperties("local.properties")
 
-    when(extension){
+    when (extension) {
         ExtensionType.APPLICATION -> {
             androidApplication {
                 buildTypes {
@@ -49,7 +47,6 @@ internal fun Project.configureKotlinAndroid(
                             "proguard-rules.pro",
                         )
                     }
-
 
                     signingConfigs {
                         maybeCreate("release").apply {
@@ -78,9 +75,9 @@ internal fun Project.configureKotlinAndroid(
                     resValues = true
                     mlModelBinding = true
                 }
-
             }
         }
+
         ExtensionType.LIBRARY -> {
             androidLibrary {
                 buildFeatures {
