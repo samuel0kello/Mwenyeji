@@ -6,6 +6,9 @@ appUpdate = "2.1.0"
 autofillNdk27 = "2.21.1"
 coil = "3.4.0"
 composeBom = "2026.05.01"
+compileSdk = "37"
+targetSdk = "37"
+minSdk = "24"
 coreKtx = "1.18.0"
 coreSplashscreen = "1.2.0"
 credentials = "1.6.0"
@@ -37,6 +40,8 @@ tensorflowLite = "2.17.0"
 tensorflowLiteSupport = "0.5.0"
 room = "2.8.4"
 tensorflowLiteMetadataVersion = "0.5.0"
+appcompat = "1.8.0"
+material = "1.14.0"
 
 [libraries]
 android-ndk27 = { module = "com.mapbox.maps:android-ndk27", version.ref = "androidNdk27" }
@@ -100,6 +105,11 @@ play-services-tflite-java = { module = "com.google.android.gms:play-services-tfl
 tensorflow-lite = { module = "org.tensorflow:tensorflow-lite", version.ref = "tensorflowLite" }
 tensorflow-lite-support = { module = "org.tensorflow:tensorflow-lite-support", version.ref = "tensorflowLiteSupport" }
 tensorflow-tensorflow-lite-metadata = { group = "org.tensorflow", name = "tensorflow-lite-metadata", version.ref = "tensorflowLiteMetadataVersion" }
+
+android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp"}
+kotlin-gradle-plugin = {group ="org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin"}
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [bundles]
 koin = [
