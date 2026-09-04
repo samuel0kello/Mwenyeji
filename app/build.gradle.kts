@@ -1,8 +1,8 @@
 import java.util.Properties
 
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.compose)
+    id("com.samuelokello.build-logic.application")
+    id("com.samuelokello.build-logic.compose")
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
@@ -10,94 +10,8 @@ plugins {
     alias(libs.plugins.androidx.room)
 }
 
-val localProperties =
-    Properties().apply {
-        rootProject.file("local.properties").takeIf { it.exists() }?.let {
-            load(it.inputStream())
-        }
-    }
-
-val versionProperties =
-    Properties().apply {
-        rootProject.file("versions.properties").takeIf { it.exists() }?.let {
-            load(it.inputStream())
-        }
-    }
-
 android {
     namespace = "com.samuelokello.mwenyeji"
-    compileSdk = 37
-
-    defaultConfig {
-        applicationId = "com.samuelokello.mwenyeji"
-        minSdk = 24
-        targetSdk = 36
-        versionCode = versionProperties.getProperty("versionCode", "1").toIntOrNull() ?: 1
-        versionName = versionProperties.getProperty("versionName", "1.0.0.0")
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        buildConfigField(
-            "String",
-            "MAPBOX_ACCESS_TOKEN",
-            "\"${localProperties.getProperty("MAPBOX_ACCESS_TOKEN") ?: ""}\"",
-        )
-
-        resValue(
-            "string",
-            "mapbox_access_token",
-            localProperties.getProperty("MAPBOX_ACCESS_TOKEN") ?: "",
-        )
-        buildConfigField(
-            "String",
-            "MAPBOX_DOWNLOADS_TOKEN",
-            "\"${localProperties.getProperty("MAPBOX_DOWNLOADS_TOKEN") ?: ""}\"",
-        )
-    }
-
-    signingConfigs {
-        create("release") {
-            storeFile = file(localProperties["STORE_FILE"] ?: "keystore.jks")
-            storePassword = localProperties["STORE_PASSWORD"] as String? ?: ""
-            keyAlias = localProperties["KEY_ALIAS"] as String? ?: ""
-            keyPassword = localProperties["KEY_PASSWORD"] as String? ?: ""
-        }
-    }
-
-    buildTypes {
-        debug {
-            versionNameSuffix = "-debug"
-            applicationIdSuffix = ".debug"
-            isDebuggable = true
-        }
-
-        release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            isDebuggable = false
-            signingConfig = signingConfigs.getByName("release")
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
-        }
-
-        create("beta") {
-            initWith(getByName("release"))
-            versionNameSuffix = "-beta"
-            isMinifyEnabled = true
-            isShrinkResources = true
-            signingConfig = signingConfigs.getByName("release")
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
 
     buildFeatures {
         compose = true
@@ -106,12 +20,35 @@ android {
         mlModelBinding = true
     }
 
+    defaultConfig {
+//        buildConfigField(
+//            "String",
+//            "MAPBOX_ACCESS_TOKEN",
+//            "\"${localProperties.getProperty("MAPBOX_ACCESS_TOKEN") ?: ""}\"",
+//        )
+//
+//        resValue(
+//            "string",
+//            "mapbox_access_token",
+//            localProperties.getProperty("MAPBOX_ACCESS_TOKEN") ?: "",
+//        )
+//        buildConfigField(
+//            "String",
+//            "MAPBOX_DOWNLOADS_TOKEN",
+//            "\"${localProperties.getProperty("MAPBOX_DOWNLOADS_TOKEN") ?: ""}\"",
+//        )
+    }
+
     packaging {
         jniLibs {
             useLegacyPackaging = true
         }
     }
 }
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
 room {
     schemaDirectory("$projectDir/schemas")
 }
