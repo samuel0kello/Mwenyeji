@@ -45,6 +45,9 @@ android {
         }
     }
 }
+room {
+    schemaDirectory("$projectDir/schemas")
+}
 
 room {
     schemaDirectory("$projectDir/schemas")
