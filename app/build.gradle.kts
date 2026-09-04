@@ -20,33 +20,11 @@ android {
         mlModelBinding = true
     }
 
-    defaultConfig {
-//        buildConfigField(
-//            "String",
-//            "MAPBOX_ACCESS_TOKEN",
-//            "\"${localProperties.getProperty("MAPBOX_ACCESS_TOKEN") ?: ""}\"",
-//        )
-//
-//        resValue(
-//            "string",
-//            "mapbox_access_token",
-//            localProperties.getProperty("MAPBOX_ACCESS_TOKEN") ?: "",
-//        )
-//        buildConfigField(
-//            "String",
-//            "MAPBOX_DOWNLOADS_TOKEN",
-//            "\"${localProperties.getProperty("MAPBOX_DOWNLOADS_TOKEN") ?: ""}\"",
-//        )
-    }
-
     packaging {
         jniLibs {
             useLegacyPackaging = true
         }
     }
-}
-room {
-    schemaDirectory("$projectDir/schemas")
 }
 
 room {

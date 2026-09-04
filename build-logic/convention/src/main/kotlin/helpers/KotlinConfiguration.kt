@@ -37,6 +37,15 @@ internal fun Project.configureKotlinAndroid(extension: ExtensionType) {
                         isDebuggable = true
                     }
 
+                    signingConfigs {
+                        maybeCreate("release").apply {
+                            storeFile = localProperties.getProperty("STORE_FILE")?.let { file(it) } ?: file("keystore.jks")
+                            storePassword = localProperties.getProperty("STORE_PASSWORD") ?: ""
+                            keyAlias = localProperties.getProperty("KEY_ALIAS") ?: ""
+                            keyPassword = localProperties.getProperty("KEY_PASSWORD") ?: ""
+                        }
+                    }
+
                     release {
                         isMinifyEnabled = true
                         isShrinkResources = true
