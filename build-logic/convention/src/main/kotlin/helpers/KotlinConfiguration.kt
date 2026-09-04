@@ -1,6 +1,5 @@
 package helpers
 
-import com.android.build.api.dsl.CommonExtension
 import extensions.ExtensionType
 import extensions.androidApplication
 import extensions.androidExtension
@@ -37,6 +36,15 @@ internal fun Project.configureKotlinAndroid(extension: ExtensionType) {
                         isDebuggable = true
                     }
 
+                    signingConfigs {
+                        maybeCreate("release").apply {
+                            storeFile = localProperties.getProperty("STORE_FILE")?.let { file(it) } ?: file("keystore.jks")
+                            storePassword = localProperties.getProperty("STORE_PASSWORD") ?: ""
+                            keyAlias = localProperties.getProperty("KEY_ALIAS") ?: ""
+                            keyPassword = localProperties.getProperty("KEY_PASSWORD") ?: ""
+                        }
+                    }
+
                     release {
                         isMinifyEnabled = true
                         isShrinkResources = true
@@ -46,15 +54,6 @@ internal fun Project.configureKotlinAndroid(extension: ExtensionType) {
                             getDefaultProguardFile("proguard-android-optimize.txt"),
                             "proguard-rules.pro",
                         )
-                    }
-
-                    signingConfigs {
-                        maybeCreate("release").apply {
-                            storeFile = localProperties.getProperty("STORE_FILE")?.let { file(it) } ?: file("keystore.jks")
-                            storePassword = localProperties.getProperty("STORE_PASSWORD") ?: ""
-                            keyAlias = localProperties.getProperty("KEY_ALIAS") ?: ""
-                            keyPassword = localProperties.getProperty("KEY_PASSWORD") ?: ""
-                        }
                     }
 
                     create("beta") {
