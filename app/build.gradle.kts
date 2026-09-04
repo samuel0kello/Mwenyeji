@@ -105,17 +105,13 @@ android {
         resValues = true
         mlModelBinding = true
     }
-}
 
     packaging {
         jniLibs {
             useLegacyPackaging = true
         }
     }
-room {
-    schemaDirectory("$projectDir/schemas")
 }
-
 room {
     schemaDirectory("$projectDir/schemas")
 }
