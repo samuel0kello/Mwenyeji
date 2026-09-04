@@ -21,7 +21,6 @@ class InAppUpdateManager(
 
     private val listener =
         InstallStateUpdatedListener { state ->
-            Log.d(tag, "InstallStatus: ${state.installStatus()}")
             if (state.installStatus() == InstallStatus.DOWNLOADED) {
                 Log.i(tag, "Update downloaded, notifying listener")
                 onUpdateDownloaded?.invoke()
