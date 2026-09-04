@@ -20,7 +20,6 @@ android {
         mlModelBinding = true
     }
 
-
     packaging {
         jniLibs {
             useLegacyPackaging = true
