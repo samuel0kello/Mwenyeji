@@ -1,18 +1,9 @@
-package helpers
+package extensions
 
-import com.android.build.api.dsl.CommonExtension
-import extensions.ExtensionType
-import extensions.androidApplication
-import extensions.androidExtension
-import extensions.androidLibrary
-import extensions.configureDefaultConfig
-import extensions.kotlinOptions
-import extensions.libs
-import extensions.loadProperties
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 
-internal fun Project.configureKotlinAndroid(extension: ExtensionType) {
+fun Project.configureKotlinAndroid(extension: ExtensionType) {
     configureDefaultConfig(extension)
     androidExtension {
         compileSdk = libs.findVersion("compileSdk").get().requiredVersion.toInt()
@@ -55,15 +46,6 @@ internal fun Project.configureKotlinAndroid(extension: ExtensionType) {
                             getDefaultProguardFile("proguard-android-optimize.txt"),
                             "proguard-rules.pro",
                         )
-                    }
-
-                    signingConfigs {
-                        maybeCreate("release").apply {
-                            storeFile = localProperties.getProperty("STORE_FILE")?.let { file(it) } ?: file("keystore.jks")
-                            storePassword = localProperties.getProperty("STORE_PASSWORD") ?: ""
-                            keyAlias = localProperties.getProperty("KEY_ALIAS") ?: ""
-                            keyPassword = localProperties.getProperty("KEY_PASSWORD") ?: ""
-                        }
                     }
 
                     create("beta") {

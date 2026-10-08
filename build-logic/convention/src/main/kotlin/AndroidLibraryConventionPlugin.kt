@@ -1,5 +1,5 @@
 import extensions.ExtensionType
-import helpers.configureKotlinAndroid
+import extensions.configureKotlinAndroid
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 

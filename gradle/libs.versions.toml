@@ -108,6 +108,10 @@ tensorflow-tensorflow-lite-metadata = { group = "org.tensorflow", name = "tensor
 
 android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp"}
 kotlin-gradle-plugin = {group ="org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin"}
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+room-gradle-plugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
