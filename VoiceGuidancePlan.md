@@ -115,13 +115,83 @@ Samuel's first table (listen, think, speak) is a separate machine from the trip 
 - Give "didn't hear", "didn't understand" and "no route found" their own spoken replies, and add a confirm step ("Embakasi, sawa?").
 - Add haptics to every row.
 
-## Where things stand on 2026-10-08
+## Where things stand on 2026-10-17
 
-- `StateMachine.md` is complete.
-- Samuel had written the types and a half-finished `PLANNED` branch in `TripSessionContract.kt`.
-- **On 2026-10-08 Claude wrote the whole function and its tests, against the agreement above.** That skipped steps 3 to 6 of Samuel's own work.
-- Claude's version also departs from the agreed design in these places:
-  - `Message` still carries English text, not one typed member per sentence.
-  - It is a `tripSessionMachine` function, not a reducer with `reduce`.
-  - It uses `kotlin.time.Instant`, not time-since-boot.
-  - The field is still `timeStamp`, not `timestamp`.
+The first rideable slice (steps 2 to 4 plus the button) is built, on `feat/talk-back`.
+
+- **History.** On 2026-10-08 Claude wrote the trip machine against the agreement. Samuel chose to keep it and refactor it. He fixed the design gaps with Claude's help (typed `Message`, reducer with `reduce`, time since boot in millis, `timestamp`). On 2026-10-17 he asked Claude to build the announcer and then the rest of the slice.
+- **Step 2, trip session:** `feature/guidance/session/`. Four moments now only vibrate (back on track, boarding noticed, I've alighted, cancel); see `StateMachine.md`.
+- **Step 3, announcer:** `feature/guidance/announcer/`. Phrasebook (English only; Swahili and Sheng fall back to English text), speech priority, `TtsSpeaker`, `VibratorHaptics`, `Announcer`.
+- **Step 4, service:** `feature/guidance/service/`. `TripGuidanceService` is a location foreground service. It turns GPS fixes into events, sends GPS lost after 60 seconds, shows the next step in a notification with "I'm on board", "I've alighted" and "Stop", and stops itself after the trip ends.
+- **The button:** each guide on route details has **Start guide**. A guide stores no stops, so the trip follows the direction the user searched. The stop is the searched destination when it matches a stop name, otherwise the far end of the route. The stage is the searched origin when it matches a stop, otherwise the stop nearest the user when the trip starts. It asks for precise location (and notifications on Android 13+), then opens the guidance screen.
+- **Guidance screen:** `feature/guidance/ui/GuidanceScreen.kt`. (Moved to MapLibre and our own map on 2026-10-18; see below.) Mapbox Standard style with landmarks, the route as straight lines between stops (no road shapes yet), stage and stop pins, the user's position followed by the camera, the next step at the top, and "I'm on board", "I've alighted" and "Stop" at the bottom. Leaving the screen does not stop guidance.
+
+**Next:**
+1. Ride a real matatu with it and tune `TripThresholds`.
+2. Write the Swahili and Sheng phrases.
+3. Add a language setting; today Swahili is used only when the phone's language is Swahili.
+4. Optionally store a stage and stop on each guide, so a guide can start mid-route without a search.
+5. Draw real road shapes (`outboundShapeId`, `inboundShapeId`) instead of straight lines.
+6. Steps 1 and 5 (planner, chat and voice input) come after the ride.
+
+## Where things stand on 2026-10-18: our own map, and learning shortcuts
+
+Goal: own the map, and know when a driver takes a shortcut instead of calling it the wrong bus.
+
+**1. Shortcut or wrong bus (app).** While riding, a detour is judged by whether it is still heading for
+the stop. See "Shortcuts" in `StateMachine.md`. New `Message.Shortcut`, thresholds
+`OFF_ROUTE_RIDE_DISTANCE_M`, `DETOUR_PROGRESS_M`, `DETOUR_LOSS_M`, guard `DETOUR`.
+
+**2. Our own map (app + `seeder/map/`).**
+- The guidance map is MapLibre (`feature/guidance/ui/GuidanceMap.kt`), not Mapbox.
+- The style (`assets/map/style.json`, from OpenFreeMap Liberty), its icons and fonts ship inside the
+  app. Only tiles come over the network. `core/map/MwenyejiMapStyle.kt` loads it.
+- Tiles: `seeder/map/build_tiles.sh` builds `kenya.pmtiles` from OpenStreetMap with Planetiler
+  (about 220 MB). `node map/upload_tiles.js` puts it on Firebase Storage and prints the URL for
+  `MWENYEJI_MAP_TILES_URL` in `gradle.properties`. While that is empty, the app uses OpenFreeMap's
+  tiles, which have the same schema. Rebuild monthly.
+- The OpenStreetMap credit is shown above the guidance buttons, as the licence requires.
+- Globe view: MapLibre Android only has it in a pre-release (13.7.0-pre-globe.0). When a stable
+  release has it, add `"projection": {"type": "globe"}` to the style.
+- The contribute flow's maps are still Mapbox: they rely on dragging pins, and MapLibre's annotation
+  plugin was last built for MapLibre 11.
+
+**3. Ride traces (app).** Asked once, the first time a guide is started ("Help Mwenyeji learn matatu
+shortcuts?"). With consent, `feature/guidance/trace/RideTraceRecorder` keeps only the ride (no walk),
+one point per 20 m. When the trip reaches its stop, it goes to `/ride_traces` with the route, direction,
+hour and weekday: no account, device or date. Cancelled trips are not sent.
+
+**4. Learning variants (`seeder/route_learning/`).**
+- `start_valhalla.sh` runs Valhalla in Docker on Kenya's OSM data.
+- `node route_learning/learn_variants.js [--dry-run]` snaps each trace to roads, finds stretches
+  that left the route, groups them by road, and writes roads taken on 3 or more rides to
+  `/route_variants`. Traces older than 90 days are deleted. Run it weekly.
+- The logic is in `variants.js`, tested by `node --test route_learning/*.test.js`.
+
+**5. Using variants (app).** At trip start the service loads `/route_variants` for the route and
+direction (5 s timeout) into `TripPlan.knownPaths`. The reducer counts them as on route, and the map
+draws them dashed.
+
+**Firestore rules to add** (not deployed; the project's rules are not in this repo):
+
+```
+match /ride_traces/{id} {
+  allow create: if request.resource.data.keys().hasOnly(
+      ['routeId', 'direction', 'boardingStopId', 'alightStopId', 'weekday', 'hour', 'points', 'createdAt'])
+    && request.resource.data.points is list && request.resource.data.points.size() <= 5000
+    && request.resource.data.createdAt == request.time;
+  allow read, update, delete: if false;   // only the learning job, with the admin key
+}
+match /route_variants/{id} {
+  allow read: if true;
+  allow write: if false;                  // only the learning job
+}
+```
+
+**Next for this part:**
+1. Upload the tiles and set `MWENYEJI_MAP_TILES_URL`.
+2. Add the rules above.
+3. Run `learn_variants.js` on a schedule once traces come in.
+4. Use matched traces to give each route its real road shape, replacing the straight lines.
+5. Move the contribute maps to MapLibre, and replace Mapbox Search with an OSM geocoder (Photon), to
+   drop Mapbox entirely.
