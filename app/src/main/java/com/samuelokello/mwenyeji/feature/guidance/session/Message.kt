@@ -9,7 +9,7 @@ package com.samuelokello.mwenyeji.feature.guidance.session
  */
 sealed class Message {
     data class WalkToStage(
-        val metres: Int,
+        val metres: Int?,
         val stageName: String,
     ) : Message()
 
@@ -27,6 +27,11 @@ sealed class Message {
     ) : Message()
 
     data class GetReady(
+        val stopName: String,
+    ) : Message()
+
+    /** The bus left every road it is known to use, but it is still getting closer to the stop. */
+    data class Shortcut(
         val stopName: String,
     ) : Message()
 

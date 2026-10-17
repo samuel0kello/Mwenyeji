@@ -1,5 +1,6 @@
 package com.samuelokello.mwenyeji.feature.guidance.session
 
+import com.samuelokello.mwenyeji.data.models.GeoPoint
 import com.samuelokello.mwenyeji.data.models.RouteStop
 
 interface TripSessionContract {
@@ -9,6 +10,8 @@ interface TripSessionContract {
      * @param stops         Route stops ordered in the direction of travel.
      * @param boardingIndex Index in [stops] of the stage the user walks to.
      * @param alightIndex   Index in [stops] of the stop the user gets off at.
+     * @param knownPaths    Roads matatus on this route are known to take besides the main line,
+     *                      learned from riders' traces. A bus on one of them is on route.
      */
     data class TripPlan(
         val stops: List<RouteStop>,
@@ -16,7 +19,9 @@ interface TripSessionContract {
         val alightIndex: Int,
         val vehicleName: String,
         val fare: Int? = null,
-        val walkingDistanceMetres: Int,
+        // Null when the phone had no location yet when the trip started.
+        val walkingDistanceMetres: Int?,
+        val knownPaths: List<List<GeoPoint>> = emptyList(),
     ) {
         val stage: RouteStop get() = stops[boardingIndex]
         val alightStop: RouteStop get() = stops[alightIndex]
@@ -30,6 +35,9 @@ interface TripSessionContract {
         // When the current timed guard (walking away, off the bus) started matching.
         val currentStreakTime: Long? = null,
         val previousDistanceToStage: Double? = null,
+        // Distance to the alight stop when the current detour began. Null while on route.
+        val detourStartToStopMetres: Double? = null,
+        val shortcutNoticeGiven: Boolean = false,
         val wrongBusWarningGiven: Boolean = false,
         val gpsLostWarningGiven: Boolean = false,
     )

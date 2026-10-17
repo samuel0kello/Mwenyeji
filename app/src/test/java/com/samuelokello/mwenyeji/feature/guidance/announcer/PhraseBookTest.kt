@@ -30,6 +30,14 @@ class PhraseBookTest {
     }
 
     @Test
+    fun `walking distance is only mentioned when known`() {
+        assertEquals(
+            "Walk to Kencom stage",
+            PhraseBook.phraseFor(Message.WalkToStage(null, "Kencom"), Language.ENGLISH),
+        )
+    }
+
+    @Test
     fun `fare is only mentioned when known`() {
         assertEquals(
             "You're at the stage. Look for Super Metro to Ngara, fare around 100",
@@ -49,6 +57,7 @@ class PhraseBookTest {
             Message.WalkingAwayFromStage,
             Message.OnBoardConfirmed(3, "Ngara"),
             Message.GetReady("Ngara"),
+            Message.Shortcut("Ngara"),
             Message.WrongBus("Ngara"),
             Message.Alight("Ngara", 200),
             Message.Arrived("Ngara"),

@@ -1,6 +1,7 @@
 package com.samuelokello.mwenyeji.feature.guidance.session
 
 import com.samuelokello.mwenyeji.data.helpers.ProximityEngine
+import com.samuelokello.mwenyeji.data.models.GeoPoint
 import com.samuelokello.mwenyeji.data.models.RouteStop
 import com.samuelokello.mwenyeji.feature.guidance.session.TripSessionContract.TripEvent
 import kotlin.math.cos
@@ -11,23 +12,31 @@ internal fun distanceMetres(
     stop: RouteStop,
 ): Double = ProximityEngine.haversineKm(fix.lat, fix.lng, stop.lat, stop.lng) * 1000
 
-/**
- * Distance from the fix to the line through the stops, in metres.
- * There are no route shapes, so straight lines between consecutive stops stand in for the road.
- */
-internal fun distanceToRouteMetres(
+/** Distance from the fix to the nearest of [paths], in metres. Infinite when there are none. */
+internal fun distanceToPathsMetres(
     fix: TripEvent.LocationFix,
-    stops: List<RouteStop>,
+    paths: List<List<GeoPoint>>,
+): Double = paths.minOfOrNull { distanceToPathMetres(fix, it) } ?: Double.POSITIVE_INFINITY
+
+/**
+ * Distance from the fix to the polyline through [points], in metres. A route without a road shape is
+ * the straight lines between its stops.
+ */
+internal fun distanceToPathMetres(
+    fix: TripEvent.LocationFix,
+    points: List<GeoPoint>,
 ): Double {
-    if (stops.size < 2) return stops.minOfOrNull { distanceMetres(fix, it) } ?: 0.0
+    if (points.isEmpty()) return Double.POSITIVE_INFINITY
 
     // Flat projection centred on the fix. Accurate enough at the few-km scale of a route.
     val metresPerDegree = 111_320.0
     val lngScale = cos(Math.toRadians(fix.lat))
-    fun x(stop: RouteStop) = (stop.lng - fix.lng) * lngScale * metresPerDegree
-    fun y(stop: RouteStop) = (stop.lat - fix.lat) * metresPerDegree
+    fun x(point: GeoPoint) = (point.lng - fix.lng) * lngScale * metresPerDegree
+    fun y(point: GeoPoint) = (point.lat - fix.lat) * metresPerDegree
 
-    return stops.zipWithNext().minOf { (a, b) ->
+    if (points.size == 1) return hypot(x(points[0]), y(points[0]))
+
+    return points.zipWithNext().minOf { (a, b) ->
         val ax = x(a)
         val ay = y(a)
         val dx = x(b) - ax

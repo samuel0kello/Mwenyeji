@@ -1,5 +1,6 @@
 package com.samuelokello.mwenyeji.feature.guidance.session
 
+import com.samuelokello.mwenyeji.data.models.GeoPoint
 import com.samuelokello.mwenyeji.data.models.RouteStop
 import com.samuelokello.mwenyeji.feature.guidance.session.TripSessionContract.TripEffect
 import com.samuelokello.mwenyeji.feature.guidance.session.TripSessionContract.TripEvent
@@ -191,20 +192,89 @@ class TripSessionReducerTest {
         assertEquals(TripPhase.APPROACHING_STOP, state.currentPhase)
     }
 
+    // Detours: 500m north of the line, so off the route. Stop 3 is about 2.2km east of stop 1.
+
     @Test
-    fun `wrong bus warning fires once per trip`() {
+    fun `a detour that keeps getting closer to the stop is a shortcut, said once`() {
         startIn(TripPhase.ON_BOARD)
 
-        repeat(4) { fix(stops[1], north = 500.0, speed = driving) }
+        // Three fixes off the route mark where the detour began.
+        repeat(3) { fix(stops[1], north = 500.0, speed = driving) }
+        // About 190m closer: not enough yet.
+        fix(stops[1], east = 200.0, north = 500.0, speed = driving)
         assertTrue(effects.isEmpty())
-        fix(stops[1], north = 500.0, speed = driving)
-        assertEquals(Message.WrongBus("Stop 3"), spoken())
+
+        fix(stops[1], east = 250.0, north = 500.0, speed = driving)
+        assertEquals(Message.Shortcut("Stop 3"), spoken())
+        assertEquals(VibrationPattern.TICK, vibration())
         assertEquals(TripPhase.ON_BOARD, state.currentPhase)
 
-        repeat(10) {
-            fix(stops[1], north = 500.0, speed = driving)
+        listOf(400.0, 600.0, 800.0).forEach {
+            fix(stops[1], east = it, north = 500.0, speed = driving)
             assertTrue(effects.isEmpty())
         }
+    }
+
+    @Test
+    fun `a detour that gets clearly further from the stop warns of the wrong bus, once`() {
+        startIn(TripPhase.ON_BOARD)
+
+        repeat(3) { fix(stops[1], north = 500.0, speed = driving) }
+        // About 470m further: not enough yet.
+        fix(stops[1], east = -480.0, north = 500.0, speed = driving)
+        assertTrue(effects.isEmpty())
+
+        fix(stops[1], east = -520.0, north = 500.0, speed = driving)
+        assertEquals(Message.WrongBus("Stop 3"), spoken())
+        assertEquals(VibrationPattern.WARNING, vibration())
+
+        repeat(5) {
+            fix(stops[1], east = -600.0 - it * 100, north = 500.0, speed = driving)
+            assertTrue(effects.isEmpty())
+        }
+    }
+
+    @Test
+    fun `standing in traffic on a detour stays quiet`() {
+        startIn(TripPhase.ON_BOARD)
+
+        repeat(60) {
+            fix(stops[1], north = 500.0, speed = 0.0)
+            assertTrue(effects.isEmpty())
+        }
+    }
+
+    @Test
+    fun `back on the route ends the detour, and the next one starts from where it begins`() {
+        startIn(TripPhase.ON_BOARD)
+
+        repeat(3) { fix(stops[1], north = 500.0, speed = driving) }
+        fix(stops[1], speed = driving)
+        assertEquals(null, state.detourStartToStopMetres)
+
+        // A new detour further along: 150m closer than its own start is not a shortcut.
+        repeat(3) { fix(stops[1], east = 300.0, north = 500.0, speed = driving) }
+        fix(stops[1], east = 450.0, north = 500.0, speed = driving)
+        assertTrue(effects.isEmpty())
+    }
+
+    @Test
+    fun `a road learned from riders counts as on route`() {
+        val learnedRoad = listOf(
+            GeoPoint(lat + 500 * metre, stops[0].lng),
+            GeoPoint(lat + 500 * metre, stops[4].lng),
+        )
+        val reducer = TripSessionReducer(plan.copy(knownPaths = listOf(learnedRoad)))
+        var state = TripState(currentPhase = TripPhase.ON_BOARD)
+
+        listOf(0.0, 0.0, 0.0, 250.0, 500.0, 0.0, -600.0).forEach { east ->
+            clock += 5_000L
+            val fix = TripEvent.LocationFix(lat + 500 * metre, stops[1].lng + east * metre, driving, 5.0, clock)
+            val (next, emitted) = reducer.reduce(state, fix)
+            state = next
+            assertTrue(emitted.isEmpty())
+        }
+        assertEquals(null, state.detourStartToStopMetres)
     }
 
     @Test

@@ -22,7 +22,8 @@ object PhraseBook {
 
     private fun english(message: Message): String =
         when (message) {
-            is Message.WalkToStage -> "Walk ${message.metres} metres to ${message.stageName} stage"
+            is Message.WalkToStage ->
+                "Walk " + (message.metres?.let { "$it metres " } ?: "") + "to ${message.stageName} stage"
 
             is Message.AtStage ->
                 "You're at the stage. Look for ${message.vehicleName} to ${message.stopName}" +
@@ -34,6 +35,9 @@ object PhraseBook {
                 "Sawa, ${message.stopsToRide} stops to ${message.stopName}. I'll tell you when to get off"
 
             is Message.GetReady -> "Get ready, ${message.stopName} is coming up"
+
+            is Message.Shortcut ->
+                "The driver is taking another road. I'll still tell you when to get off at ${message.stopName}"
 
             is Message.WrongBus -> "This bus may not be going to ${message.stopName}, check with the conductor"
 

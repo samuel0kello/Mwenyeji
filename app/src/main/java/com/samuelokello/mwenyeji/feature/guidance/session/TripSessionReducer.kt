@@ -1,5 +1,6 @@
 package com.samuelokello.mwenyeji.feature.guidance.session
 
+import com.samuelokello.mwenyeji.data.models.GeoPoint
 import com.samuelokello.mwenyeji.feature.guidance.session.TripSessionContract.TripEffect
 import com.samuelokello.mwenyeji.feature.guidance.session.TripSessionContract.TripEvent
 import com.samuelokello.mwenyeji.feature.guidance.session.TripSessionContract.TripPlan
@@ -9,6 +10,8 @@ import kotlin.math.roundToInt
 internal class TripSessionReducer(
     private val plan: TripPlan,
 ) {
+    // The main line through the stops, then the roads riders' traces showed matatus also take.
+    private val routePaths: List<List<GeoPoint>> = listOf(plan.stops.map { GeoPoint(it.lat, it.lng) }) + plan.knownPaths
 
     /**
      * Pure transition function for a guided trip. See StateMachine.md for the table this implements.
@@ -147,8 +150,10 @@ internal class TripSessionReducer(
         val stopName = plan.alightStop.name
         val toStop = distanceMetres(fix, plan.alightStop)
         val nearestIndex = plan.stops.indices.minBy { distanceMetres(fix, plan.stops[it]) }
-        // "Past the stop": the nearest stop on the route comes after the alight stop.
-        val pastStop = nearestIndex > plan.alightIndex
+        val offRoute = distanceToPathsMetres(fix, routePaths) > TripThresholds.OFF_ROUTE_RIDE_DISTANCE_M
+        // "Past the stop": back on known roads, and the nearest stop comes after the alight stop.
+        // On a detour the nearest stop says little, because the bus skips stops.
+        val pastStop = !offRoute && nearestIndex > plan.alightIndex
 
         var next = state.streak(
             TripGuard.MISSED_STOP,
@@ -163,24 +168,16 @@ internal class TripSessionReducer(
 
         when (state.currentPhase) {
             TripPhase.ON_BOARD -> {
+                // Get ready by distance, or by stops passed while the bus is on its known roads.
                 next = next.streak(
                     TripGuard.APPROACHING,
-                    toStop <= TripThresholds.GET_READY_DISTANCE_M || nearestIndex >= plan.alightIndex - 1,
+                    toStop <= TripThresholds.GET_READY_DISTANCE_M || (!offRoute && nearestIndex >= plan.alightIndex - 1),
                 )
                 if (next.count(TripGuard.APPROACHING) >= 3) {
                     return next.enter(TripPhase.APPROACHING_STOP) to say(Message.GetReady(stopName), VibrationPattern.GET_READY)
                 }
 
-                next = next.streak(
-                    TripGuard.WRONG_BUS,
-                    distanceToRouteMetres(fix, plan.stops) > TripThresholds.WRONG_BUS_DISTANCE_M,
-                )
-                if (next.count(TripGuard.WRONG_BUS) >= 5 && !next.wrongBusWarningGiven) {
-                    return next.copy(wrongBusWarningGiven = true) to say(
-                        Message.WrongBus(stopName),
-                        VibrationPattern.WARNING,
-                    )
-                }
+                return detour(next.streak(TripGuard.DETOUR, offRoute), toStop)
             }
 
             TripPhase.APPROACHING_STOP -> {
@@ -203,6 +200,31 @@ internal class TripSessionReducer(
             else -> Unit
         }
         return next to emptyList()
+    }
+
+    /**
+     * A bus off its known roads is judged by where it is heading, not where it is: still getting closer
+     * to the stop is a shortcut around traffic, getting clearly further is probably the wrong bus.
+     */
+    private fun detour(
+        state: TripState,
+        toStop: Double,
+    ): Pair<TripState, List<TripEffect>> {
+        if (state.count(TripGuard.DETOUR) < 3) {
+            return state.copy(detourStartToStopMetres = null) to emptyList()
+        }
+
+        val start = state.detourStartToStopMetres ?: toStop
+        val next = state.copy(detourStartToStopMetres = start)
+        return when {
+            toStop >= start + TripThresholds.DETOUR_LOSS_M && !next.wrongBusWarningGiven ->
+                next.copy(wrongBusWarningGiven = true) to say(Message.WrongBus(plan.alightStop.name), VibrationPattern.WARNING)
+
+            toStop <= start - TripThresholds.DETOUR_PROGRESS_M && !next.shortcutNoticeGiven ->
+                next.copy(shortcutNoticeGiven = true) to say(Message.Shortcut(plan.alightStop.name), VibrationPattern.TICK)
+
+            else -> next to emptyList()
+        }
     }
 
     private fun missedStop(

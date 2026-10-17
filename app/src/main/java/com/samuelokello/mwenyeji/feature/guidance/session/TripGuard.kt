@@ -6,7 +6,7 @@ enum class TripGuard {
     BACK_ON_TRACK,
     BOARDED,
     APPROACHING,
-    WRONG_BUS,
+    DETOUR,
     ALIGHT,
     ARRIVED,
     MISSED_STOP,

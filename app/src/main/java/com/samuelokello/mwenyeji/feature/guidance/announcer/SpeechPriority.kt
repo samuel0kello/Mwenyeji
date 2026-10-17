@@ -25,6 +25,9 @@ val Message.priority: SpeechPriority
 
         is Message.GetReady -> SpeechPriority.NORMAL
 
+        // Reassurance only: the user has nothing to do.
+        is Message.Shortcut -> SpeechPriority.NORMAL
+
         is Message.WrongBus -> SpeechPriority.URGENT
 
         is Message.Alight -> SpeechPriority.URGENT
