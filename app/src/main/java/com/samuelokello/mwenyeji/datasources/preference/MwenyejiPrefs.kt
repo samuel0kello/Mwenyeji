@@ -26,6 +26,11 @@ interface MwenyejiPrefs {
     fun getUserType(): Flow<String?>
 
     fun getDefaultTimeOfDay(): Flow<String?>
+
+    suspend fun setShareRideTraces(share: Boolean)
+
+    /** Whether the rider agreed to share ride traces, or null if they have not been asked yet. */
+    fun getShareRideTraces(): Flow<Boolean?>
 }
 
 class MwenyejiPrefsImpl(
@@ -55,6 +60,12 @@ class MwenyejiPrefsImpl(
 
     override fun getDefaultTimeOfDay(): Flow<String?> = context.dataStore.data.map { it[KEY_DEFAULT_TIME_OF_DAY] }
 
+    override suspend fun setShareRideTraces(share: Boolean) {
+        context.dataStore.edit { it[KEY_SHARE_RIDE_TRACES] = share }
+    }
+
+    override fun getShareRideTraces(): Flow<Boolean?> = context.dataStore.data.map { it[KEY_SHARE_RIDE_TRACES] }
+
     companion object {
         private val KEY_ONBOARDING_COMPLETE = booleanPreferencesKey("onboarding_complete")
 
@@ -62,5 +73,6 @@ class MwenyejiPrefsImpl(
 
         private val KEY_USER_TYPE = stringPreferencesKey("user_type")
         private val KEY_DEFAULT_TIME_OF_DAY = stringPreferencesKey("time_of_day")
+        private val KEY_SHARE_RIDE_TRACES = booleanPreferencesKey("share_ride_traces")
     }
 }
