@@ -43,15 +43,12 @@ internal class TripSessionReducer(
             }
 
             TripEvent.UserTapsIHaveAlighted -> if (phase.isRiding || phase == TripPhase.MISSED_STOP) {
-                currentState.enter(TripPhase.ARRIVED) to say(Message.TripEnded, VibrationPattern.MILESTONE) + TripEffect.EndTrip
+                currentState.enter(TripPhase.ARRIVED) to buzz(VibrationPattern.MILESTONE) + TripEffect.EndTrip
             } else {
                 currentState.unchanged()
             }
 
-            TripEvent.UserTapsCancel -> currentState.enter(TripPhase.CANCELLED) to say(
-                Message.GuideStopped,
-                VibrationPattern.TICK,
-            ) + TripEffect.EndTrip
+            TripEvent.UserTapsCancel -> currentState.enter(TripPhase.CANCELLED) to buzz(VibrationPattern.TICK) + TripEffect.EndTrip
 
             TripEvent.GpsLost ->
                 // Nothing is tracking the user before Start, so there is nothing to warn about.
@@ -124,10 +121,7 @@ internal class TripSessionReducer(
 
         val next = state.streak(TripGuard.BACK_ON_TRACK, previous != null && distance < previous).copy(previousDistanceToStage = distance)
         if (next.count(TripGuard.BACK_ON_TRACK) >= 3) {
-            return next.enter(TripPhase.WALKING_TO_STAGE).copy(previousDistanceToStage = distance) to say(
-                Message.BackOnTrack,
-                VibrationPattern.TICK,
-            )
+            return next.enter(TripPhase.WALKING_TO_STAGE).copy(previousDistanceToStage = distance) to buzz(VibrationPattern.TICK)
         }
         return next to emptyList()
     }
@@ -140,7 +134,7 @@ internal class TripSessionReducer(
 
         val next = state.streak(TripGuard.BOARDED, moving)
         if (next.count(TripGuard.BOARDED) >= 3) {
-            return next.enter(TripPhase.ON_BOARD) to say(Message.BoardingDetected, VibrationPattern.TICK)
+            return next.enter(TripPhase.ON_BOARD) to buzz(VibrationPattern.TICK)
         }
         return next to emptyList()
     }
@@ -244,9 +238,13 @@ private fun TripState.streak(
 
 private fun TripState.count(guard: TripGuard): Int = guardStreaks[guard] ?: 0
 
+// The buzz comes first so attention arrives before the words.
 private fun say(
     message: Message,
     pattern: VibrationPattern,
-): List<TripEffect> = listOf(TripEffect.Speak(message), TripEffect.Vibrate(pattern))
+): List<TripEffect> = listOf(TripEffect.Vibrate(pattern), TripEffect.Speak(message))
+
+/** For moments the user already knows about, or that need no words: a buzz is enough. */
+private fun buzz(pattern: VibrationPattern): List<TripEffect> = listOf(TripEffect.Vibrate(pattern))
 
 private fun Double.roundToTens(): Int = (this / 10).roundToInt() * 10

@@ -3,6 +3,9 @@ package com.samuelokello.mwenyeji.feature.guidance.session
 /**
  * One member per sentence the trip can speak. Only values that change between trips are fields;
  * the wording, in each language, belongs to the announcer.
+ *
+ * Moments the user already knows about (they tapped the button) or that need no words
+ * (back on track, boarding noticed) only vibrate, so they have no member here.
  */
 sealed class Message {
     data class WalkToStage(
@@ -18,14 +21,10 @@ sealed class Message {
 
     data object WalkingAwayFromStage : Message()
 
-    data object BackOnTrack : Message()
-
     data class OnBoardConfirmed(
         val stopsToRide: Int,
         val stopName: String,
     ) : Message()
-
-    data object BoardingDetected : Message()
 
     data class GetReady(
         val stopName: String,
@@ -50,10 +49,6 @@ sealed class Message {
         val stopName: String,
         val metresBehind: Int,
     ) : Message()
-
-    data object TripEnded : Message()
-
-    data object GuideStopped : Message()
 
     data object LostLocation : Message()
 }

@@ -6,25 +6,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PhraseBookTest {
-    // One sample of every message. The first test fails if a new member is missing here.
-    private val samples = listOf(
-        Message.WalkToStage(200, "Kencom"),
-        Message.AtStage("Super Metro", "Ngara", 100),
-        Message.WalkingAwayFromStage,
-        Message.BackOnTrack,
-        Message.OnBoardConfirmed(3, "Ngara"),
-        Message.BoardingDetected,
-        Message.GetReady("Ngara"),
-        Message.WrongBus("Ngara"),
-        Message.Alight("Ngara", 200),
-        Message.Arrived("Ngara"),
-        Message.MissedStop,
-        Message.OffBus("Ngara", 400),
-        Message.TripEnded,
-        Message.GuideStopped,
-        Message.LostLocation,
-    )
-
     @Test
     fun `every message has a sentence in every language`() {
         val members = Message::class.java.declaredClasses.filter { Message::class.java.isAssignableFrom(it) }.toSet()
@@ -57,6 +38,23 @@ class PhraseBookTest {
         assertEquals(
             "You're at the stage. Look for Super Metro to Ngara",
             PhraseBook.phraseFor(Message.AtStage("Super Metro", "Ngara", null), Language.ENGLISH),
+        )
+    }
+
+    companion object {
+        // One sample of every message. The first test fails if a new member is missing here.
+        val samples = listOf(
+            Message.WalkToStage(200, "Kencom"),
+            Message.AtStage("Super Metro", "Ngara", 100),
+            Message.WalkingAwayFromStage,
+            Message.OnBoardConfirmed(3, "Ngara"),
+            Message.GetReady("Ngara"),
+            Message.WrongBus("Ngara"),
+            Message.Alight("Ngara", 200),
+            Message.Arrived("Ngara"),
+            Message.MissedStop,
+            Message.OffBus("Ngara", 400),
+            Message.LostLocation,
         )
     }
 }

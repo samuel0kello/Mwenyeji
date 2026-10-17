@@ -110,7 +110,8 @@ class TripSessionReducerTest {
         assertEquals(TripPhase.OFF_ROUTE, state.currentPhase)
         fix(stage, east = -240.0)
         assertEquals(TripPhase.WALKING_TO_STAGE, state.currentPhase)
-        assertEquals(Message.BackOnTrack, spoken())
+        assertEquals(null, spoken())
+        assertEquals(VibrationPattern.TICK, vibration())
     }
 
     @Test
@@ -135,6 +136,8 @@ class TripSessionReducerTest {
 
         fix(stage, east = 250.0, speed = driving)
         assertEquals(TripPhase.ON_BOARD, state.currentPhase)
+        assertEquals(null, spoken())
+        assertEquals(VibrationPattern.TICK, vibration())
     }
 
     @Test
@@ -234,6 +237,8 @@ class TripSessionReducerTest {
                 startIn(phase)
                 send(TripEvent.UserTapsIHaveAlighted)
                 assertEquals(TripPhase.ARRIVED, state.currentPhase)
+                assertEquals(null, spoken())
+                assertEquals(VibrationPattern.MILESTONE, vibration())
                 assertTrue(TripEffect.EndTrip in effects)
             }
 
@@ -249,7 +254,8 @@ class TripSessionReducerTest {
 
         send(TripEvent.UserTapsCancel)
         assertEquals(TripPhase.CANCELLED, state.currentPhase)
-        assertEquals(Message.GuideStopped, spoken())
+        assertEquals(null, spoken())
+        assertEquals(VibrationPattern.TICK, vibration())
         assertTrue(TripEffect.EndTrip in effects)
 
         send(TripEvent.UserTapsCancel)

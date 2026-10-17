@@ -30,12 +30,8 @@ object PhraseBook {
 
             Message.WalkingAwayFromStage -> "You're walking away from the stage"
 
-            Message.BackOnTrack -> "Back on track"
-
             is Message.OnBoardConfirmed ->
                 "Sawa, ${message.stopsToRide} stops to ${message.stopName}. I'll tell you when to get off"
-
-            Message.BoardingDetected -> "Looks like you're on the move. I'll tell you when to get off"
 
             is Message.GetReady -> "Get ready, ${message.stopName} is coming up"
 
@@ -49,10 +45,6 @@ object PhraseBook {
                 "You've passed your stop. Ask to be dropped now if it's safe, otherwise at the next stage"
 
             is Message.OffBus -> "You're off the bus. ${message.stopName} stage is ${message.metresBehind} metres behind you"
-
-            Message.TripEnded -> "Trip ended"
-
-            Message.GuideStopped -> "Guidance stopped"
 
             Message.LostLocation -> "I've lost your location, watch for your stop"
         }
