@@ -57,6 +57,8 @@ import com.samuelokello.mwenyeji.data.models.RouteTag
 import com.samuelokello.mwenyeji.feature.feed.components.RouteTagChip
 import com.samuelokello.mwenyeji.feature.guidance.service.TripGuidanceService
 import com.samuelokello.mwenyeji.feature.guidance.service.TripRequest
+import com.samuelokello.mwenyeji.feature.guidance.ui.TraceConsentDialog
+import com.samuelokello.mwenyeji.feature.guidance.ui.guidancePermissions
 import com.samuelokello.mwenyeji.presentation.designsystem.animation.ExpandAnimatedVisibility
 import com.samuelokello.mwenyeji.presentation.designsystem.animation.MwenyejiAnimatedVisibility
 import com.samuelokello.mwenyeji.presentation.designsystem.animation.MwenyejiAnimations
@@ -164,42 +166,11 @@ fun RouteDetailsScreen(
     }
 
     if (state.traceConsentFor != null) {
-        TraceConsentDialog(onAction = viewModel::onAction)
+        TraceConsentDialog(
+            onAnswer = { share -> viewModel.onAction(RouteDetailsAction.TraceConsentAnswered(share)) },
+            onDismiss = { viewModel.onAction(RouteDetailsAction.TraceConsentDismissed) },
+        )
     }
-}
-
-/** Asked once, before the first guided trip: may Mwenyeji learn from the path the matatu takes? */
-@Composable
-private fun TraceConsentDialog(onAction: (RouteDetailsAction) -> Unit) {
-    val colors = MwenyejiTheme.colorScheme
-    AlertDialog(
-        onDismissRequest = { onAction(RouteDetailsAction.TraceConsentDismissed) },
-        containerColor = colors.surfaceContainerHigh,
-        title = {
-            Text(
-                text = stringResource(R.string.trace_consent_title),
-                style = MwenyejiTheme.typography.titleLarge,
-                color = colors.onSurface,
-            )
-        },
-        text = {
-            Text(
-                text = stringResource(R.string.trace_consent_body),
-                style = MwenyejiTheme.typography.bodyMedium,
-                color = colors.onSurfaceVariant,
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = { onAction(RouteDetailsAction.TraceConsentAnswered(share = true)) }) {
-                Text(stringResource(R.string.trace_consent_allow), color = colors.primary)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = { onAction(RouteDetailsAction.TraceConsentAnswered(share = false)) }) {
-                Text(stringResource(R.string.trace_consent_decline), color = colors.primary)
-            }
-        },
-    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -1170,11 +1141,3 @@ private fun Long.toRelativeTime(context: Context): String {
         else -> context.getString(R.string.days_ago_short, days.toInt())
     }
 }
-
-/** Precise location is required; notifications are asked for at the same time on Android 13+. */
-private fun guidancePermissions(): Array<String> =
-    buildList {
-        add(Manifest.permission.ACCESS_FINE_LOCATION)
-        add(Manifest.permission.ACCESS_COARSE_LOCATION)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) add(Manifest.permission.POST_NOTIFICATIONS)
-    }.toTypedArray()

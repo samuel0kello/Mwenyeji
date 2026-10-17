@@ -6,6 +6,7 @@ import com.samuelokello.mwenyeji.datasources.di.dataSourceModules
 import com.samuelokello.mwenyeji.feature.auth.di.featureAuthModule
 import com.samuelokello.mwenyeji.feature.feed.di.feedModule
 import com.samuelokello.mwenyeji.feature.onboarding.di.onBoardingModule
+import com.samuelokello.mwenyeji.feature.planner.di.plannerModule
 import org.koin.dsl.module
 
 val mwenyejiModules =
@@ -17,4 +18,5 @@ val mwenyejiModules =
         includes(onBoardingModule)
         includes(featureAuthModule)
         includes(feedModule)
+        includes(plannerModule)
     }

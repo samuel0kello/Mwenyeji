@@ -22,6 +22,16 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
 
+    <!-- Voice input uses the phone's own speech recogniser. Android 11+ hides it unless declared. -->
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+        <intent>
+            <action android:name="android.speech.action.RECOGNIZE_SPEECH" />
+        </intent>
+    </queries>
+
     <application
         android:name=".MwenyejiApp"
         android:allowBackup="true"
