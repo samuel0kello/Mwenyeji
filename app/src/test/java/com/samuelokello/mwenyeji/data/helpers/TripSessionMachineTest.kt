@@ -9,8 +9,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.Instant
 
 class TripSessionMachineTest {
     // Five stops heading east along one latitude, roughly 1.1km apart.
@@ -31,7 +29,7 @@ class TripSessionMachineTest {
     private val walking = 1.2
     private val driving = 10.0
 
-    private var clock = Instant.fromEpochSeconds(0)
+    private var clock = 0L
     private var state = TripState()
     private var effects = emptyList<TripEffect>()
 
@@ -48,11 +46,11 @@ class TripSessionMachineTest {
         north: Double = 0.0,
         speed: Double = walking,
     ) {
-        clock += 5.seconds
+        clock += 5_000L
         send(TripEvent.LocationFix(stop.lat + north * metre, stop.lng + east * metre, speed, 5.0, clock))
     }
 
-    private fun spoken(): String? = effects.filterIsInstance<TripEffect.Speak>().firstOrNull()?.let { (it.message as Message.Text).text }
+    private fun spoken(): Message? = effects.filterIsInstance<TripEffect.Speak>().firstOrNull()?.message
 
     private fun vibration(): VibrationPattern? = effects.filterIsInstance<TripEffect.Vibrate>().firstOrNull()?.pattern
 
@@ -73,7 +71,7 @@ class TripSessionMachineTest {
         send(TripEvent.UserTapsStart(locationPermissionGranted = true))
 
         assertEquals(TripPhase.WALKING_TO_STAGE, state.currentPhase)
-        assertEquals("Walk 200m to Stop 0 stage", spoken())
+        assertEquals(Message.WalkToStage(200, "Stop 0"), spoken())
         assertEquals(VibrationPattern.TICK, vibration())
     }
 
@@ -90,7 +88,7 @@ class TripSessionMachineTest {
 
         fix(stage, east = -10.0)
         assertEquals(TripPhase.AT_STAGE, state.currentPhase)
-        assertEquals("You're at the stage. Look for Super Metro to Stop 3, fare around 100", spoken())
+        assertEquals(Message.AtStage("Super Metro", "Stop 3", 100), spoken())
         assertEquals(VibrationPattern.MILESTONE, vibration())
     }
 
@@ -111,7 +109,7 @@ class TripSessionMachineTest {
         assertEquals(TripPhase.OFF_ROUTE, state.currentPhase)
         fix(stage, east = -240.0)
         assertEquals(TripPhase.WALKING_TO_STAGE, state.currentPhase)
-        assertEquals("Back on track", spoken())
+        assertEquals(Message.BackOnTrack, spoken())
     }
 
     @Test
@@ -121,7 +119,7 @@ class TripSessionMachineTest {
         send(TripEvent.UserTapsIOnBoard)
 
         assertEquals(TripPhase.ON_BOARD, state.currentPhase)
-        assertEquals("Sawa, 3 stops to Stop 3. I'll tell you when to get off", spoken())
+        assertEquals(Message.OnBoardConfirmed(3, "Stop 3"), spoken())
     }
 
     @Test
@@ -159,14 +157,14 @@ class TripSessionMachineTest {
 
         repeat(3) { fix(alight, east = -700.0, speed = driving) }
         assertEquals(TripPhase.APPROACHING_STOP, state.currentPhase)
-        assertEquals("Get ready, Stop 3 is coming up", spoken())
+        assertEquals(Message.GetReady("Stop 3"), spoken())
         assertEquals(VibrationPattern.GET_READY, vibration())
 
         fix(alight, east = -280.0, speed = driving)
         assertEquals(TripPhase.APPROACHING_STOP, state.currentPhase)
         fix(alight, east = -200.0, speed = driving)
         assertEquals(TripPhase.ALIGHT_NOW, state.currentPhase)
-        assertEquals("Alight at Stop 3 in 200 metres", spoken())
+        assertEquals(Message.Alight("Stop 3", 200), spoken())
         assertEquals(VibrationPattern.ALIGHT, vibration())
 
         // Inside the radius but still at speed: not arrived yet.
@@ -175,7 +173,7 @@ class TripSessionMachineTest {
 
         repeat(3) { fix(alight, east = 10.0, speed = walking) }
         assertEquals(TripPhase.ARRIVED, state.currentPhase)
-        assertEquals("You've arrived at Stop 3", spoken())
+        assertEquals(Message.Arrived("Stop 3"), spoken())
         assertTrue(TripEffect.EndTrip in effects)
     }
 
@@ -196,7 +194,7 @@ class TripSessionMachineTest {
         repeat(4) { fix(stops[1], north = 500.0, speed = driving) }
         assertTrue(effects.isEmpty())
         fix(stops[1], north = 500.0, speed = driving)
-        assertEquals("This bus may not be going to Stop 3, check with the conductor", spoken())
+        assertEquals(Message.WrongBus("Stop 3"), spoken())
         assertEquals(TripPhase.ON_BOARD, state.currentPhase)
 
         repeat(10) {
@@ -221,7 +219,10 @@ class TripSessionMachineTest {
 
         fix(stops[4], speed = walking)
         assertEquals(TripPhase.ARRIVED, state.currentPhase)
-        assertTrue(spoken()!!.startsWith("You're off the bus. Stop 3 stage is "))
+        val offBus = spoken() as Message.OffBus
+        assertEquals("Stop 3", offBus.stopName)
+        // Stop 4 is about 1.1km past stop 3.
+        assertTrue(offBus.metresBehind in 1_000..1_200)
         assertTrue(TripEffect.EndTrip in effects)
     }
 
@@ -247,7 +248,7 @@ class TripSessionMachineTest {
 
         send(TripEvent.UserTapsCancel)
         assertEquals(TripPhase.CANCELLED, state.currentPhase)
-        assertEquals("Guidance stopped", spoken())
+        assertEquals(Message.GuideStopped, spoken())
         assertTrue(TripEffect.EndTrip in effects)
 
         send(TripEvent.UserTapsCancel)

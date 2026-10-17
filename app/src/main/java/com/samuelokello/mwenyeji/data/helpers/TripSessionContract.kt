@@ -8,8 +8,6 @@ import com.samuelokello.mwenyeji.data.models.RouteStop
 import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.Instant
 
 interface TripSessionContract {
     /**
@@ -37,7 +35,7 @@ interface TripSessionContract {
         // How many fixes in a row each guard has matched. Cleared on every phase change.
         val guardStreaks: Map<TripGuard, Int> = emptyMap(),
         // When the current timed guard (walking away, off the bus) started matching.
-        val currentStreakTime: Instant? = null,
+        val currentStreakTime: Long? = null,
         val previousDistanceToStage: Double? = null,
         val wrongBusWarningGiven: Boolean = false,
         val gpsLostWarningGiven: Boolean = false,
@@ -56,11 +54,11 @@ interface TripSessionContract {
             val lng: Double,
             val speed: Double,
             val accuracy: Double,
-            val timeStamp: Instant,
+            val elapsedMillis: Long,
         ) : TripEvent
         data object UserTapsCancel : TripEvent
 
-        /** Sent by the location source after [TripThresholds.GPS_LOST_TIMEOUT] without a fix. */
+        /** Sent by the location source after [TripThresholds.GPS_LOST_TIMEOUT_MS] without a fix. */
         data object GpsLost : TripEvent
     }
 
@@ -87,9 +85,9 @@ object TripThresholds {
     const val WRONG_BUS_DISTANCE_M = 300.0
     const val VEHICLE_SPEED_MPS = 15 / 3.6
     const val WALKING_SPEED_MPS = 7 / 3.6
-    val OFF_ROUTE_TIME = 30.seconds
-    val OFF_BUS_TIME = 60.seconds
-    val GPS_LOST_TIMEOUT = 60.seconds
+    const val OFF_ROUTE_TIME_MS = 30_000L
+    const val OFF_BUS_TIME_MS = 60_000L
+    const val GPS_LOST_TIMEOUT_MS = 60_000L
 }
 
 /**
@@ -110,7 +108,7 @@ internal fun tripSessionMachine(
 
             event.locationPermissionGranted ->
                 currentState.enter(TripPhase.WALKING_TO_STAGE) to say(
-                    "Walk ${plan.walkingDistanceMetres}m to ${plan.stage.name} stage",
+                    Message.WalkToStage(plan.walkingDistanceMetres, plan.stage.name),
                     VibrationPattern.TICK,
                 )
 
@@ -120,7 +118,7 @@ internal fun tripSessionMachine(
         TripEvent.UserTapsIOnBoard ->
             if (phase == TripPhase.AT_STAGE) {
                 currentState.enter(TripPhase.ON_BOARD) to say(
-                    "Sawa, ${plan.stopsToRide} stops to ${plan.alightStop.name}. I'll tell you when to get off",
+                    Message.OnBoardConfirmed(plan.stopsToRide, plan.alightStop.name),
                     VibrationPattern.TICK,
                 )
             } else {
@@ -130,14 +128,14 @@ internal fun tripSessionMachine(
         TripEvent.UserTapsIHaveAlighted ->
             if (phase.isRiding || phase == TripPhase.MISSED_STOP) {
                 currentState.enter(TripPhase.ARRIVED) to
-                    say("Trip ended", VibrationPattern.MILESTONE) + TripEffect.EndTrip
+                    say(Message.TripEnded, VibrationPattern.MILESTONE) + TripEffect.EndTrip
             } else {
                 currentState.unchanged()
             }
 
         TripEvent.UserTapsCancel ->
             currentState.enter(TripPhase.CANCELLED) to
-                say("Guidance stopped", VibrationPattern.TICK) + TripEffect.EndTrip
+                say(Message.GuideStopped, VibrationPattern.TICK) + TripEffect.EndTrip
 
         TripEvent.GpsLost ->
             // Nothing is tracking the user before Start, so there is nothing to warn about.
@@ -145,7 +143,7 @@ internal fun tripSessionMachine(
                 currentState.unchanged()
             } else {
                 currentState.copy(gpsLostWarningGiven = true) to
-                    say("I've lost your location, watch for your stop", VibrationPattern.WARNING)
+                    say(Message.LostLocation, VibrationPattern.WARNING)
             }
 
         is TripEvent.LocationFix -> {
@@ -183,18 +181,17 @@ private fun walkingToStage(
     val atStage = state.streak(TripGuard.REACHED_STAGE, distance <= TripThresholds.STAGE_RADIUS_M)
     if (atStage.count(TripGuard.REACHED_STAGE) >= 3) {
         return atStage.enter(TripPhase.AT_STAGE) to say(
-            "You're at the stage. Look for ${plan.vehicleName} to ${plan.alightStop.name}" +
-                (plan.fare?.let { ", fare around $it" } ?: ""),
+            Message.AtStage(plan.vehicleName, plan.alightStop.name, plan.fare),
             VibrationPattern.MILESTONE,
         )
     }
 
     val previous = state.previousDistanceToStage
     val walkingAwaySince =
-        if (previous != null && distance > previous) state.currentStreakTime ?: fix.timeStamp else null
-    if (walkingAwaySince != null && fix.timeStamp - walkingAwaySince >= TripThresholds.OFF_ROUTE_TIME) {
+        if (previous != null && distance > previous) state.currentStreakTime ?: fix.elapsedMillis else null
+    if (walkingAwaySince != null && fix.elapsedMillis - walkingAwaySince >= TripThresholds.OFF_ROUTE_TIME_MS) {
         return atStage.enter(TripPhase.OFF_ROUTE).copy(previousDistanceToStage = distance) to
-            say("You're walking away from the stage", VibrationPattern.WARNING)
+            say(Message.WalkingAwayFromStage, VibrationPattern.WARNING)
     }
 
     return atStage.copy(
@@ -216,7 +213,7 @@ private fun offRoute(
         .copy(previousDistanceToStage = distance)
     if (next.count(TripGuard.BACK_ON_TRACK) >= 3) {
         return next.enter(TripPhase.WALKING_TO_STAGE).copy(previousDistanceToStage = distance) to
-            say("Back on track", VibrationPattern.TICK)
+            say(Message.BackOnTrack, VibrationPattern.TICK)
     }
     return next to emptyList()
 }
@@ -232,7 +229,7 @@ private fun atStage(
     val next = state.streak(TripGuard.BOARDED, moving)
     if (next.count(TripGuard.BOARDED) >= 3) {
         return next.enter(TripPhase.ON_BOARD) to
-            say("Looks like you're on the move. I'll tell you when to get off", VibrationPattern.TICK)
+            say(Message.BoardingDetected, VibrationPattern.TICK)
     }
     return next to emptyList()
 }
@@ -255,7 +252,7 @@ private fun riding(
     )
     if (next.count(TripGuard.MISSED_STOP) >= 3) {
         return next.enter(TripPhase.MISSED_STOP) to say(
-            "You've passed your stop. Ask to be dropped now if it's safe, otherwise at the next stage",
+            Message.MissedStop,
             VibrationPattern.ALIGHT,
         )
     }
@@ -268,7 +265,7 @@ private fun riding(
             )
             if (next.count(TripGuard.APPROACHING) >= 3) {
                 return next.enter(TripPhase.APPROACHING_STOP) to
-                    say("Get ready, $stopName is coming up", VibrationPattern.GET_READY)
+                    say(Message.GetReady(stopName), VibrationPattern.GET_READY)
             }
 
             next = next.streak(
@@ -277,7 +274,7 @@ private fun riding(
             )
             if (next.count(TripGuard.WRONG_BUS) >= 5 && !next.wrongBusWarningGiven) {
                 return next.copy(wrongBusWarningGiven = true) to say(
-                    "This bus may not be going to $stopName, check with the conductor",
+                    Message.WrongBus(stopName),
                     VibrationPattern.WARNING,
                 )
             }
@@ -287,7 +284,7 @@ private fun riding(
             next = next.streak(TripGuard.ALIGHT, toStop <= TripThresholds.ALIGHT_DISTANCE_M)
             if (next.count(TripGuard.ALIGHT) >= 2) {
                 return next.enter(TripPhase.ALIGHT_NOW) to
-                    say("Alight at $stopName in ${toStop.roundToTens()} metres", VibrationPattern.ALIGHT)
+                    say(Message.Alight(stopName, toStop.roundToTens()), VibrationPattern.ALIGHT)
             }
         }
 
@@ -298,7 +295,7 @@ private fun riding(
             )
             if (next.count(TripGuard.ARRIVED) >= 3) {
                 return next.enter(TripPhase.ARRIVED) to
-                    say("You've arrived at $stopName", VibrationPattern.MILESTONE) + TripEffect.EndTrip
+                    say(Message.Arrived(stopName), VibrationPattern.MILESTONE) + TripEffect.EndTrip
             }
         }
 
@@ -313,11 +310,11 @@ private fun missedStop(
     fix: TripEvent.LocationFix,
 ): Pair<TripState, List<TripEffect>> {
     val slowSince =
-        if (fix.speed < TripThresholds.WALKING_SPEED_MPS) state.currentStreakTime ?: fix.timeStamp else null
-    if (slowSince != null && fix.timeStamp - slowSince >= TripThresholds.OFF_BUS_TIME) {
+        if (fix.speed < TripThresholds.WALKING_SPEED_MPS) state.currentStreakTime ?: fix.elapsedMillis else null
+    if (slowSince != null && fix.elapsedMillis - slowSince >= TripThresholds.OFF_BUS_TIME_MS) {
         val behind = distanceMetres(fix, plan.alightStop).roundToTens()
         return state.enter(TripPhase.ARRIVED) to say(
-            "You're off the bus. ${plan.alightStop.name} stage is ${behind}m behind you",
+            Message.OffBus(plan.alightStop.name, behind),
             VibrationPattern.MILESTONE,
         ) + TripEffect.EndTrip
     }
@@ -342,9 +339,9 @@ private fun TripState.streak(
 private fun TripState.count(guard: TripGuard): Int = guardStreaks[guard] ?: 0
 
 private fun say(
-    text: String,
+    message: Message,
     pattern: VibrationPattern,
-): List<TripEffect> = listOf(TripEffect.Speak(Message.Text(text)), TripEffect.Vibrate(pattern))
+): List<TripEffect> = listOf(TripEffect.Speak(message), TripEffect.Vibrate(pattern))
 
 private fun Double.roundToTens(): Int = (this / 10).roundToInt() * 10
 
@@ -380,13 +377,62 @@ private fun distanceToRouteMetres(
     }
 }
 
+/**
+ * One member per sentence the trip can speak. Only values that change between trips are fields;
+ * the wording, in each language, belongs to the announcer.
+ */
 sealed class Message {
-    data class Text(
-        val text: String,
+    data class WalkToStage(
+        val metres: Int,
+        val stageName: String,
     ) : Message()
-    data class Resource(
-        val resId: Int,
+
+    data class AtStage(
+        val vehicleName: String,
+        val stopName: String,
+        val fare: Int?,
     ) : Message()
+
+    data object WalkingAwayFromStage : Message()
+
+    data object BackOnTrack : Message()
+
+    data class OnBoardConfirmed(
+        val stopsToRide: Int,
+        val stopName: String,
+    ) : Message()
+
+    data object BoardingDetected : Message()
+
+    data class GetReady(
+        val stopName: String,
+    ) : Message()
+
+    data class WrongBus(
+        val stopName: String,
+    ) : Message()
+
+    data class Alight(
+        val stopName: String,
+        val metres: Int,
+    ) : Message()
+
+    data class Arrived(
+        val stopName: String,
+    ) : Message()
+
+    data object MissedStop : Message()
+
+    data class OffBus(
+        val stopName: String,
+        val metresBehind: Int,
+    ) : Message()
+
+    data object TripEnded : Message()
+
+    data object GuideStopped : Message()
+
+    data object LostLocation : Message()
 }
 
 enum class TripPhase {
