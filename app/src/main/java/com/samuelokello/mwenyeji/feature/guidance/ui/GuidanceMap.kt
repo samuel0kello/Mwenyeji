@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,24 +17,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.core.map.MwenyejiMapStyle
 import com.samuelokello.mwenyeji.data.models.GeoPoint
 import com.samuelokello.mwenyeji.data.models.RouteStop
 import com.samuelokello.mwenyeji.feature.guidance.session.TripSessionContract.TripPlan
 import com.samuelokello.mwenyeji.presentation.designsystem.components.map.applyTheme
+import com.samuelokello.mwenyeji.presentation.designsystem.components.map.rememberMapViewWithLifecycle
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
-import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.location.LocationComponentActivationOptions
 import org.maplibre.android.location.modes.CameraMode
 import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
@@ -61,7 +56,6 @@ internal fun GuidanceMap(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
     val colors = MwenyejiTheme.colorScheme
     val overlay =
         OverlayColors(
@@ -71,34 +65,9 @@ internal fun GuidanceMap(
             stopFill = colors.surface.toArgb(),
         )
 
-    val mapView =
-        remember {
-            MapLibre.getInstance(context)
-            MapView(context).apply { onCreate(null) }
-        }
+    val mapView = rememberMapViewWithLifecycle()
     var map by remember { mutableStateOf<MapLibreMap?>(null) }
     var style by remember { mutableStateOf<Style?>(null) }
-
-    DisposableEffect(lifecycle, mapView) {
-        val observer =
-            LifecycleEventObserver { _, event ->
-                when (event) {
-                    Lifecycle.Event.ON_START -> mapView.onStart()
-                    Lifecycle.Event.ON_RESUME -> mapView.onResume()
-                    Lifecycle.Event.ON_PAUSE -> mapView.onPause()
-                    Lifecycle.Event.ON_STOP -> mapView.onStop()
-                    else -> Unit
-                }
-            }
-        lifecycle.addObserver(observer)
-        onDispose {
-            lifecycle.removeObserver(observer)
-            // Leaving the screen while it is still showing: unwind the MapView ourselves.
-            if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) mapView.onPause()
-            if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) mapView.onStop()
-            mapView.onDestroy()
-        }
-    }
 
     val currentPlan by rememberUpdatedState(plan)
     LaunchedEffect(mapView) {

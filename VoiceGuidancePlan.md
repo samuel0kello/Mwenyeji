@@ -153,8 +153,10 @@ the stop. See "Shortcuts" in `StateMachine.md`. New `Message.Shortcut`, threshol
 - The OpenStreetMap credit is shown above the guidance buttons, as the licence requires.
 - Globe view: MapLibre Android only has it in a pre-release (13.7.0-pre-globe.0). When a stable
   release has it, add `"projection": {"type": "globe"}` to the style.
-- The contribute flow's maps are still Mapbox: they rely on dragging pins, and MapLibre's annotation
-  plugin was last built for MapLibre 11.
+- Mapbox is gone from the app (2026-10-18). The contribute flow's maps use `MwenyejiPinMap`, with
+  pins dragged by hand-written touch handling (MapLibre's annotation plugin was last built for
+  MapLibre 11). Place search uses Photon over OpenStreetMap (`PhotonSearchRemoteDataSource`), on
+  komoot's public server for now; Nominatim stays available as a named alternative.
 
 **3. Ride traces (app).** Asked once, the first time a guide is started ("Help Mwenyeji learn matatu
 shortcuts?"). With consent, `feature/guidance/trace/RideTraceRecorder` keeps only the ride (no walk),
@@ -193,5 +195,5 @@ match /route_variants/{id} {
 2. Add the rules above.
 3. Run `learn_variants.js` on a schedule once traces come in.
 4. Use matched traces to give each route its real road shape, replacing the straight lines.
-5. Move the contribute maps to MapLibre, and replace Mapbox Search with an OSM geocoder (Photon), to
-   drop Mapbox entirely.
+5. Before launch, run our own Photon on Kenya's OSM data instead of the public server
+   (`SearchConfig.photonUrl`).

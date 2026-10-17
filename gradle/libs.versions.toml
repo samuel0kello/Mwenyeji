@@ -1,9 +1,7 @@
 [versions]
 activityCompose = "1.13.0"
 agp = "9.1.1"
-androidNdk27 = "11.21.1"
 appUpdate = "2.1.0"
-autofillNdk27 = "2.21.1"
 coil = "3.4.0"
 composeBom = "2026.05.01"
 compileSdk = "37"
@@ -30,7 +28,6 @@ ksp = "2.3.4"
 ktor = "3.4.2"
 lifecycleRuntimeCompose = "2.10.0"
 lifecycleRuntimeKtx = "2.10.0"
-mapsComposeNdk27 = "11.21.1"
 maplibre = "13.6.1"
 material3 = "1.5.0-alpha21"
 navigationCompose = "2.9.7"
@@ -45,7 +42,6 @@ appcompat = "1.8.0"
 material = "1.14.0"
 
 [libraries]
-android-ndk27 = { module = "com.mapbox.maps:android-ndk27", version.ref = "androidNdk27" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
@@ -68,11 +64,9 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3",
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 app-update = { module = "com.google.android.play:app-update", version.ref = "appUpdate" }
 app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "appUpdate" }
-autofill-ndk27 = { module = "com.mapbox.search:autofill-ndk27", version.ref = "autofillNdk27" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
-discover-ndk27 = { module = "com.mapbox.search:discover-ndk27", version.ref = "autofillNdk27" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
@@ -95,12 +89,7 @@ ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-conte
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
 ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
-mapbox-search-android-ndk27 = { module = "com.mapbox.search:mapbox-search-android-ndk27", version.ref = "autofillNdk27" }
-mapbox-search-android-ui-ndk27 = { module = "com.mapbox.search:mapbox-search-android-ui-ndk27", version.ref = "autofillNdk27" }
 maplibre-android-sdk = { module = "org.maplibre.gl:android-sdk", version.ref = "maplibre" }
-maps-compose-ndk27 = { module = "com.mapbox.extension:maps-compose-ndk27", version.ref = "mapsComposeNdk27" }
-offline-ndk27 = { module = "com.mapbox.search:offline-ndk27", version.ref = "autofillNdk27" }
-place-autocomplete-ndk27 = { module = "com.mapbox.search:place-autocomplete-ndk27", version.ref = "autofillNdk27" }
 play-services-basement = { group = "com.google.android.gms", name = "play-services-basement", version.ref = "playServicesBasement" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 play-services-tflite-java = { module = "com.google.android.gms:play-services-tflite-java", version.ref = "playServicesTfliteJava" }
