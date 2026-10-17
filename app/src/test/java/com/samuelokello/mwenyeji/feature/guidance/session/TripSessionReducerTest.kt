@@ -1,16 +1,16 @@
-package com.samuelokello.mwenyeji.data.helpers
+package com.samuelokello.mwenyeji.feature.guidance.session
 
-import com.samuelokello.mwenyeji.data.helpers.TripSessionContract.TripEffect
-import com.samuelokello.mwenyeji.data.helpers.TripSessionContract.TripEvent
-import com.samuelokello.mwenyeji.data.helpers.TripSessionContract.TripPlan
-import com.samuelokello.mwenyeji.data.helpers.TripSessionContract.TripState
 import com.samuelokello.mwenyeji.data.models.RouteStop
+import com.samuelokello.mwenyeji.feature.guidance.session.TripSessionContract.TripEffect
+import com.samuelokello.mwenyeji.feature.guidance.session.TripSessionContract.TripEvent
+import com.samuelokello.mwenyeji.feature.guidance.session.TripSessionContract.TripPlan
+import com.samuelokello.mwenyeji.feature.guidance.session.TripSessionContract.TripState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class TripSessionMachineTest {
+class TripSessionReducerTest {
     // Five stops heading east along one latitude, roughly 1.1km apart.
     private val lat = -1.28
     private val stops = List(5) { RouteStop("s$it", "Stop $it", lat, 36.82 + it * 0.01, it) }
@@ -32,9 +32,10 @@ class TripSessionMachineTest {
     private var clock = 0L
     private var state = TripState()
     private var effects = emptyList<TripEffect>()
+    private val reducer = TripSessionReducer(plan)
 
     private fun send(event: TripEvent) {
-        val (next, emitted) = tripSessionMachine(plan, state, event)
+        val (next, emitted) = reducer.reduce(state, event)
         state = next
         effects = emitted
     }

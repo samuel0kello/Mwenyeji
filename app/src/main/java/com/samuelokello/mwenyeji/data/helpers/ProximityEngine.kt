@@ -11,7 +11,6 @@ import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.sqrt
-import kotlin.time.Instant
 
 /**
  * Converts GTFS routes + their stop lists into BoardableRoute objects
