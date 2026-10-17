@@ -31,6 +31,7 @@ ktor = "3.4.2"
 lifecycleRuntimeCompose = "2.10.0"
 lifecycleRuntimeKtx = "2.10.0"
 mapsComposeNdk27 = "11.21.1"
+maplibre = "13.6.1"
 material3 = "1.5.0-alpha21"
 navigationCompose = "2.9.7"
 playServicesBasement = "18.10.0"
@@ -96,6 +97,7 @@ ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 mapbox-search-android-ndk27 = { module = "com.mapbox.search:mapbox-search-android-ndk27", version.ref = "autofillNdk27" }
 mapbox-search-android-ui-ndk27 = { module = "com.mapbox.search:mapbox-search-android-ui-ndk27", version.ref = "autofillNdk27" }
+maplibre-android-sdk = { module = "org.maplibre.gl:android-sdk", version.ref = "maplibre" }
 maps-compose-ndk27 = { module = "com.mapbox.extension:maps-compose-ndk27", version.ref = "mapsComposeNdk27" }
 offline-ndk27 = { module = "com.mapbox.search:offline-ndk27", version.ref = "autofillNdk27" }
 place-autocomplete-ndk27 = { module = "com.mapbox.search:place-autocomplete-ndk27", version.ref = "autofillNdk27" }

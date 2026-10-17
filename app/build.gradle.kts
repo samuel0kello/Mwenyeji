@@ -13,6 +13,22 @@ plugins {
 android {
     namespace = "com.samuelokello.mwenyeji"
 
+    defaultConfig {
+        // Mapbox reads its public token from this string resource when a map is created.
+        val localProperties =
+            Properties().apply {
+                rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+            }
+        resValue("string", "mapbox_access_token", localProperties.getProperty("MAPBOX_ACCESS_TOKEN", ""))
+
+        // Mwenyeji's own map tiles (a PMTiles file printed by seeder/map/upload_tiles.js). Empty uses
+        // OpenFreeMap's tiles, which share the same schema, until our file is published.
+        val mapTilesUrl = localProperties.getProperty("MWENYEJI_MAP_TILES_URL")
+            ?: providers.gradleProperty("MWENYEJI_MAP_TILES_URL").orNull
+            ?: ""
+        buildConfigField("String", "MAP_TILES_URL", "\"$mapTilesUrl\"")
+    }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -82,6 +98,7 @@ dependencies {
 
     implementation(libs.android.ndk27)
     implementation(libs.maps.compose.ndk27)
+    implementation(libs.maplibre.android.sdk)
     implementation(libs.autofill.ndk27)
     implementation(libs.discover.ndk27)
     implementation(libs.place.autocomplete.ndk27)
