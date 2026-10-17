@@ -36,7 +36,7 @@ Voice guidance during a commute, working the way maps apps do, with haptic feedb
 | Interrupting speech | Tap only, so the mic does not hear the app's own voice. |
 | Naming | Call it "voice guidance" in code and UI. "TalkBack" is Android's screen reader. |
 
-**Still open:** Claude recommended that in v1, typed and tapped input works offline in all three languages, and voice input uses the device recognizer where available and the network otherwise. Samuel has not answered yet.
+**Decided 2026-10-18:** voice input uses the phone's own speech recogniser (offline where it has the language, online otherwise); typing always works. Planning is reached both from a "Where to?" entry on the feed and from a chat screen. With no earphones, guidance vibrates only, unless the rider allows the loudspeaker. Swahili and Sheng phrases are left for later.
 
 ## Build order
 
@@ -197,3 +197,26 @@ match /route_variants/{id} {
 4. Use matched traces to give each route its real road shape, replacing the straight lines.
 5. Before launch, run our own Photon on Kenya's OSM data instead of the public server
    (`SearchConfig.photonUrl`).
+
+## Where things stand on 2026-10-18: the missing goals
+
+- **Step 1, trip planner** (`feature/planner/domain`). `TripRequestParser` reads "take me to X",
+  "from X to Y" and a few Swahili and Sheng phrasings. `PlaceDirectory` finds places offline among all
+  stop names and Nairobi nicknames (tao, Archives, westie…), forgiving small misspellings; places it
+  does not know go to Photon. `TripPlanner` finds direct routes (least walking, both directions), and
+  `TripPlanning` adds the most confirmed guide's sacco and fare. Transfers are not built yet.
+- **Step 5, chat and voice input** (`feature/planner/ui`). "Where to?" on the feed (tap, mic, or chat
+  bubble) opens `PlanTripScreen`; `AskScreen` is the chat. Both offer Start guide on each trip, through
+  `rememberStartGuidance` (consent, permission, start), which route details uses too. Chat is
+  rule-based and offline: no language model. Replies are not spoken yet.
+- **Walk updates:** "Kencom stage, 300 metres north-east" every 100 m closer.
+- **Safety:** speech only through earphones unless the loudspeaker is allowed (switch on the guidance
+  screen); unplugging or a call stops speech.
+- **Notification tap** opens the guidance screen.
+
+**Still not done from the original goals:**
+1. Ride a real matatu and tune `TripThresholds` (the gate before building more).
+2. Swahili and Sheng phrases, and a language setting (left for later by choice).
+3. Trips with a change of matatu.
+4. Offline map tiles (the Kenya file is built but not uploaded or bundled).
+5. Online free-form chat behind Firebase, and speaking chat replies.
