@@ -12,6 +12,7 @@ data class SearchConfig(
     val defaultBoundingBox: BoundingBox,
     val countryCode: String,
     val userAgent: String,
+    val photonUrl: String,
 ) {
     companion object {
         val NAIROBI =
@@ -26,6 +27,7 @@ data class SearchConfig(
                     ),
                 countryCode = "ke",
                 userAgent = "Mwenyeji/1.0 (com.samuelokello.mwenyeji)",
+                photonUrl = "https://photon.komoot.io/api/",
             )
     }
 }
