@@ -116,6 +116,35 @@ class TripSessionReducerTest {
     }
 
     @Test
+    fun `walking towards the stage says how far and which way every hundred metres`() {
+        startIn(TripPhase.WALKING_TO_STAGE)
+
+        val updates = mutableListOf<Message.WalkProgress>()
+        // From 500 m west of the stage, 50 m closer each fix.
+        (0..9).forEach {
+            fix(stage, east = -500.0 + it * 50)
+            (spoken() as? Message.WalkProgress)?.let(updates::add)
+        }
+
+        assertEquals(listOf(400, 300, 200, 100), updates.map { it.metres })
+        assertTrue(updates.all { it.stageName == "Stop 0" && it.direction == CompassDirection.EAST })
+        assertEquals(TripPhase.WALKING_TO_STAGE, state.currentPhase)
+    }
+
+    @Test
+    fun `walking away and back again gives no progress until a new hundred metres is closed`() {
+        startIn(TripPhase.WALKING_TO_STAGE)
+
+        fix(stage, north = 300.0)
+        fix(stage, north = 320.0)
+        fix(stage, north = 260.0)
+        assertTrue(effects.isEmpty())
+
+        fix(stage, north = 200.0)
+        assertEquals(Message.WalkProgress("Stop 0", 200, CompassDirection.SOUTH), spoken())
+    }
+
+    @Test
     fun `tapping on board at the stage starts the ride`() {
         startIn(TripPhase.AT_STAGE)
 

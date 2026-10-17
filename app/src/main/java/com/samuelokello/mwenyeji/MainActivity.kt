@@ -1,5 +1,6 @@
 package com.samuelokello.mwenyeji
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -9,6 +10,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.samuelokello.mwenyeji.core.InAppUpdateManager
+import com.samuelokello.mwenyeji.feature.guidance.service.OpenGuidance
 import com.samuelokello.mwenyeji.presentation.designsystem.components.snackbar.SnackBarManager
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiAppTheme
 import org.koin.android.ext.android.get
@@ -43,11 +45,18 @@ class MainActivity : ComponentActivity() {
             checkForUpdate(updateLauncher)
         }
 
+        OpenGuidance.handle(intent)
+
         setContent {
             MwenyejiAppTheme {
                 App(snackbarManager = snackbarManager)
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        OpenGuidance.handle(intent)
     }
 
     override fun onResume() {

@@ -22,6 +22,12 @@ class AnnouncerTest {
             calls += "speak"
         }
 
+        var stopped = false
+
+        override fun stop() {
+            stopped = true
+        }
+
         override fun shutdown() {
             shutDown = true
         }
@@ -39,6 +45,35 @@ class AnnouncerTest {
     }
 
     private fun announcer(language: Language = Language.ENGLISH) = Announcer(speaker, haptics, language)
+
+    @Test
+    fun `with no private way to hear, sentences are dropped and buzzes still come`() {
+        Announcer(speaker, haptics, Language.ENGLISH, canSpeak = { false }).announce(
+            listOf(TripEffect.Vibrate(VibrationPattern.ALIGHT), TripEffect.Speak(Message.Alight("Ngara", 200))),
+        )
+
+        assertTrue(speaker.spoken.isEmpty())
+        assertEquals(listOf(VibrationPattern.ALIGHT), haptics.patterns)
+    }
+
+    @Test
+    fun `whether it may speak is asked at each sentence`() {
+        var earphones = false
+        val announcer = Announcer(speaker, haptics, Language.ENGLISH, canSpeak = { earphones })
+
+        announcer.announce(listOf(TripEffect.Speak(Message.GetReady("Ngara"))))
+        earphones = true
+        announcer.announce(listOf(TripEffect.Speak(Message.GetReady("Ngara"))))
+
+        assertEquals(1, speaker.spoken.size)
+    }
+
+    @Test
+    fun `stop speaking silences the speaker`() {
+        announcer().stopSpeaking()
+
+        assertTrue(speaker.stopped)
+    }
 
     @Test
     fun `speak and vibrate effects reach the speaker and haptics in order`() {

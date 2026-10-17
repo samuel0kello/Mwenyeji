@@ -171,4 +171,35 @@
     <string name="trace_consent_body">When you arrive, Mwenyeji can send the path the matatu took, so it learns the roads drivers really use. Only the ride is sent: never your walk to or from the stage, your name or your account.</string>
     <string name="trace_consent_allow">Allow</string>
     <string name="trace_consent_decline">Not now</string>
+    <string name="guidance_hearing_voice">Speaking guidance</string>
+    <string name="guidance_hearing_vibrate">Vibrate only. Connect earphones to hear guidance.</string>
+    <string name="guidance_use_speaker">Speaker</string>
+    <!-- Trip planning: "Where to?" and chat -->
+    <string name="plan_where_to">Where to?</string>
+    <string name="plan_placeholder">Take me to Embakasi</string>
+    <string name="plan_listen_prompt">Where do you want to go?</string>
+    <string name="plan_speak">Speak</string>
+    <string name="plan_send">Send</string>
+    <string name="plan_ask">Ask Mwenyeji</string>
+    <string name="plan_trips_to">Matatus to %1$s from %2$s</string>
+    <string name="plan_option_title">Route %1$s</string>
+    <string name="plan_option_title_sacco">Route %1$s · %2$s</string>
+    <string name="plan_walk_to_stage">Walk %1$d m to %2$s</string>
+    <plurals name="plan_ride">
+        <item quantity="one">Ride %1$d stop to %2$s</item>
+        <item quantity="other">Ride %1$d stops to %2$s</item>
+    </plurals>
+    <string name="plan_walk_from_stop">Then walk about %1$d m</string>
+    <string name="plan_fare">Fare around KSh %1$d. Confirm with the conductor.</string>
+    <string name="plan_not_a_trip">Tell me where you want to go, like \"Take me to Embakasi\".</string>
+    <string name="plan_unknown_place">I don\'t know \"%1$s\" yet. Try the name of a stage near it.</string>
+    <string name="plan_need_location">To plan from where you are, Mwenyeji needs your location.</string>
+    <string name="plan_allow_location">Allow location</string>
+    <string name="plan_no_routes">Routes haven\'t loaded yet. Connect to the internet once, then try again.</string>
+    <string name="plan_walkable">%1$s is only %2$d m away. Walking is quicker.</string>
+    <string name="plan_no_direct_route">No single matatu goes from %1$s to %2$s yet. Trips with a change are coming.</string>
+    <string name="plan_voice_unavailable">This phone has no speech recogniser. Type instead.</string>
+    <string name="plan_working">Finding matatus…</string>
+    <string name="chat_welcome">Habari! Where are you going? Type it or tap the mic.</string>
+    <string name="chat_placeholder">Message Mwenyeji</string>
 </resources>

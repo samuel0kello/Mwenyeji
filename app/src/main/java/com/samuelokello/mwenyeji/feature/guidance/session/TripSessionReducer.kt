@@ -109,10 +109,28 @@ internal class TripSessionReducer(
             )
         }
 
-        return atStage.copy(
-            previousDistanceToStage = distance,
-            currentStreakTime = walkingAwaySince,
-        ) to emptyList()
+        // Every stretch closer, say how far and which way. The first fix of the walk only sets the mark.
+        // Compared as spoken, to the nearest ten metres, so "400" follows "500" and not "390".
+        val lastUpdate = state.lastWalkUpdateMetres
+        val progress =
+            lastUpdate != null &&
+                distance.roundToTens() <= lastUpdate.roundToTens() - TripThresholds.WALK_UPDATE_STEP_M &&
+                distance > TripThresholds.WALK_UPDATE_MIN_M
+        val next =
+            atStage.copy(
+                previousDistanceToStage = distance,
+                currentStreakTime = walkingAwaySince,
+                lastWalkUpdateMetres = if (lastUpdate == null || progress) distance else lastUpdate,
+            )
+        if (!progress) return next to emptyList()
+        return next to say(
+            Message.WalkProgress(
+                plan.stage.name,
+                distance.roundToTens(),
+                CompassDirection.fromBearing(bearingDegrees(fix, plan.stage)),
+            ),
+            VibrationPattern.TICK,
+        )
     }
 
     private fun offRoute(
@@ -251,6 +269,7 @@ private fun TripState.enter(phase: TripPhase): TripState =
         guardStreaks = emptyMap(),
         currentStreakTime = null,
         previousDistanceToStage = null,
+        lastWalkUpdateMetres = null,
     )
 
 private fun TripState.streak(

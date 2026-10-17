@@ -76,8 +76,11 @@ internal object GuidanceNotifications {
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .setContentIntent(openApp(context))
 
+    /** Back to the running app, on the guidance screen. */
     private fun openApp(context: Context): PendingIntent? =
         context.packageManager.getLaunchIntentForPackage(context.packageName)?.let {
+            it.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            it.putExtra(OpenGuidance.EXTRA, true)
             PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
 

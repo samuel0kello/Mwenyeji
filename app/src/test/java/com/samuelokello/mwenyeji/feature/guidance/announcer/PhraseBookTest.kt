@@ -1,5 +1,6 @@
 package com.samuelokello.mwenyeji.feature.guidance.announcer
 
+import com.samuelokello.mwenyeji.feature.guidance.session.CompassDirection
 import com.samuelokello.mwenyeji.feature.guidance.session.Message
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -49,6 +50,14 @@ class PhraseBookTest {
         )
     }
 
+    @Test
+    fun `walk progress names the stage, the distance and the direction`() {
+        assertEquals(
+            "Kencom stage, 150 metres north-east",
+            PhraseBook.phraseFor(Message.WalkProgress("Kencom", 150, CompassDirection.NORTH_EAST), Language.ENGLISH),
+        )
+    }
+
     companion object {
         // One sample of every message. The first test fails if a new member is missing here.
         val samples = listOf(
@@ -64,6 +73,7 @@ class PhraseBookTest {
             Message.MissedStop,
             Message.OffBus("Ngara", 400),
             Message.LostLocation,
+            Message.WalkProgress("Kencom", 150, CompassDirection.NORTH_EAST),
         )
     }
 }

@@ -20,6 +20,7 @@ import java.util.Locale
  * - Speaks as navigation guidance, so music lowers its volume (ducks) instead of stopping.
  * - Urgent sentences flush the queue, unless an urgent sentence is speaking: then they wait their turn.
  * - Sheng is spoken by the Swahili voice. A missing voice falls back to English.
+ * - Losing audio focus to a call stops speech; it does not resume, the next sentence speaks fresh.
  *
  * Owned by whoever runs the trip (the foreground service), so it lives as long as the trip, not a screen.
  */
@@ -67,6 +68,17 @@ class TtsSpeaker(
 
                 SpeakerState.Unavailable -> Unit
             }
+        }
+
+    override fun stop(): Unit =
+        synchronized(lock) {
+            if (released) return
+            held.clear()
+            if (_state.value is SpeakerState.Ready) tts.stop()
+            inFlight.clear()
+            speakingId = null
+            abandonFocus()
+            if (shuttingDown) mainHandler.post { release() }
         }
 
     override fun shutdown(): Unit =
@@ -171,21 +183,28 @@ class TtsSpeaker(
             val request = (focusRequest as? AudioFocusRequest)
                 ?: AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
                     .setAudioAttributes(attributes)
+                    .setOnAudioFocusChangeListener(focusListener, mainHandler)
                     .build()
                     .also { focusRequest = it }
             audioManager.requestAudioFocus(request)
         } else {
             @Suppress("DEPRECATION")
-            audioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+            audioManager.requestAudioFocus(focusListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
         }
     }
+
+    // A phone call (or anything else that takes the audio for itself) silences guidance at once.
+    private val focusListener =
+        AudioManager.OnAudioFocusChangeListener { change ->
+            if (change == AudioManager.AUDIOFOCUS_LOSS || change == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) stop()
+        }
 
     private fun abandonFocus() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             (focusRequest as? AudioFocusRequest)?.let { audioManager.abandonAudioFocusRequest(it) }
         } else {
             @Suppress("DEPRECATION")
-            audioManager.abandonAudioFocus(null)
+            audioManager.abandonAudioFocus(focusListener)
         }
     }
 

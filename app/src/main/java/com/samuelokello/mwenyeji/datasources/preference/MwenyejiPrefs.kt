@@ -31,6 +31,11 @@ interface MwenyejiPrefs {
 
     /** Whether the rider agreed to share ride traces, or null if they have not been asked yet. */
     fun getShareRideTraces(): Flow<Boolean?>
+
+    suspend fun setAllowLoudspeaker(allow: Boolean)
+
+    /** Whether guidance may speak with no earphones connected. Off by default: it vibrates instead. */
+    fun getAllowLoudspeaker(): Flow<Boolean>
 }
 
 class MwenyejiPrefsImpl(
@@ -66,6 +71,12 @@ class MwenyejiPrefsImpl(
 
     override fun getShareRideTraces(): Flow<Boolean?> = context.dataStore.data.map { it[KEY_SHARE_RIDE_TRACES] }
 
+    override suspend fun setAllowLoudspeaker(allow: Boolean) {
+        context.dataStore.edit { it[KEY_ALLOW_LOUDSPEAKER] = allow }
+    }
+
+    override fun getAllowLoudspeaker(): Flow<Boolean> = context.dataStore.data.map { it[KEY_ALLOW_LOUDSPEAKER] ?: false }
+
     companion object {
         private val KEY_ONBOARDING_COMPLETE = booleanPreferencesKey("onboarding_complete")
 
@@ -74,5 +85,6 @@ class MwenyejiPrefsImpl(
         private val KEY_USER_TYPE = stringPreferencesKey("user_type")
         private val KEY_DEFAULT_TIME_OF_DAY = stringPreferencesKey("time_of_day")
         private val KEY_SHARE_RIDE_TRACES = booleanPreferencesKey("share_ride_traces")
+        private val KEY_ALLOW_LOUDSPEAKER = booleanPreferencesKey("allow_loudspeaker")
     }
 }

@@ -1,5 +1,6 @@
 package com.samuelokello.mwenyeji.feature.guidance.announcer
 
+import com.samuelokello.mwenyeji.feature.guidance.session.CompassDirection
 import com.samuelokello.mwenyeji.feature.guidance.session.Message
 
 /**
@@ -24,6 +25,9 @@ object PhraseBook {
         when (message) {
             is Message.WalkToStage ->
                 "Walk " + (message.metres?.let { "$it metres " } ?: "") + "to ${message.stageName} stage"
+
+            is Message.WalkProgress ->
+                "${message.stageName} stage, ${message.metres} metres ${message.direction.english()}"
 
             is Message.AtStage ->
                 "You're at the stage. Look for ${message.vehicleName} to ${message.stopName}" +
@@ -52,4 +56,6 @@ object PhraseBook {
 
             Message.LostLocation -> "I've lost your location, watch for your stop"
         }
+
+    private fun CompassDirection.english(): String = name.lowercase().replace('_', '-')
 }

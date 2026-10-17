@@ -32,6 +32,9 @@ interface Speaker {
     /** Sentences that arrive while the engine is starting are held and spoken once it is ready. */
     fun speak(utterance: Utterance)
 
+    /** Silences the sentence speaking now and drops the queue, for when the listener can no longer hear privately. */
+    fun stop()
+
     /** Lets the sentences already queued finish, then releases the engine. */
     fun shutdown()
 }

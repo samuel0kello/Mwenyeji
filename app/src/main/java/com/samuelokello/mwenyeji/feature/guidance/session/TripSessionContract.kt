@@ -35,6 +35,8 @@ interface TripSessionContract {
         // When the current timed guard (walking away, off the bus) started matching.
         val currentStreakTime: Long? = null,
         val previousDistanceToStage: Double? = null,
+        // Distance to the stage at the last walk update (or at the first fix of the walk).
+        val lastWalkUpdateMetres: Double? = null,
         // Distance to the alight stop when the current detour began. Null while on route.
         val detourStartToStopMetres: Double? = null,
         val shortcutNoticeGiven: Boolean = false,

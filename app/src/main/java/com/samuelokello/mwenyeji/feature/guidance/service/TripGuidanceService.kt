@@ -4,12 +4,18 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.location.Location
+import android.media.AudioDeviceCallback
+import android.media.AudioDeviceInfo
+import android.media.AudioManager
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.NotificationManagerCompat
@@ -28,6 +34,7 @@ import com.samuelokello.mwenyeji.data.models.RideTrace
 import com.samuelokello.mwenyeji.data.repository.RouteLearningRepository
 import com.samuelokello.mwenyeji.datasources.preference.MwenyejiPrefs
 import com.samuelokello.mwenyeji.feature.guidance.announcer.Announcer
+import com.samuelokello.mwenyeji.feature.guidance.announcer.AudioRoute
 import com.samuelokello.mwenyeji.feature.guidance.announcer.Language
 import com.samuelokello.mwenyeji.feature.guidance.announcer.TtsSpeaker
 import com.samuelokello.mwenyeji.feature.guidance.announcer.VibratorHaptics
@@ -92,6 +99,7 @@ class TripGuidanceService : Service() {
         super.onCreate()
         locationClient = LocationServices.getFusedLocationProviderClient(this)
         GuidanceNotifications.createChannel(this)
+        watchAudio()
     }
 
     override fun onStartCommand(
@@ -125,6 +133,7 @@ class TripGuidanceService : Service() {
 
     override fun onDestroy() {
         session?.let { endSession(it) }
+        unwatchAudio()
         scope.cancel()
         _trip.value = null
         super.onDestroy()
@@ -137,10 +146,10 @@ class TripGuidanceService : Service() {
         stopJob?.cancel()
 
         if (!enterForeground(GuidanceNotifications.starting(this))) return
-        _trip.value = GuidanceSnapshot(request.routeId, TripPhase.PLANNED, plan = null)
+        publish(request.routeId, TripPhase.PLANNED, plan = null)
 
         // Start the speech engine now so it warms up while we look for the user.
-        val announcer = Announcer(TtsSpeaker(this), VibratorHaptics(this), userLanguage())
+        val announcer = Announcer(TtsSpeaker(this), VibratorHaptics(this), userLanguage(), canSpeak = ::canSpeak)
         startJob = scope.launch {
             // Learned roads load while we wait for the first fix. A slow network must not hold up the trip.
             val knownPaths = async { withTimeoutOrNull(KNOWN_PATHS_TIMEOUT_MS) { loadKnownPaths(request) }.orEmpty() }
@@ -148,7 +157,7 @@ class TripGuidanceService : Service() {
             val plan = request.toPlan(here?.latitude, here?.longitude).copy(knownPaths = knownPaths.await())
             val recorder = if (prefs.getShareRideTraces().first() == true) RideTraceRecorder() else null
             session = Session(request, plan, TripSessionReducer(plan), announcer, recorder)
-            _trip.value = GuidanceSnapshot(request.routeId, TripPhase.PLANNED, plan)
+            publish(request.routeId, TripPhase.PLANNED, plan)
             dispatch(TripEvent.UserTapsStart(locationPermissionGranted = hasPreciseLocation()))
             if (session != null) startLocationUpdates()
         }
@@ -161,7 +170,7 @@ class TripGuidanceService : Service() {
         val (next, effects) = current.reducer.reduce(current.state, event)
         current.state = next
         if (event is TripEvent.LocationFix) current.recorder?.onFix(event, next.currentPhase)
-        _trip.value = GuidanceSnapshot(current.request.routeId, next.currentPhase, current.plan)
+        publish(current.request.routeId, next.currentPhase, current.plan)
         current.announcer.announce(effects)
 
         // The service cannot show a permission dialog; the route screen asks before starting.
@@ -196,6 +205,77 @@ class TripGuidanceService : Service() {
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
+
+    private fun publish(
+        routeId: String,
+        phase: TripPhase,
+        plan: TripPlan?,
+    ) {
+        _trip.value = GuidanceSnapshot(routeId, phase, plan, voiceOn = canSpeak())
+    }
+
+    // ── Who can hear ─────────────────────────────────────────────────────────
+
+    private lateinit var audioManager: AudioManager
+    private var privateAudio = false
+    private var allowLoudspeaker = false
+
+    /** Speak only where only the rider hears it, unless they chose the loudspeaker. */
+    private fun canSpeak(): Boolean = privateAudio || allowLoudspeaker
+
+    private fun watchAudio() {
+        audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+        privateAudio = AudioRoute.hasPrivateOutput(audioManager)
+        audioManager.registerAudioDeviceCallback(audioDevices, Handler(Looper.getMainLooper()))
+        ContextCompat.registerReceiver(
+            this,
+            becomingNoisy,
+            IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY),
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
+        scope.launch {
+            prefs.getAllowLoudspeaker().collect { allow ->
+                allowLoudspeaker = allow
+                onHearingChanged()
+            }
+        }
+    }
+
+    private fun unwatchAudio() {
+        audioManager.unregisterAudioDeviceCallback(audioDevices)
+        unregisterReceiver(becomingNoisy)
+    }
+
+    private fun onHearingChanged() {
+        val current = session
+        if (!canSpeak()) current?.announcer?.stopSpeaking()
+        _trip.value?.let { _trip.value = it.copy(voiceOn = canSpeak()) }
+    }
+
+    private val audioDevices =
+        object : AudioDeviceCallback() {
+            override fun onAudioDevicesAdded(added: Array<out AudioDeviceInfo>) {
+                privateAudio = AudioRoute.hasPrivateOutput(audioManager)
+                onHearingChanged()
+            }
+
+            override fun onAudioDevicesRemoved(removed: Array<out AudioDeviceInfo>) {
+                privateAudio = AudioRoute.hasPrivateOutput(audioManager)
+                onHearingChanged()
+            }
+        }
+
+    // Sent the moment earphones are pulled out, before sound moves to the loudspeaker.
+    private val becomingNoisy =
+        object : BroadcastReceiver() {
+            override fun onReceive(
+                context: Context,
+                intent: Intent,
+            ) {
+                privateAudio = false
+                onHearingChanged()
+            }
+        }
 
     // ── Learning from rides ──────────────────────────────────────────────────
 
@@ -356,9 +436,11 @@ class TripGuidanceService : Service() {
  *
  * @param routeId The route the trip is on, so a route's screen only offers to open its own trip.
  * @param plan    Null for the first few seconds, while the service waits for a location fix.
+ * @param voiceOn False while guidance only vibrates: no earphones, and the loudspeaker not allowed.
  */
 data class GuidanceSnapshot(
     val routeId: String,
     val phase: TripPhase,
     val plan: TripPlan?,
+    val voiceOn: Boolean = true,
 )

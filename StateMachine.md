@@ -14,6 +14,7 @@ If an event arrives and no guard matches, stay in the current state and do nothi
 | Planned                                         | User taps Start           | Location permission granted                                              | WalkingToStage  | Say "Walk 200 metres to Archives stage"; Tick                                                                          |
 | Planned                                         | User taps Start           | Location permission not granted                                          | Planned         | Ask for location permission; no buzz                                                                             |
 | WalkingToStage                                  | Location fix              | Within 30m of the stage, 3 fixes in a row                                | AtStage         | Say "You're at the stage. Look for Super Metro to Embakasi, fare around 100"; Milestone                          |
+| WalkingToStage                                  | Location fix              | Another 100m closer to the stage (to the nearest 10m), still more than 60m away| WalkingToStage  | Say "Kencom stage, 300 metres north-east"; Tick                                                                  |
 | WalkingToStage                                  | Location fix              | Distance to the stage has grown for 30 seconds                           | OffRoute        | Say "You're walking away from the stage"; Warning                                                                |
 | OffRoute                                        | Location fix              | Distance to the stage has shrunk, 3 fixes in a row                       | WalkingToStage  | Tick (no speech)                                                                                                 |
 | AtStage                                         | User taps "I'm on board"  | Always                                                                   | OnBoard         | Say "Sawa, 9 stops to Embakasi. I'll tell you when to get off"; Tick                                             |
@@ -73,6 +74,7 @@ All of these are starting guesses. Tune them on real trips.
 | Name                 | Value      | Used for                                    |
 |----------------------|------------|---------------------------------------------|
 | Stage radius         | 30m        | Reaching the boarding stage                 |
+| Walk update step     | 100m       | A progress sentence on the walk             |
 | Off-route time       | 30 seconds | Walking away from the stage                 |
 | Vehicle speed        | 15 km/h    | Detecting boarding, detecting a missed stop |
 | Walking speed        | 7 km/h     | Detecting that the user is off the bus      |
@@ -98,3 +100,10 @@ it stays quiet. Coming back to the route forgets the detour.
 (`TripPlan.knownPaths`, loaded from `/route_variants`). A bus on a learned road is on route, so common
 shortcuts say nothing at all. On a detour the nearest stop says little, so "past the stop before it"
 and "past the stop" only count while on route.
+
+## Who hears it
+
+Every sentence above is spoken only when the rider can hear it privately: earphones, headphones or
+Bluetooth audio. Otherwise the trip is vibrate-only, because a stop name said aloud in a matatu tells
+everyone where the rider is going. The rider can allow the loudspeaker from the guidance screen.
+Pulling the earphones out, or a phone call taking the audio, stops the sentence being spoken.

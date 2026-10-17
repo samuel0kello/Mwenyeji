@@ -13,6 +13,13 @@ sealed class Message {
         val stageName: String,
     ) : Message()
 
+    /** Progress on the walk, said each time the rider is another stretch closer to the stage. */
+    data class WalkProgress(
+        val stageName: String,
+        val metres: Int,
+        val direction: CompassDirection,
+    ) : Message()
+
     data class AtStage(
         val vehicleName: String,
         val stopName: String,

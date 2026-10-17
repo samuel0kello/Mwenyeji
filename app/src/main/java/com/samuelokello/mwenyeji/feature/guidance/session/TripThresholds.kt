@@ -3,6 +3,12 @@ package com.samuelokello.mwenyeji.feature.guidance.session
 /** Starting guesses. Tune them on real trips. */
 object TripThresholds {
     const val STAGE_RADIUS_M = 30.0
+
+    // On the walk, a progress update each time the rider is this much closer to the stage...
+    const val WALK_UPDATE_STEP_M = 100.0
+
+    // ...but not this close: "You're at the stage" comes next.
+    const val WALK_UPDATE_MIN_M = 60.0
     const val BOARDED_DISTANCE_M = 100.0
     const val GET_READY_DISTANCE_M = 800.0
     const val ALIGHT_DISTANCE_M = 300.0

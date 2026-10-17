@@ -250,6 +250,10 @@ class FakeMwenyejiPrefs : MwenyejiPrefs {
     }
 
     override fun getShareRideTraces(): Flow<Boolean?> = shareRideTraces
+
+    override suspend fun setAllowLoudspeaker(allow: Boolean) = Unit
+
+    override fun getAllowLoudspeaker(): Flow<Boolean> = flowOf(false)
 }
 
 class FakeRoutesRepository : RoutesRepository {

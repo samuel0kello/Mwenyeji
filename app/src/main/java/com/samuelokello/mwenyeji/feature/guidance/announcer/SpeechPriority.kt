@@ -17,6 +17,8 @@ val Message.priority: SpeechPriority
     get() = when (this) {
         is Message.WalkToStage -> SpeechPriority.NORMAL
 
+        is Message.WalkProgress -> SpeechPriority.NORMAL
+
         is Message.AtStage -> SpeechPriority.NORMAL
 
         Message.WalkingAwayFromStage -> SpeechPriority.NORMAL
