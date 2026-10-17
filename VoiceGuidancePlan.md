@@ -11,6 +11,21 @@ Written 2026-10-08 from the chat of 2026-10-03, so the plan is not lost. The tri
 
 The one exception so far: Samuel asked Claude to fix the table in `StateMachine.md`, and Claude rewrote it.
 
+## What Mwenyeji is, and is not
+
+Mwenyeji is not a maps app, a wrapper around one, or a copy of Google Maps. It is for getting a job
+done: commuting the way a local does. A local knows which stage to walk to, which matatu to look
+for, what it costs, where to change, and when to get off, including the parts no map shows ("walk
+up to the highway and take the Riruta one").
+
+So, when choosing what to build:
+
+- **Local knowledge comes first.** What riders confirm beats what any dataset says.
+- **The map is supporting, not the product.** It shows where you are and where the stage is. A
+  decision that only makes the map nicer comes after one that makes the trip right.
+- **Every answer should be one a local would give.** If a local would laugh at a suggestion, the app
+  should not make it.
+
 ## What the feature is
 
 Voice guidance during a commute, working the way maps apps do, with haptic feedback.
@@ -220,3 +235,69 @@ match /route_variants/{id} {
 3. Trips with a change of matatu.
 4. Offline map tiles (the Kenya file is built but not uploaded or bundled).
 5. Online free-form chat behind Firebase, and speaking chat replies.
+
+## The problem at hand (2026-10-18): the route data is not what runs
+
+### What happened
+
+From Ndumbuini to Gathondeki, the planner offered **route 103 (Dagoretti Market to Wangige)**, which
+in our data runs Ndumbuini Junction (stop 38), Uthiru Roundabout, St. Joseph's, ILRI, Summer-Rock,
+then Gathondeki (stop 45). No walking at either end, so it ranked first.
+
+On the ground there is no matatu from Ndumbuini to Gathondeki. A local walks about 600 m up to the
+highway at Uthiru Roundabout and takes **3U** (Uthiru to Dagoretti Corner) towards Riruta, which
+passes Gathondeki. Our data has 3U too, but the planner ranked it second because of the walk.
+
+### Why it matters
+
+The code did what the data said. The data is wrong. Our routes come from GTFS (the public-transport
+timetable format), from a mapping survey of Nairobi's matatus that is now years old. Some stretches
+no longer run, or never ran as recorded. Nothing in the app can tell yet, so it gives confident
+answers a local knows are wrong.
+
+**This is the pain Mwenyeji exists to fix.** Having routes is not enough; anyone can have them.
+Knowing which of them are true, and how locals really make the trip, is what Mwenyeji adds.
+
+### The change in thinking
+
+Today the GTFS data is the truth and riders' guides sit on top of it. It should be the other way
+round: **the GTFS data is a first guess, and riders confirm or correct it.**
+
+### The plan
+
+1. **Trust per stretch.** A stretch is one route, one direction, from stop A to stop B. Trust is
+   kept per stretch, not per route, because route 103 may be right near Wangige and wrong at
+   Ndumbuini. Each stretch is one of:
+   - **unconfirmed:** only in the GTFS data;
+   - **confirmed:** riders' guides, "it works" verdicts, completed guided trips, or ride traces
+     cover it;
+   - **disputed:** riders said it does not run.
+2. **The planner trusts riders over the old data.** Confirmed stretches first, unconfirmed ones
+   labelled "not confirmed by riders yet", disputed ones never offered. Ndumbuini to Gathondeki
+   would then come out as: walk 600 m to Uthiru Roundabout, take 3U towards Riruta, get off at
+   Gathondeki.
+3. **Correcting takes one tap.** "This matatu doesn't go here" on a trip card, and "it didn't work"
+   after a guided trip. A guided trip that reaches its stop confirms the stretch it rode, with no tap.
+4. **Riders add what the data is missing.** For example "From Ndumbuini, walk to the highway and
+   take the Riruta matatu". That is a trip with a walk and a change in it, so the planner has to
+   support changes too. In Nairobi the hard part of a trip is usually the change, not the ride.
+5. **Ride traces close the loop.** They already show where matatus really drive. They can also show
+   which stretches nobody ever rides, and mark those as doubtful.
+
+### What already exists to build on
+
+- Routes store `confirmedCount`, `didntWorkCount` and `outdatedCount`, and guides record verdicts.
+  These are per route today; they need to become per stretch.
+- Ride traces and learned variants (`ride_traces`, `route_variants`, `seeder/route_learning`).
+- One planner (`TripPlanner`, `TripPlanning`) where trust is applied, and where changes are added.
+
+### Order
+
+1. Trust per stretch, used by the planner.
+2. The one-tap correction.
+3. Trips with a change of matatu.
+4. Ride traces flagging stretches nobody rides.
+
+Steps 1 and 2 alone stop the app confidently offering route 103 for this trip. Until then, route
+103's Ndumbuini to Gathondeki stretch can be fixed by hand in `route_stops` with a seeder script, so
+the test trip is right.
