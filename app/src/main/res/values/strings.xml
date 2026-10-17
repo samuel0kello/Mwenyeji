@@ -142,4 +142,33 @@
     <string name="failed_to_load_route">Failed to load route</string>
     <string name="failed_to_load_guides">Failed to load guides</string>
     <string name="ai_disclaimer">AI suggestions are generated from travel patterns and may not always be accurate. Please verify with locals where possible.</string>
+
+    <!-- Trip guidance -->
+    <string name="guidance_title">Voice guidance</string>
+    <string name="guidance_start_guide">Start guide</string>
+    <string name="guidance_open">Open guidance</string>
+    <string name="guidance_stops_left">%1$d stops to %2$s</string>
+    <string name="guidance_needs_precise_location">Voice guidance needs precise location to know when your stop is near.</string>
+    <string name="guidance_vehicle_route">route %1$s</string>
+    <string name="guidance_vehicle_default">the matatu</string>
+    <string name="guidance_channel_name">Trip guidance</string>
+    <string name="guidance_channel_description">Shows the next step while voice guidance is running.</string>
+    <string name="guidance_notification_title">Trip to %1$s</string>
+    <string name="guidance_status_starting">Finding your location…</string>
+    <string name="guidance_status_walking">Walk to %1$s stage</string>
+    <string name="guidance_status_off_route">You\'re walking away from %1$s stage</string>
+    <string name="guidance_status_at_stage">At %1$s. Look for %2$s</string>
+    <string name="guidance_status_on_board">Riding to %1$s</string>
+    <string name="guidance_status_approaching">%1$s is coming up</string>
+    <string name="guidance_status_alight">Get off at %1$s</string>
+    <string name="guidance_status_missed">You\'ve passed %1$s</string>
+    <string name="guidance_status_arrived">You\'ve arrived at %1$s</string>
+    <string name="guidance_status_cancelled">Guidance stopped</string>
+    <string name="guidance_action_on_board">I\'m on board</string>
+    <string name="guidance_action_alighted">I\'ve alighted</string>
+    <string name="guidance_action_stop">Stop</string>
+    <string name="trace_consent_title">Help Mwenyeji learn matatu shortcuts?</string>
+    <string name="trace_consent_body">When you arrive, Mwenyeji can send the path the matatu took, so it learns the roads drivers really use. Only the ride is sent: never your walk to or from the stage, your name or your account.</string>
+    <string name="trace_consent_allow">Allow</string>
+    <string name="trace_consent_decline">Not now</string>
 </resources>

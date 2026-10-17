@@ -10,6 +10,7 @@ import com.samuelokello.mwenyeji.data.models.RouteStop
 import com.samuelokello.mwenyeji.data.models.Verdict
 import com.samuelokello.mwenyeji.data.repository.AuthRepository
 import com.samuelokello.mwenyeji.data.repository.RoutesRepository
+import com.samuelokello.mwenyeji.datasources.preference.MwenyejiPrefs
 import com.samuelokello.mwenyeji.feature.auth.AuthState
 import com.samuelokello.mwenyeji.presentation.designsystem.components.snackbar.SnackBarManager
 import com.samuelokello.mwenyeji.presentation.designsystem.components.snackbar.SnackBarMessage
@@ -20,7 +21,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -28,6 +33,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -42,6 +48,7 @@ class RouteDetailsViewModelTest {
     private lateinit var fakeSnackBarManager: FakeSnackBarManager
     private lateinit var fakeSuggestionEngine: FakeGuideSuggestionEngine
     private lateinit var fakeConnectivityObserver: FakeConnectivityObserver
+    private lateinit var fakePrefs: FakeMwenyejiPrefs
 
     @Before
     fun setUp() {
@@ -51,6 +58,7 @@ class RouteDetailsViewModelTest {
         fakeSnackBarManager = FakeSnackBarManager()
         fakeSuggestionEngine = FakeGuideSuggestionEngine()
         fakeConnectivityObserver = FakeConnectivityObserver()
+        fakePrefs = FakeMwenyejiPrefs()
 
         viewModel =
             RouteDetailsViewModel(
@@ -59,6 +67,7 @@ class RouteDetailsViewModelTest {
                 snackbarManager = fakeSnackBarManager,
                 suggestionEngine = fakeSuggestionEngine,
                 connectivityObserver = fakeConnectivityObserver,
+                prefs = fakePrefs,
             )
     }
 
@@ -86,6 +95,9 @@ class RouteDetailsViewModelTest {
 
             // When
             viewModel.onAction(RouteDetailsAction.LoadRoute(routeId))
+            advanceUntilIdle()
+            // The screen asks for the suggestion once it sees no guides.
+            viewModel.onAction(RouteDetailsAction.GenerateAiSuggestion)
             advanceUntilIdle()
 
             // Then
@@ -119,6 +131,9 @@ class RouteDetailsViewModelTest {
             // When
             viewModel.onAction(RouteDetailsAction.LoadRoute(routeId))
             advanceUntilIdle()
+            // The screen asks for the suggestion once it sees no guides.
+            viewModel.onAction(RouteDetailsAction.GenerateAiSuggestion)
+            advanceUntilIdle()
 
             // Then
             val state = viewModel.state.value
@@ -129,6 +144,112 @@ class RouteDetailsViewModelTest {
             assertEquals(3, steps.size)
             assertTrue(steps[1].instruction.contains("Tell conductor"))
         }
+
+    // ── Ride-sharing consent before the first guided trip ────────────────────
+
+    private fun TestScope.loadRouteWithGuide() {
+        fakeRouteRepository.route = Route(id = "route-3", from = "A", to = "C", firstStopId = "stop-a")
+        fakeRouteRepository.stops =
+            listOf(
+                RouteStop("stop-a", "A", 0.0, 0.0, 1),
+                RouteStop("stop-b", "B", 0.1, 0.1, 2),
+                RouteStop("stop-c", "C", 0.2, 0.2, 3),
+            )
+        fakeRouteRepository.guides = listOf(Guide(id = "guide-1", routeId = "route-3", sacco = "Super Metro"))
+        viewModel.onAction(RouteDetailsAction.LoadRoute("route-3"))
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun `the first guided trip asks before starting`() =
+        runTest {
+            loadRouteWithGuide()
+            val effects = mutableListOf<RouteDetailsEffect>()
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.effects.toList(effects) }
+
+            viewModel.onAction(RouteDetailsAction.StartGuide("guide-1", "the matatu"))
+            advanceUntilIdle()
+
+            assertNotNull(viewModel.state.value.traceConsentFor)
+            assertTrue(effects.isEmpty())
+        }
+
+    @Test
+    fun `answering saves the choice and starts the trip`() =
+        runTest {
+            loadRouteWithGuide()
+            val effects = mutableListOf<RouteDetailsEffect>()
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.effects.toList(effects) }
+
+            viewModel.onAction(RouteDetailsAction.StartGuide("guide-1", "the matatu"))
+            advanceUntilIdle()
+            viewModel.onAction(RouteDetailsAction.TraceConsentAnswered(share = false))
+            advanceUntilIdle()
+
+            assertEquals(false, fakePrefs.shareRideTraces.value)
+            assertNull(viewModel.state.value.traceConsentFor)
+            val start = effects.single() as RouteDetailsEffect.StartGuidance
+            assertEquals("route-3", start.request.routeId)
+            assertEquals("Super Metro", start.request.vehicleName)
+        }
+
+    @Test
+    fun `once answered, later trips start without asking`() =
+        runTest {
+            fakePrefs.shareRideTraces.value = true
+            loadRouteWithGuide()
+            val effects = mutableListOf<RouteDetailsEffect>()
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.effects.toList(effects) }
+
+            viewModel.onAction(RouteDetailsAction.StartGuide("guide-1", "the matatu"))
+            advanceUntilIdle()
+
+            assertNull(viewModel.state.value.traceConsentFor)
+            assertTrue(effects.single() is RouteDetailsEffect.StartGuidance)
+        }
+
+    @Test
+    fun `closing the question starts nothing and asks again next time`() =
+        runTest {
+            loadRouteWithGuide()
+            val effects = mutableListOf<RouteDetailsEffect>()
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.effects.toList(effects) }
+
+            viewModel.onAction(RouteDetailsAction.StartGuide("guide-1", "the matatu"))
+            advanceUntilIdle()
+            viewModel.onAction(RouteDetailsAction.TraceConsentDismissed)
+            advanceUntilIdle()
+
+            assertNull(viewModel.state.value.traceConsentFor)
+            assertNull(fakePrefs.shareRideTraces.value)
+            assertTrue(effects.isEmpty())
+        }
+}
+
+class FakeMwenyejiPrefs : MwenyejiPrefs {
+    val shareRideTraces = MutableStateFlow<Boolean?>(null)
+
+    override suspend fun setOnBoardingComplete(isComplete: Boolean) = Unit
+
+    override fun isOnBoardingComplete(): Flow<Boolean> = flowOf(true)
+
+    override suspend fun setTooltipShown(key: String) = Unit
+
+    override fun getTooltipShown(key: String): Flow<Boolean> = flowOf(true)
+
+    override suspend fun saveUserType(userType: String) = Unit
+
+    override suspend fun saveDefaultTimeOfDay(timeOfDay: String) = Unit
+
+    override fun getUserType(): Flow<String?> = flowOf(null)
+
+    override fun getDefaultTimeOfDay(): Flow<String?> = flowOf(null)
+
+    override suspend fun setShareRideTraces(share: Boolean) {
+        shareRideTraces.value = share
+    }
+
+    override fun getShareRideTraces(): Flow<Boolean?> = shareRideTraces
 }
 
 class FakeRoutesRepository : RoutesRepository {

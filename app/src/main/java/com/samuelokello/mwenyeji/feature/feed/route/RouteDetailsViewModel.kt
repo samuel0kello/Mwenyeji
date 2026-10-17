@@ -17,12 +17,16 @@ import com.samuelokello.mwenyeji.data.models.TimeOfDay
 import com.samuelokello.mwenyeji.data.models.Verdict
 import com.samuelokello.mwenyeji.data.repository.AuthRepository
 import com.samuelokello.mwenyeji.data.repository.RoutesRepository
+import com.samuelokello.mwenyeji.datasources.preference.MwenyejiPrefs
+import com.samuelokello.mwenyeji.feature.guidance.service.TripRequest
+import com.samuelokello.mwenyeji.feature.guidance.service.matches
 import com.samuelokello.mwenyeji.presentation.designsystem.components.snackbar.SnackBarManager
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -35,6 +39,7 @@ class RouteDetailsViewModel(
     private val snackbarManager: SnackBarManager,
     private val suggestionEngine: GuideSuggestionEngine,
     private val connectivityObserver: ConnectivityObserver,
+    private val prefs: MwenyejiPrefs,
 ) : ViewModel() {
     private val _state = MutableStateFlow(RouteDetailsState())
     val state: StateFlow<RouteDetailsState> = _state.asStateFlow()
@@ -71,10 +76,64 @@ class RouteDetailsViewModel(
                 }
             }
 
+            is RouteDetailsAction.StartGuide -> startGuide(action)
+
+            is RouteDetailsAction.TraceConsentAnswered -> answerTraceConsent(action.share)
+
+            RouteDetailsAction.TraceConsentDismissed -> _state.update { it.copy(traceConsentFor = null) }
+
+            is RouteDetailsAction.GuidancePermissionDenied -> {
+                snackbarManager.showError(action.message)
+            }
+
             is RouteDetailsAction.GenerateAiSuggestion -> {
                 snackbarManager.showInfo("Local guide suggestion is a coming soon feature")
                 generateAiSuggestion(_state.value.route, _state.value.routeStops)
             }
+        }
+    }
+
+    /**
+     * A guide does not store its stops, so the trip follows the direction the user searched:
+     * it ends at the destination and starts at the searched origin, or at the stop nearest the user.
+     */
+    private fun startGuide(action: RouteDetailsAction.StartGuide) {
+        val current = _state.value
+        val route = current.route ?: return
+        val guide =
+            current.guides.firstOrNull { it.id == action.guideId }
+                ?: current.suggestedGuide?.takeIf { it.id == action.guideId }
+                ?: return
+        val request =
+            TripRequest.forDirection(
+                routeId = route.id,
+                routeStops = current.routeStops,
+                from = current.overrideFrom ?: route.from,
+                to = current.overrideTo ?: route.to,
+                labelSaysReverse = route.isReverseFor(current.overrideFrom, current.overrideTo),
+                vehicleName = guide.sacco.ifBlank { action.defaultVehicleName },
+                fare = guide.fareKsh?.toInt(),
+            )
+        if (request == null) {
+            snackbarManager.showInfo("Stages are still loading. Try again in a moment.")
+            return
+        }
+        viewModelScope.launch {
+            // Asked once, the first time a guide is started; the answer is kept from then on.
+            if (prefs.getShareRideTraces().first() == null) {
+                _state.update { it.copy(traceConsentFor = request) }
+            } else {
+                _effects.send(RouteDetailsEffect.StartGuidance(request))
+            }
+        }
+    }
+
+    private fun answerTraceConsent(share: Boolean) {
+        val request = _state.value.traceConsentFor ?: return
+        _state.update { it.copy(traceConsentFor = null) }
+        viewModelScope.launch {
+            prefs.setShareRideTraces(share)
+            _effects.send(RouteDetailsEffect.StartGuidance(request))
         }
     }
 
@@ -158,8 +217,11 @@ class RouteDetailsViewModel(
         val effectiveFrom = currentState.overrideFrom ?: route.from
         val effectiveTo = currentState.overrideTo ?: route.to
 
-        // Determine if we are traveling in reverse direction compared to GTFS default
-        val isReverse = effectiveFrom == route.to || effectiveTo == route.from
+        // Which way along the stored stops the trip runs: from the stops themselves when the names match,
+        // because many routes store their stops the other way round from their from/to label.
+        val isReverse =
+            TripRequest.runsReversed(stops, effectiveFrom, effectiveTo)
+                ?: route.isReverseFor(currentState.overrideFrom, currentState.overrideTo)
         val startStopId = if (isReverse) route.lastStopId else route.firstStopId
 
         viewModelScope.launch {
@@ -221,13 +283,13 @@ class RouteDetailsViewModel(
         val steps = mutableListOf<RouteStep>()
         steps.add(RouteStep(1, "Board at $effectiveFrom"))
 
-        val displayStops = if (isReverse) stops.reversed() else stops
+        // Only the stops between boarding and alighting, in the direction of travel.
+        val ride = ridePortion(if (isReverse) stops.reversed() else stops, effectiveFrom, effectiveTo)
 
-        if (displayStops.size > 2) {
-            // Include up to 3 intermediate stops if they exist
-            val intermediateStops = displayStops.drop(1).dropLast(1).take(3)
-            intermediateStops.forEachIndexed { index, stop ->
-                steps.add(RouteStep(index + 2, "Pass through ${stop.name}"))
+        if (ride.size > 2) {
+            // Up to 3 landmarks spread along the ride, so a long ride is not a list of every stop.
+            landmarks(ride.drop(1).dropLast(1), count = 3).forEach { stop ->
+                steps.add(RouteStep(steps.size + 1, "Pass through ${stop.name}"))
             }
             steps.add(RouteStep(steps.size + 1, "Alight at $effectiveTo"))
         } else {
@@ -328,6 +390,8 @@ data class RouteDetailsState(
     val selectedVerdict: RouteVerdict? = null,
     // Connectivity
     val connectivityStatus: ConnectivityStatus = ConnectivityStatus.Available,
+    // The trip waiting on the ride-sharing question, shown as a dialog while not null.
+    val traceConsentFor: TripRequest? = null,
 )
 
 sealed interface RouteDetailsAction {
@@ -344,9 +408,64 @@ sealed interface RouteDetailsAction {
 
     data object GenerateAiSuggestion : RouteDetailsAction
 
+    /** @param defaultVehicleName Spoken when the guide names no sacco. */
+    data class StartGuide(
+        val guideId: String,
+        val defaultVehicleName: String,
+    ) : RouteDetailsAction
+
+    /** @param share Whether the rider lets Mwenyeji learn from the path of their rides. */
+    data class TraceConsentAnswered(
+        val share: Boolean,
+    ) : RouteDetailsAction
+
+    /** Closed without answering: nothing starts, and the question comes back next time. */
+    data object TraceConsentDismissed : RouteDetailsAction
+
+    data class GuidancePermissionDenied(
+        val message: String,
+    ) : RouteDetailsAction
+
     data object NavigateBack : RouteDetailsAction
 }
 
 sealed interface RouteDetailsEffect {
     data object NavigateBack : RouteDetailsEffect
+
+    data class StartGuidance(
+        val request: TripRequest,
+    ) : RouteDetailsEffect
+}
+
+/** The stops from [from] to [to] in [stops] (already in travel order), or all of them when the names do not match. */
+private fun ridePortion(
+    stops: List<RouteStop>,
+    from: String,
+    to: String,
+): List<RouteStop> {
+    val start = stops.indexOfFirst { it.matches(from) }.takeIf { it >= 0 } ?: 0
+    val end = stops.indexOfLast { it.matches(to) }.takeIf { it > start } ?: stops.lastIndex
+    return stops.subList(start, end + 1)
+}
+
+/** [count] stops spread evenly through [stops]. */
+private fun landmarks(
+    stops: List<RouteStop>,
+    count: Int,
+): List<RouteStop> {
+    if (stops.size <= count) return stops
+    return (1..count).map { stops[it * stops.size / (count + 1)] }
+}
+
+/**
+ * The route's from/to label read as a direction: true when the trip runs from the label's "to" towards
+ * its "from". Only a fallback: many routes store their stops the other way round from their label.
+ */
+private fun Route.isReverseFor(
+    overrideFrom: String?,
+    overrideTo: String?,
+): Boolean {
+    val from = overrideFrom ?: this.from
+    val to = overrideTo ?: this.to
+    return from == this.to || to == this.from
 }

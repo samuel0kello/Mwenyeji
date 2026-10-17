@@ -16,6 +16,11 @@
     <!-- Trip guidance buzzes before each instruction. -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <!-- Trip guidance runs as a location foreground service with an ongoing notification. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
 
     <application
         android:name=".MwenyejiApp"
@@ -37,6 +42,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service
+            android:name=".feature.guidance.service.TripGuidanceService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

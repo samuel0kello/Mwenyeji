@@ -1,6 +1,11 @@
 package com.samuelokello.mwenyeji.feature.feed.route
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,14 +25,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,6 +47,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.core.network.ConnectivityStatus
@@ -44,11 +55,15 @@ import com.samuelokello.mwenyeji.data.models.Guide
 import com.samuelokello.mwenyeji.data.models.RouteStep
 import com.samuelokello.mwenyeji.data.models.RouteTag
 import com.samuelokello.mwenyeji.feature.feed.components.RouteTagChip
+import com.samuelokello.mwenyeji.feature.guidance.service.TripGuidanceService
+import com.samuelokello.mwenyeji.feature.guidance.service.TripRequest
 import com.samuelokello.mwenyeji.presentation.designsystem.animation.ExpandAnimatedVisibility
 import com.samuelokello.mwenyeji.presentation.designsystem.animation.MwenyejiAnimatedVisibility
 import com.samuelokello.mwenyeji.presentation.designsystem.animation.MwenyejiAnimations
 import com.samuelokello.mwenyeji.presentation.designsystem.components.MwenyejiLoadingIndicator
 import com.samuelokello.mwenyeji.presentation.designsystem.components.MwenyejiRouteBar
+import com.samuelokello.mwenyeji.presentation.designsystem.components.button.MwenyejiButton
+import com.samuelokello.mwenyeji.presentation.designsystem.components.button.MwenyejiOutlinedButton
 import com.samuelokello.mwenyeji.presentation.designsystem.components.card.MwenyejiCard
 import com.samuelokello.mwenyeji.presentation.ui.shimmerEffect
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
@@ -69,10 +84,29 @@ fun RouteDetailsScreen(
     to: String? = null,
     onNavigateBack: () -> Unit,
     onNavigateToContribute: (String) -> Unit,
+    onNavigateToGuidance: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: RouteDetailsViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val runningTrip by TripGuidanceService.trip.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val needsPreciseLocation = stringResource(R.string.guidance_needs_precise_location)
+
+    // Guidance waits here while the permission dialog is open.
+    var pendingGuidance by remember { mutableStateOf<TripRequest?>(null) }
+    val guidancePermissionLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
+            val request = pendingGuidance
+            pendingGuidance = null
+            // Notifications are optional: guidance still speaks without them.
+            if (results[Manifest.permission.ACCESS_FINE_LOCATION] == true && request != null) {
+                TripGuidanceService.start(context, request)
+                onNavigateToGuidance()
+            } else {
+                viewModel.onAction(RouteDetailsAction.GuidancePermissionDenied(needsPreciseLocation))
+            }
+        }
 
     LaunchedEffect(routeId, from, to) {
         viewModel.onAction(RouteDetailsAction.LoadRoute(routeId, from, to))
@@ -82,6 +116,19 @@ fun RouteDetailsScreen(
         viewModel.effects.collect { effect ->
             when (effect) {
                 is RouteDetailsEffect.NavigateBack -> onNavigateBack()
+
+                is RouteDetailsEffect.StartGuidance -> {
+                    val granted =
+                        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                            PackageManager.PERMISSION_GRANTED
+                    if (granted) {
+                        TripGuidanceService.start(context, effect.request)
+                        onNavigateToGuidance()
+                    } else {
+                        pendingGuidance = effect.request
+                        guidancePermissionLauncher.launch(guidancePermissions())
+                    }
+                }
             }
         }
     }
@@ -105,6 +152,9 @@ fun RouteDetailsScreen(
         else -> {
             RouteDetailsScreenContent(
                 state = state,
+                // A trip on another route is not this route's: Start guide here replaces it.
+                isGuiding = runningTrip?.routeId == routeId,
+                onOpenGuidance = onNavigateToGuidance,
                 onAction = viewModel::onAction,
                 onNavigateBack = onNavigateBack,
                 onNavigateToContribute = { onNavigateToContribute(routeId) },
@@ -112,12 +162,52 @@ fun RouteDetailsScreen(
             )
         }
     }
+
+    if (state.traceConsentFor != null) {
+        TraceConsentDialog(onAction = viewModel::onAction)
+    }
+}
+
+/** Asked once, before the first guided trip: may Mwenyeji learn from the path the matatu takes? */
+@Composable
+private fun TraceConsentDialog(onAction: (RouteDetailsAction) -> Unit) {
+    val colors = MwenyejiTheme.colorScheme
+    AlertDialog(
+        onDismissRequest = { onAction(RouteDetailsAction.TraceConsentDismissed) },
+        containerColor = colors.surfaceContainerHigh,
+        title = {
+            Text(
+                text = stringResource(R.string.trace_consent_title),
+                style = MwenyejiTheme.typography.titleLarge,
+                color = colors.onSurface,
+            )
+        },
+        text = {
+            Text(
+                text = stringResource(R.string.trace_consent_body),
+                style = MwenyejiTheme.typography.bodyMedium,
+                color = colors.onSurfaceVariant,
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onAction(RouteDetailsAction.TraceConsentAnswered(share = true)) }) {
+                Text(stringResource(R.string.trace_consent_allow), color = colors.primary)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onAction(RouteDetailsAction.TraceConsentAnswered(share = false)) }) {
+                Text(stringResource(R.string.trace_consent_decline), color = colors.primary)
+            }
+        },
+    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RouteDetailsScreenContent(
     state: RouteDetailsState,
+    isGuiding: Boolean,
+    onOpenGuidance: () -> Unit,
     onAction: (RouteDetailsAction) -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateToContribute: () -> Unit,
@@ -125,6 +215,10 @@ fun RouteDetailsScreenContent(
 ) {
     val route = state.route ?: return
     val colors = MwenyejiTheme.colorScheme
+    // Spoken as "Look for … to <stop>" when a guide names no sacco.
+    val defaultVehicleName =
+        route.routeNumber?.let { stringResource(R.string.guidance_vehicle_route, it) }
+            ?: stringResource(R.string.guidance_vehicle_default)
     MwenyejiTheme.typography
 
     Scaffold(
@@ -196,6 +290,10 @@ fun RouteDetailsScreenContent(
                     ) {
                         SuggestedGuideCard(
                             guide = aiGuide,
+                            isGuiding = isGuiding,
+                            canStartGuide = state.routeStops.size >= 2,
+                            onStartGuide = { onAction(RouteDetailsAction.StartGuide(aiGuide.id, defaultVehicleName)) },
+                            onOpenGuidance = onOpenGuidance,
                             modifier =
                                 Modifier
                                     .padding(horizontal = 16.dp)
@@ -281,6 +379,10 @@ fun RouteDetailsScreenContent(
                     onVerdictSelected = { verdict ->
                         onAction(RouteDetailsAction.VerdictSelected(guide.id, verdict))
                     },
+                    isGuiding = isGuiding,
+                    canStartGuide = state.routeStops.size >= 2,
+                    onStartGuide = { onAction(RouteDetailsAction.StartGuide(guide.id, defaultVehicleName)) },
+                    onOpenGuidance = onOpenGuidance,
                     modifier =
                         Modifier
                             .padding(horizontal = 16.dp)
@@ -303,6 +405,10 @@ private fun GuideCard(
     totalGuides: Int,
     selectedVerdict: RouteVerdict?,
     onVerdictSelected: (RouteVerdict) -> Unit,
+    isGuiding: Boolean,
+    canStartGuide: Boolean,
+    onStartGuide: () -> Unit,
+    onOpenGuidance: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = MwenyejiTheme.colorScheme
@@ -390,6 +496,13 @@ private fun GuideCard(
             if (guide.warnings.isNotBlank()) {
                 Warning(warning = guide.warnings)
             }
+
+            StartGuideButton(
+                isGuiding = isGuiding,
+                canStartGuide = canStartGuide,
+                onStartGuide = onStartGuide,
+                onOpenGuidance = onOpenGuidance,
+            )
 
             HorizontalDivider(color = colors.border, thickness = 0.5.dp)
 
@@ -664,6 +777,10 @@ private fun RouteDetailBottomBar(
 @Composable
 private fun SuggestedGuideCard(
     guide: Guide,
+    isGuiding: Boolean,
+    canStartGuide: Boolean,
+    onStartGuide: () -> Unit,
+    onOpenGuidance: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = MwenyejiTheme.colorScheme
@@ -791,6 +908,13 @@ private fun SuggestedGuideCard(
                 }
             }
 
+            StartGuideButton(
+                isGuiding = isGuiding,
+                canStartGuide = canStartGuide,
+                onStartGuide = onStartGuide,
+                onOpenGuidance = onOpenGuidance,
+            )
+
             HorizontalDivider(color = colors.border.copy(alpha = 0.5f), thickness = 0.5.dp)
 
             // AI Disclaimer
@@ -816,6 +940,30 @@ private fun SuggestedGuideCard(
                 )
             }
         }
+    }
+}
+
+/** Voice guidance follows the guide; the stage and stop come from the trip's direction. */
+@Composable
+private fun StartGuideButton(
+    isGuiding: Boolean,
+    canStartGuide: Boolean,
+    onStartGuide: () -> Unit,
+    onOpenGuidance: () -> Unit,
+) {
+    if (isGuiding) {
+        MwenyejiOutlinedButton(
+            text = stringResource(R.string.guidance_open),
+            onClick = onOpenGuidance,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    } else {
+        MwenyejiButton(
+            text = stringResource(R.string.guidance_start_guide),
+            onClick = onStartGuide,
+            enabled = canStartGuide,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 
@@ -1022,3 +1170,11 @@ private fun Long.toRelativeTime(context: Context): String {
         else -> context.getString(R.string.days_ago_short, days.toInt())
     }
 }
+
+/** Precise location is required; notifications are asked for at the same time on Android 13+. */
+private fun guidancePermissions(): Array<String> =
+    buildList {
+        add(Manifest.permission.ACCESS_FINE_LOCATION)
+        add(Manifest.permission.ACCESS_COARSE_LOCATION)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) add(Manifest.permission.POST_NOTIFICATIONS)
+    }.toTypedArray()

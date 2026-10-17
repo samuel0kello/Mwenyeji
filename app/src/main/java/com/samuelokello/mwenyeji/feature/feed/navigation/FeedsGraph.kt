@@ -8,6 +8,7 @@ import com.samuelokello.mwenyeji.feature.contribute.navigation.navigateToContrib
 import com.samuelokello.mwenyeji.feature.feed.FeedScreen
 import com.samuelokello.mwenyeji.feature.feed.route.AllRoutes
 import com.samuelokello.mwenyeji.feature.feed.route.RouteDetailsScreen
+import com.samuelokello.mwenyeji.feature.guidance.ui.GuidanceScreen
 import com.samuelokello.mwenyeji.navigation.navigateBack
 import com.samuelokello.mwenyeji.navigation.slideScreen
 import com.samuelokello.mwenyeji.navigation.tabScreen
@@ -28,6 +29,9 @@ data class RouteDetailsRoute(
 
 @Serializable
 data object SeeAllRoutesRoute
+
+@Serializable
+data object GuidanceRoute
 
 fun NavGraphBuilder.feedsNavGraph(
     navController: NavHostController,
@@ -59,7 +63,12 @@ fun NavGraphBuilder.feedsNavGraph(
                 onNavigateToContribute = {
                     onRequireAuth { navController.navigateToContribute() }
                 },
+                onNavigateToGuidance = { navController.navigate(GuidanceRoute) { launchSingleTop = true } },
             )
+        }
+
+        slideScreen<GuidanceRoute> {
+            GuidanceScreen(onNavigateBack = { navController.navigateBack() })
         }
 
         slideScreen<SeeAllRoutesRoute> {
