@@ -5,6 +5,7 @@ import com.samuelokello.mwenyeji.datasources.preference.di.preferenceModule
 import com.samuelokello.mwenyeji.datasources.sources.auth.di.authDataSourceModule
 import com.samuelokello.mwenyeji.datasources.sources.confirmation.di.confirmationsDataSourceModule
 import com.samuelokello.mwenyeji.datasources.sources.device.di.deviceDataSourceModule
+import com.samuelokello.mwenyeji.datasources.sources.learning.di.routeLearningDataSourceModule
 import com.samuelokello.mwenyeji.datasources.sources.routes.di.routesDataSourceModule
 import com.samuelokello.mwenyeji.datasources.sources.search.di.searchDataSourceModule
 
@@ -17,4 +18,5 @@ val dataSourceModules =
         routesDataSourceModule,
         confirmationsDataSourceModule,
         searchDataSourceModule,
+        routeLearningDataSourceModule,
     )

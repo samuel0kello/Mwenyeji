@@ -20,19 +20,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.mapbox.geojson.Point
-import com.mapbox.maps.MapboxExperimental
-import com.mapbox.maps.extension.compose.MapboxMap
-import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
-import com.mapbox.maps.extension.compose.annotation.generated.PointAnnotation
-import com.mapbox.maps.extension.compose.annotation.rememberIconImage
-import com.mapbox.maps.extension.compose.style.MapStyle
 import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.data.models.SearchResult
 import com.samuelokello.mwenyeji.presentation.designsystem.components.inputFields.MwenyejiInputField
+import com.samuelokello.mwenyeji.presentation.designsystem.components.map.MapPin
+import com.samuelokello.mwenyeji.presentation.designsystem.components.map.MwenyejiPinMap
 import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 
-// @OptIn(MapboxExperimental::class)
 // @Composable
 // fun RouteStepScreen(state: ContributeState, onAction: (ContributeActions) -> Unit, modifier: Modifier = Modifier) {
 //    val colors = MwenyejiTheme.colorScheme
@@ -236,7 +230,6 @@ private fun SuggestionsDropdown(
     }
 }
 
-@OptIn(MapboxExperimental::class)
 @Composable
 fun FromMapPreview(
     lat: Double,
@@ -249,51 +242,15 @@ fun FromMapPreview(
     val typography = MwenyejiTheme.typography
     LocalContext.current
 
-    val point = Point.fromLngLat(lng, lat)
-
-    val mapViewportState =
-        key(lat, lng) {
-            rememberMapViewportState {
-                setCameraOptions {
-                    center(point)
-                    zoom(15.0)
-                    pitch(0.0)
-                }
-            }
-        }
-
     Column(modifier = modifier.fillMaxWidth()) {
-        MapboxMap(
+        MwenyejiPinMap(
+            pins = listOf(MapPin("place", lat, lng)),
+            onPinMoved = { _, newLat, newLng -> onPinDragged(newLat, newLng) },
             modifier =
                 Modifier
                     .fillMaxWidth()
                     .height(180.dp),
-            mapViewportState = mapViewportState,
-            style = { MapStyle(style = "mapbox://styles/mapbox/dark-v11") },
-            scaleBar = {},
-            compass = {},
-            logo = {},
-        ) {
-            // PointAnnotation supports dragging — Marker does not
-            val marker =
-                rememberIconImage(
-                    key = "mwenyeji-pin",
-                    painter = painterResource(id = R.drawable.ic_map_pin), // your pin drawable
-                )
-
-            PointAnnotation(point = point) {
-                iconImage = marker
-                iconSize = 1.2
-
-                // enable dragging
-                interactionsState.isDraggable = true
-
-                interactionsState.onDragged { annotation ->
-                    val newPoint = annotation.point
-                    onPinDragged(newPoint.latitude(), newPoint.longitude())
-                }
-            }
-        }
+        )
 
         Spacer(Modifier.height(6.dp))
         Text(

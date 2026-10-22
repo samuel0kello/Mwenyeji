@@ -139,7 +139,7 @@ object ProximityEngine {
         val terminus: String,
     )
 
-    private fun haversineKm(
+    internal fun haversineKm(
         lat1: Double,
         lng1: Double,
         lat2: Double,

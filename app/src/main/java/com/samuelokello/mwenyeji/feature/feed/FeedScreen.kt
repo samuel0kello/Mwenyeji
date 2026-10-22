@@ -35,6 +35,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -50,8 +52,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -93,6 +97,8 @@ fun FeedScreen(
     onNavigateToSeeAll: () -> Unit,
     onNavigateToContribute: () -> Unit,
     modifier: Modifier = Modifier,
+    onPlanTrip: (listen: Boolean) -> Unit = {},
+    onOpenChat: () -> Unit = {},
     viewModel: FeedViewModel = koinViewModel(),
     snackBarManager: SnackBarManager = koinInject(),
 ) {
@@ -251,6 +257,8 @@ fun FeedScreen(
         },
         onAction = viewModel::onAction,
         onNavigateToContribute = onNavigateToContribute,
+        onPlanTrip = onPlanTrip,
+        onOpenChat = onOpenChat,
         modifier = modifier,
     )
 }
@@ -263,6 +271,8 @@ internal fun FeedScreenContent(
     onAction: (FeedAction) -> Unit,
     onNavigateToContribute: () -> Unit,
     modifier: Modifier = Modifier,
+    onPlanTrip: (listen: Boolean) -> Unit = {},
+    onOpenChat: () -> Unit = {},
 ) {
     val colors = MwenyejiTheme.colorScheme
     val typography = MwenyejiTheme.typography
@@ -278,6 +288,12 @@ internal fun FeedScreenContent(
                     Column(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
+                        TripEntryRow(
+                            onPlanTrip = { onPlanTrip(false) },
+                            onListen = { onPlanTrip(true) },
+                            onOpenChat = onOpenChat,
+                        )
+
                         MwenyejiSearchBar(
                             state = state.searchState,
                             placeholder = stringResource(R.string.search_area_stage_destination),
@@ -532,6 +548,48 @@ fun TooltipWithAnimation(
             modifier = Modifier.offset { IntOffset(y = offsetY.roundToPx(), x = 0) },
             visible = show,
         )
+    }
+}
+
+/** The way into trip planning: tap to type, the mic to speak, the bubble to chat. */
+@Composable
+private fun TripEntryRow(
+    onPlanTrip: () -> Unit,
+    onListen: () -> Unit,
+    onOpenChat: () -> Unit,
+) {
+    val colors = MwenyejiTheme.colorScheme
+    val shape = RoundedCornerShape(24.dp)
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .background(colors.primaryContainer)
+                .clickable(onClick = onPlanTrip)
+                .padding(start = 16.dp, end = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(R.string.plan_placeholder),
+            style = MwenyejiTheme.typography.bodyLarge,
+            color = colors.onPrimaryContainer,
+            modifier = Modifier.weight(1f),
+        )
+        IconButton(onClick = onListen) {
+            Icon(
+                painter = painterResource(R.drawable.ic_outline_mic),
+                contentDescription = stringResource(R.string.plan_speak),
+                tint = colors.onPrimaryContainer,
+            )
+        }
+        IconButton(onClick = onOpenChat) {
+            Icon(
+                painter = painterResource(R.drawable.ic_outline_chat),
+                contentDescription = stringResource(R.string.plan_ask),
+                tint = colors.onPrimaryContainer,
+            )
+        }
     }
 }
 

@@ -1,0 +1,383 @@
+package com.samuelokello.mwenyeji.feature.guidance.session
+
+import com.samuelokello.mwenyeji.data.models.GeoPoint
+import com.samuelokello.mwenyeji.data.models.RouteStop
+import com.samuelokello.mwenyeji.feature.guidance.session.TripSessionContract.TripEffect
+import com.samuelokello.mwenyeji.feature.guidance.session.TripSessionContract.TripEvent
+import com.samuelokello.mwenyeji.feature.guidance.session.TripSessionContract.TripPlan
+import com.samuelokello.mwenyeji.feature.guidance.session.TripSessionContract.TripState
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class TripSessionReducerTest {
+    // Five stops heading east along one latitude, roughly 1.1km apart.
+    private val lat = -1.28
+    private val stops = List(5) { RouteStop("s$it", "Stop $it", lat, 36.82 + it * 0.01, it) }
+    private val plan = TripPlan(
+        stops = stops,
+        boardingIndex = 0,
+        alightIndex = 3,
+        vehicleName = "Super Metro",
+        fare = 100,
+        walkingDistanceMetres = 200,
+    )
+    private val stage = stops[0]
+    private val alight = stops[3]
+
+    private val metre = 1 / 111_320.0
+    private val walking = 1.2
+    private val driving = 10.0
+
+    private var clock = 0L
+    private var state = TripState()
+    private var effects = emptyList<TripEffect>()
+    private val reducer = TripSessionReducer(plan)
+
+    private fun send(event: TripEvent) {
+        val (next, emitted) = reducer.reduce(state, event)
+        state = next
+        effects = emitted
+    }
+
+    /** A fix [east] metres east and [north] metres north of [stop], 5 seconds after the last one. */
+    private fun fix(
+        stop: RouteStop,
+        east: Double = 0.0,
+        north: Double = 0.0,
+        speed: Double = walking,
+    ) {
+        clock += 5_000L
+        send(TripEvent.LocationFix(stop.lat + north * metre, stop.lng + east * metre, speed, 5.0, clock))
+    }
+
+    private fun spoken(): Message? = effects.filterIsInstance<TripEffect.Speak>().firstOrNull()?.message
+
+    private fun vibration(): VibrationPattern? = effects.filterIsInstance<TripEffect.Vibrate>().firstOrNull()?.pattern
+
+    private fun startIn(phase: TripPhase) {
+        state = TripState(currentPhase = phase)
+    }
+
+    @Test
+    fun `start without permission asks for it and stays planned`() {
+        send(TripEvent.UserTapsStart(locationPermissionGranted = false))
+
+        assertEquals(TripPhase.PLANNED, state.currentPhase)
+        assertEquals(listOf(TripEffect.RequestLocationPermission), effects)
+    }
+
+    @Test
+    fun `start with permission begins the walk`() {
+        send(TripEvent.UserTapsStart(locationPermissionGranted = true))
+
+        assertEquals(TripPhase.WALKING_TO_STAGE, state.currentPhase)
+        assertEquals(Message.WalkToStage(200, "Stop 0"), spoken())
+        assertEquals(VibrationPattern.TICK, vibration())
+    }
+
+    @Test
+    fun `reaching the stage needs three fixes in a row`() {
+        startIn(TripPhase.WALKING_TO_STAGE)
+
+        fix(stage, east = -10.0)
+        fix(stage, east = -10.0)
+        fix(stage, east = -200.0)
+        fix(stage, east = -10.0)
+        fix(stage, east = -10.0)
+        assertEquals(TripPhase.WALKING_TO_STAGE, state.currentPhase)
+
+        fix(stage, east = -10.0)
+        assertEquals(TripPhase.AT_STAGE, state.currentPhase)
+        assertEquals(Message.AtStage("Super Metro", "Stop 3", 100), spoken())
+        assertEquals(VibrationPattern.MILESTONE, vibration())
+    }
+
+    @Test
+    fun `walking away for thirty seconds goes off route, then three closer fixes recover`() {
+        startIn(TripPhase.WALKING_TO_STAGE)
+
+        // First fix only sets the baseline; growth is measured from the second.
+        (0..6).forEach { fix(stage, east = -200.0 - it * 10) }
+        assertEquals(TripPhase.WALKING_TO_STAGE, state.currentPhase)
+
+        fix(stage, east = -270.0)
+        assertEquals(TripPhase.OFF_ROUTE, state.currentPhase)
+        assertEquals(VibrationPattern.WARNING, vibration())
+
+        fix(stage, east = -260.0)
+        fix(stage, east = -250.0)
+        assertEquals(TripPhase.OFF_ROUTE, state.currentPhase)
+        fix(stage, east = -240.0)
+        assertEquals(TripPhase.WALKING_TO_STAGE, state.currentPhase)
+        assertEquals(null, spoken())
+        assertEquals(VibrationPattern.TICK, vibration())
+    }
+
+    @Test
+    fun `walking towards the stage says how far and which way every hundred metres`() {
+        startIn(TripPhase.WALKING_TO_STAGE)
+
+        val updates = mutableListOf<Message.WalkProgress>()
+        // From 500 m west of the stage, 50 m closer each fix.
+        (0..9).forEach {
+            fix(stage, east = -500.0 + it * 50)
+            (spoken() as? Message.WalkProgress)?.let(updates::add)
+        }
+
+        assertEquals(listOf(400, 300, 200, 100), updates.map { it.metres })
+        assertTrue(updates.all { it.stageName == "Stop 0" && it.direction == CompassDirection.EAST })
+        assertEquals(TripPhase.WALKING_TO_STAGE, state.currentPhase)
+    }
+
+    @Test
+    fun `walking away and back again gives no progress until a new hundred metres is closed`() {
+        startIn(TripPhase.WALKING_TO_STAGE)
+
+        fix(stage, north = 300.0)
+        fix(stage, north = 320.0)
+        fix(stage, north = 260.0)
+        assertTrue(effects.isEmpty())
+
+        fix(stage, north = 200.0)
+        assertEquals(Message.WalkProgress("Stop 0", 200, CompassDirection.SOUTH), spoken())
+    }
+
+    @Test
+    fun `tapping on board at the stage starts the ride`() {
+        startIn(TripPhase.AT_STAGE)
+
+        send(TripEvent.UserTapsIOnBoard)
+
+        assertEquals(TripPhase.ON_BOARD, state.currentPhase)
+        assertEquals(Message.OnBoardConfirmed(3, "Stop 3"), spoken())
+    }
+
+    @Test
+    fun `moving fast away from the stage is detected as boarding`() {
+        startIn(TripPhase.AT_STAGE)
+
+        // Fast but still inside 100m does not count.
+        fix(stage, east = 50.0, speed = driving)
+        fix(stage, east = 150.0, speed = driving)
+        fix(stage, east = 200.0, speed = driving)
+        assertEquals(TripPhase.AT_STAGE, state.currentPhase)
+
+        fix(stage, east = 250.0, speed = driving)
+        assertEquals(TripPhase.ON_BOARD, state.currentPhase)
+        assertEquals(null, spoken())
+        assertEquals(VibrationPattern.TICK, vibration())
+    }
+
+    @Test
+    fun `waiting at the stage stays quiet`() {
+        startIn(TripPhase.AT_STAGE)
+
+        repeat(20) {
+            fix(stage, east = 5.0, speed = 0.0)
+            assertTrue(effects.isEmpty())
+        }
+        assertEquals(TripPhase.AT_STAGE, state.currentPhase)
+    }
+
+    @Test
+    fun `full ride goes get ready, alight, arrived`() {
+        startIn(TripPhase.ON_BOARD)
+
+        // Still closest to stop 1, more than 800m out.
+        repeat(3) { fix(stops[1], east = 100.0, speed = driving) }
+        assertEquals(TripPhase.ON_BOARD, state.currentPhase)
+
+        repeat(3) { fix(alight, east = -700.0, speed = driving) }
+        assertEquals(TripPhase.APPROACHING_STOP, state.currentPhase)
+        assertEquals(Message.GetReady("Stop 3"), spoken())
+        assertEquals(VibrationPattern.GET_READY, vibration())
+
+        fix(alight, east = -280.0, speed = driving)
+        assertEquals(TripPhase.APPROACHING_STOP, state.currentPhase)
+        fix(alight, east = -200.0, speed = driving)
+        assertEquals(TripPhase.ALIGHT_NOW, state.currentPhase)
+        assertEquals(Message.Alight("Stop 3", 200), spoken())
+        assertEquals(VibrationPattern.ALIGHT, vibration())
+
+        // Inside the radius but still at speed: not arrived yet.
+        repeat(3) { fix(alight, east = -20.0, speed = driving) }
+        assertEquals(TripPhase.ALIGHT_NOW, state.currentPhase)
+
+        repeat(3) { fix(alight, east = 10.0, speed = walking) }
+        assertEquals(TripPhase.ARRIVED, state.currentPhase)
+        assertEquals(Message.Arrived("Stop 3"), spoken())
+        assertTrue(TripEffect.EndTrip in effects)
+    }
+
+    @Test
+    fun `passing the stop before the alight stop triggers get ready`() {
+        startIn(TripPhase.ON_BOARD)
+
+        // 900m short of the alight stop, but stop 2 is now the nearest one.
+        repeat(3) { fix(stops[2], east = 200.0, speed = driving) }
+
+        assertEquals(TripPhase.APPROACHING_STOP, state.currentPhase)
+    }
+
+    // Detours: 500m north of the line, so off the route. Stop 3 is about 2.2km east of stop 1.
+
+    @Test
+    fun `a detour that keeps getting closer to the stop is a shortcut, said once`() {
+        startIn(TripPhase.ON_BOARD)
+
+        // Three fixes off the route mark where the detour began.
+        repeat(3) { fix(stops[1], north = 500.0, speed = driving) }
+        // About 190m closer: not enough yet.
+        fix(stops[1], east = 200.0, north = 500.0, speed = driving)
+        assertTrue(effects.isEmpty())
+
+        fix(stops[1], east = 250.0, north = 500.0, speed = driving)
+        assertEquals(Message.Shortcut("Stop 3"), spoken())
+        assertEquals(VibrationPattern.TICK, vibration())
+        assertEquals(TripPhase.ON_BOARD, state.currentPhase)
+
+        listOf(400.0, 600.0, 800.0).forEach {
+            fix(stops[1], east = it, north = 500.0, speed = driving)
+            assertTrue(effects.isEmpty())
+        }
+    }
+
+    @Test
+    fun `a detour that gets clearly further from the stop warns of the wrong bus, once`() {
+        startIn(TripPhase.ON_BOARD)
+
+        repeat(3) { fix(stops[1], north = 500.0, speed = driving) }
+        // About 470m further: not enough yet.
+        fix(stops[1], east = -480.0, north = 500.0, speed = driving)
+        assertTrue(effects.isEmpty())
+
+        fix(stops[1], east = -520.0, north = 500.0, speed = driving)
+        assertEquals(Message.WrongBus("Stop 3"), spoken())
+        assertEquals(VibrationPattern.WARNING, vibration())
+
+        repeat(5) {
+            fix(stops[1], east = -600.0 - it * 100, north = 500.0, speed = driving)
+            assertTrue(effects.isEmpty())
+        }
+    }
+
+    @Test
+    fun `standing in traffic on a detour stays quiet`() {
+        startIn(TripPhase.ON_BOARD)
+
+        repeat(60) {
+            fix(stops[1], north = 500.0, speed = 0.0)
+            assertTrue(effects.isEmpty())
+        }
+    }
+
+    @Test
+    fun `back on the route ends the detour, and the next one starts from where it begins`() {
+        startIn(TripPhase.ON_BOARD)
+
+        repeat(3) { fix(stops[1], north = 500.0, speed = driving) }
+        fix(stops[1], speed = driving)
+        assertEquals(null, state.detourStartToStopMetres)
+
+        // A new detour further along: 150m closer than its own start is not a shortcut.
+        repeat(3) { fix(stops[1], east = 300.0, north = 500.0, speed = driving) }
+        fix(stops[1], east = 450.0, north = 500.0, speed = driving)
+        assertTrue(effects.isEmpty())
+    }
+
+    @Test
+    fun `a road learned from riders counts as on route`() {
+        val learnedRoad = listOf(
+            GeoPoint(lat + 500 * metre, stops[0].lng),
+            GeoPoint(lat + 500 * metre, stops[4].lng),
+        )
+        val reducer = TripSessionReducer(plan.copy(knownPaths = listOf(learnedRoad)))
+        var state = TripState(currentPhase = TripPhase.ON_BOARD)
+
+        listOf(0.0, 0.0, 0.0, 250.0, 500.0, 0.0, -600.0).forEach { east ->
+            clock += 5_000L
+            val fix = TripEvent.LocationFix(lat + 500 * metre, stops[1].lng + east * metre, driving, 5.0, clock)
+            val (next, emitted) = reducer.reduce(state, fix)
+            state = next
+            assertTrue(emitted.isEmpty())
+        }
+        assertEquals(null, state.detourStartToStopMetres)
+    }
+
+    @Test
+    fun `riding past the stop is a missed stop, then slowing for a minute ends the trip`() {
+        startIn(TripPhase.ALIGHT_NOW)
+
+        repeat(2) { fix(stops[4], east = -100.0, speed = driving) }
+        assertEquals(TripPhase.ALIGHT_NOW, state.currentPhase)
+        fix(stops[4], east = -100.0, speed = driving)
+        assertEquals(TripPhase.MISSED_STOP, state.currentPhase)
+        assertEquals(VibrationPattern.ALIGHT, vibration())
+
+        // Baseline fix plus 55 seconds of walking pace is not enough.
+        repeat(12) { fix(stops[4], speed = walking) }
+        assertEquals(TripPhase.MISSED_STOP, state.currentPhase)
+
+        fix(stops[4], speed = walking)
+        assertEquals(TripPhase.ARRIVED, state.currentPhase)
+        val offBus = spoken() as Message.OffBus
+        assertEquals("Stop 3", offBus.stopName)
+        // Stop 4 is about 1.1km past stop 3.
+        assertTrue(offBus.metresBehind in 1_000..1_200)
+        assertTrue(TripEffect.EndTrip in effects)
+    }
+
+    @Test
+    fun `tapping alighted ends the trip from any riding phase`() {
+        listOf(TripPhase.ON_BOARD, TripPhase.APPROACHING_STOP, TripPhase.ALIGHT_NOW, TripPhase.MISSED_STOP)
+            .forEach { phase ->
+                startIn(phase)
+                send(TripEvent.UserTapsIHaveAlighted)
+                assertEquals(TripPhase.ARRIVED, state.currentPhase)
+                assertEquals(null, spoken())
+                assertEquals(VibrationPattern.MILESTONE, vibration())
+                assertTrue(TripEffect.EndTrip in effects)
+            }
+
+        startIn(TripPhase.WALKING_TO_STAGE)
+        send(TripEvent.UserTapsIHaveAlighted)
+        assertEquals(TripPhase.WALKING_TO_STAGE, state.currentPhase)
+        assertTrue(effects.isEmpty())
+    }
+
+    @Test
+    fun `cancel ends the trip and final states ignore everything`() {
+        startIn(TripPhase.ON_BOARD)
+
+        send(TripEvent.UserTapsCancel)
+        assertEquals(TripPhase.CANCELLED, state.currentPhase)
+        assertEquals(null, spoken())
+        assertEquals(VibrationPattern.TICK, vibration())
+        assertTrue(TripEffect.EndTrip in effects)
+
+        send(TripEvent.UserTapsCancel)
+        assertTrue(effects.isEmpty())
+        send(TripEvent.GpsLost)
+        assertTrue(effects.isEmpty())
+        assertEquals(TripPhase.CANCELLED, state.currentPhase)
+    }
+
+    @Test
+    fun `gps lost warns once until the next fix`() {
+        startIn(TripPhase.ON_BOARD)
+
+        send(TripEvent.GpsLost)
+        assertEquals(VibrationPattern.WARNING, vibration())
+        assertEquals(TripPhase.ON_BOARD, state.currentPhase)
+
+        send(TripEvent.GpsLost)
+        assertTrue(effects.isEmpty())
+
+        fix(stops[1], speed = driving)
+        assertFalse(state.gpsLostWarningGiven)
+        send(TripEvent.GpsLost)
+        assertEquals(VibrationPattern.WARNING, vibration())
+    }
+}

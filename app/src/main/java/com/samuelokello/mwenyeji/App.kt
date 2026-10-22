@@ -22,8 +22,12 @@ import androidx.navigation.compose.rememberNavController
 import com.samuelokello.mwenyeji.feature.auth.SessionEvent
 import com.samuelokello.mwenyeji.feature.auth.SessionViewModel
 import com.samuelokello.mwenyeji.feature.auth.SignInPromptSheet
+import com.samuelokello.mwenyeji.feature.feed.navigation.GuidanceRoute
+import com.samuelokello.mwenyeji.feature.guidance.service.OpenGuidance
+import com.samuelokello.mwenyeji.feature.guidance.service.TripGuidanceService
 import com.samuelokello.mwenyeji.navigation.MwenyejiNavGraph
 import com.samuelokello.mwenyeji.presentation.designsystem.components.snackbar.MwenyejiSnackbarHost
+import kotlinx.coroutines.flow.first
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -36,6 +40,18 @@ fun App(
     val navController = rememberNavController()
 
     val signInUi by sessionViewModel.signInUi.collectAsStateWithLifecycle()
+
+    // The guidance notification was tapped: show the trip once the navigation graph exists.
+    LaunchedEffect(navController) {
+        OpenGuidance.requested.collect { requested ->
+            if (!requested) return@collect
+            navController.currentBackStackEntryFlow.first()
+            if (TripGuidanceService.trip.value != null) {
+                navController.navigate(GuidanceRoute) { launchSingleTop = true }
+            }
+            OpenGuidance.consume()
+        }
+    }
 
     LaunchedEffect(Unit) {
         sessionViewModel.events.collect { event ->

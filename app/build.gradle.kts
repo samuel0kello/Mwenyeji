@@ -13,6 +13,19 @@ plugins {
 android {
     namespace = "com.samuelokello.mwenyeji"
 
+    defaultConfig {
+        val localProperties =
+            Properties().apply {
+                rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+            }
+        // Mwenyeji's own map tiles (a PMTiles file printed by seeder/map/upload_tiles.js). Empty uses
+        // OpenFreeMap's tiles, which share the same schema, until our file is published.
+        val mapTilesUrl = localProperties.getProperty("MWENYEJI_MAP_TILES_URL")
+            ?: providers.gradleProperty("MWENYEJI_MAP_TILES_URL").orNull
+            ?: ""
+        buildConfigField("String", "MAP_TILES_URL", "\"$mapTilesUrl\"")
+    }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -49,6 +62,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    // The XML launch theme (Theme.MaterialComponents) lives here.
+    implementation(libs.material)
 
     implementation(libs.googleid)
     testImplementation(libs.junit)
@@ -80,14 +95,7 @@ dependencies {
     implementation(libs.play.services.basement)
     implementation(libs.play.services.location)
 
-    implementation(libs.android.ndk27)
-    implementation(libs.maps.compose.ndk27)
-    implementation(libs.autofill.ndk27)
-    implementation(libs.discover.ndk27)
-    implementation(libs.place.autocomplete.ndk27)
-    implementation(libs.offline.ndk27)
-    implementation(libs.mapbox.search.android.ndk27)
-    implementation(libs.mapbox.search.android.ui.ndk27)
+    implementation(libs.maplibre.android.sdk)
 
     // ktor
     implementation(libs.bundles.ktor)
