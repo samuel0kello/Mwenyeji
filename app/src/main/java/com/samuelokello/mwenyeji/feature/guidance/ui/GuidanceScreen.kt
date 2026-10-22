@@ -2,6 +2,7 @@ package com.samuelokello.mwenyeji.feature.guidance.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Switch
@@ -31,6 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.samuelokello.mwenyeji.R
 import com.samuelokello.mwenyeji.core.map.MwenyejiMapStyle
+import com.samuelokello.mwenyeji.data.helpers.ProximityEngine
+import com.samuelokello.mwenyeji.data.models.GeoPoint
 import com.samuelokello.mwenyeji.datasources.preference.MwenyejiPrefs
 import com.samuelokello.mwenyeji.feature.guidance.service.GuidanceSnapshot
 import com.samuelokello.mwenyeji.feature.guidance.service.TripGuidanceService
@@ -44,6 +49,7 @@ import com.samuelokello.mwenyeji.presentation.ui.theme.MwenyejiTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import kotlin.math.roundToInt
 
 /**
  * The map view of a running trip: the route, the stage and the stop, the rider's position, the next
@@ -83,6 +89,8 @@ fun GuidanceScreen(
         onAllowLoudspeaker = { allow -> scope.launch { prefs.setAllowLoudspeaker(allow) } },
         onBack = onNavigateBack,
         onBoard = { TripGuidanceService.onBoard(context) },
+        onAtStage = { TripGuidanceService.atStage(context) },
+        onPickStage = { index -> TripGuidanceService.pickStage(context, index) },
         onAlighted = { TripGuidanceService.alighted(context) },
         onStop = { TripGuidanceService.stop(context) },
         modifier = modifier,
@@ -96,6 +104,8 @@ private fun GuidanceContent(
     onAllowLoudspeaker: (Boolean) -> Unit,
     onBack: () -> Unit,
     onBoard: () -> Unit,
+    onAtStage: () -> Unit,
+    onPickStage: (Int) -> Unit,
     onAlighted: () -> Unit,
     onStop: () -> Unit,
     modifier: Modifier = Modifier,
@@ -106,7 +116,7 @@ private fun GuidanceContent(
     val plan = trip?.plan
 
     Box(modifier = modifier.fillMaxSize()) {
-        GuidanceMap(plan = plan, modifier = Modifier.fillMaxSize())
+        GuidanceMap(plan = plan, phase = phase, here = trip?.here, modifier = Modifier.fillMaxSize())
 
         Column(
             modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(16.dp),
@@ -156,6 +166,9 @@ private fun GuidanceContent(
             if (trip != null) {
                 HearingRow(voiceOn = trip.voiceOn, allowLoudspeaker = allowLoudspeaker, onAllowLoudspeaker = onAllowLoudspeaker)
             }
+            if (plan != null && phase.isBeforeBoarding && plan.stageChoices.size > 1) {
+                StageChoices(plan = plan, here = trip?.here, onPick = onPickStage)
+            }
         }
 
         // The taps the trip needs right now, within thumb reach.
@@ -172,6 +185,22 @@ private fun GuidanceContent(
                     .padding(horizontal = 6.dp, vertical = 2.dp),
             )
             when {
+                // The stop on the map is not always where the stage is, and riders board where
+                // matatus stop: either can be said before the app notices.
+                phase == TripPhase.WALKING_TO_STAGE || phase == TripPhase.OFF_ROUTE ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        MwenyejiOutlinedButton(
+                            text = stringResource(R.string.guidance_action_at_stage),
+                            onClick = onAtStage,
+                            modifier = Modifier.weight(1f),
+                        )
+                        MwenyejiButton(
+                            text = stringResource(R.string.guidance_action_on_board),
+                            onClick = onBoard,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+
                 phase == TripPhase.AT_STAGE ->
                     MwenyejiButton(
                         text = stringResource(R.string.guidance_action_on_board),
@@ -234,6 +263,50 @@ private fun HearingRow(
             color = colors.onSurface,
         )
         Switch(checked = allowLoudspeaker, onCheckedChange = onAllowLoudspeaker)
+    }
+}
+
+/**
+ * The stages within walking distance, with how far each is now. Picking one moves the trip there:
+ * the stop the app chose is not always where locals board.
+ */
+@Composable
+private fun StageChoices(
+    plan: TripPlan,
+    here: GeoPoint?,
+    onPick: (Int) -> Unit,
+) {
+    val colors = MwenyejiTheme.colorScheme
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(colors.surfaceContainerHigh.copy(alpha = 0.95f), MwenyejiTheme.shapes.medium)
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.guidance_board_at),
+            style = MwenyejiTheme.typography.labelMedium,
+            color = colors.onSurfaceVariant,
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            plan.stageChoices.forEach { index ->
+                val stop = plan.stops[index]
+                val label =
+                    here?.let {
+                        val metres = (ProximityEngine.haversineKm(it.lat, it.lng, stop.lat, stop.lng) * 100).roundToInt() * 10
+                        stringResource(R.string.guidance_stage_choice, stop.name, metres)
+                    } ?: stop.name
+                FilterChip(
+                    selected = index == plan.boardingIndex,
+                    onClick = { onPick(index) },
+                    label = { Text(label) },
+                )
+            }
+        }
     }
 }
 

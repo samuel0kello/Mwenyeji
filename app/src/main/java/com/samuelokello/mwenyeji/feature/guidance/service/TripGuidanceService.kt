@@ -29,9 +29,11 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.samuelokello.mwenyeji.data.helpers.DataResult
+import com.samuelokello.mwenyeji.data.models.DirectionLine
 import com.samuelokello.mwenyeji.data.models.GeoPoint
 import com.samuelokello.mwenyeji.data.models.RideTrace
 import com.samuelokello.mwenyeji.data.repository.RouteLearningRepository
+import com.samuelokello.mwenyeji.data.repository.RoutesRepository
 import com.samuelokello.mwenyeji.datasources.preference.MwenyejiPrefs
 import com.samuelokello.mwenyeji.feature.guidance.announcer.Announcer
 import com.samuelokello.mwenyeji.feature.guidance.announcer.AudioRoute
@@ -75,17 +77,20 @@ import kotlin.coroutines.resume
 class TripGuidanceService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val learning: RouteLearningRepository by inject()
+    private val routes: RoutesRepository by inject()
     private val prefs: MwenyejiPrefs by inject()
     private lateinit var locationClient: FusedLocationProviderClient
     private var session: Session? = null
     private var startJob: Job? = null
     private var gpsLostJob: Job? = null
     private var stopJob: Job? = null
+    private var expiryJob: Job? = null
 
     private class Session(
         val request: TripRequest,
-        val plan: TripPlan,
-        val reducer: TripSessionReducer,
+        // Both change when the rider boards somewhere other than the planned stage.
+        var plan: TripPlan,
+        var reducer: TripSessionReducer,
         val announcer: Announcer,
         // Null unless the rider agreed to share ride traces.
         val recorder: RideTraceRecorder?,
@@ -114,6 +119,11 @@ class TripGuidanceService : Service() {
             }
 
             ACTION_ON_BOARD -> dispatch(TripEvent.UserTapsIOnBoard)
+
+            ACTION_AT_STAGE -> dispatch(TripEvent.UserTapsAtStage)
+
+            ACTION_PICK_STAGE ->
+                intent.getIntExtra(EXTRA_STOP_INDEX, -1).takeIf { it >= 0 }?.let { dispatch(TripEvent.UserPicksStage(it)) }
 
             ACTION_ALIGHTED -> dispatch(TripEvent.UserTapsIHaveAlighted)
 
@@ -151,15 +161,29 @@ class TripGuidanceService : Service() {
         // Start the speech engine now so it warms up while we look for the user.
         val announcer = Announcer(TtsSpeaker(this), VibratorHaptics(this), userLanguage(), canSpeak = ::canSpeak)
         startJob = scope.launch {
-            // Learned roads load while we wait for the first fix. A slow network must not hold up the trip.
-            val knownPaths = async { withTimeoutOrNull(KNOWN_PATHS_TIMEOUT_MS) { loadKnownPaths(request) }.orEmpty() }
-            val here = currentLocation()
-            val plan = request.toPlan(here?.latitude, here?.longitude).copy(knownPaths = knownPaths.await())
+            // This direction's own stops and road, and learned roads, load while we wait for the first
+            // fix. A slow network must not hold up the trip: without them it runs on what it was given.
+            val line = async { withTimeoutOrNull(ROUTE_DATA_TIMEOUT_MS) { loadDirectionLine(request) } }
+            val knownPaths = async { withTimeoutOrNull(ROUTE_DATA_TIMEOUT_MS) { loadKnownPaths(request) }.orEmpty() }
+            val firstFix = currentLocation()
+            here = firstFix?.let { GeoPoint(it.latitude, it.longitude) }
+            val direction = line.await()
+            val onItsSide = direction?.let { request.onDirectionStops(it.stops) } ?: request
+            val plan =
+                onItsSide
+                    .toPlan(firstFix?.latitude, firstFix?.longitude)
+                    .copy(knownPaths = knownPaths.await(), road = direction?.road.orEmpty())
             val recorder = if (prefs.getShareRideTraces().first() == true) RideTraceRecorder() else null
-            session = Session(request, plan, TripSessionReducer(plan), announcer, recorder)
+            session = Session(onItsSide, plan, TripSessionReducer(plan), announcer, recorder)
             publish(request.routeId, TripPhase.PLANNED, plan)
             dispatch(TripEvent.UserTapsStart(locationPermissionGranted = hasPreciseLocation()))
-            if (session != null) startLocationUpdates()
+            if (session != null) {
+                startLocationUpdates()
+                expiryJob = scope.launch {
+                    delay(TripThresholds.MAX_TRIP_MS)
+                    dispatch(TripEvent.TripExpired)
+                }
+            }
         }
         // Stopped before the first fix arrived: nothing else owns the speech engine yet.
         startJob?.invokeOnCompletion { cause -> if (cause != null) announcer.close() }
@@ -169,7 +193,14 @@ class TripGuidanceService : Service() {
         val current = session ?: return
         val (next, effects) = current.reducer.reduce(current.state, event)
         current.state = next
-        if (event is TripEvent.LocationFix) current.recorder?.onFix(event, next.currentPhase)
+        effects.filterIsInstance<TripEffect.MoveStage>().lastOrNull()?.let { move ->
+            current.plan = current.plan.copy(boardingIndex = move.boardingIndex)
+            current.reducer = TripSessionReducer(current.plan)
+        }
+        if (event is TripEvent.LocationFix) {
+            current.recorder?.onFix(event, next.currentPhase)
+            here = GeoPoint(event.lat, event.lng)
+        }
         publish(current.request.routeId, next.currentPhase, current.plan)
         current.announcer.announce(effects)
 
@@ -196,6 +227,8 @@ class TripGuidanceService : Service() {
     private fun endSession(current: Session) {
         locationClient.removeLocationUpdates(locationCallback)
         gpsLostJob?.cancel()
+        expiryJob?.cancel()
+        here = null
         current.announcer.close()
         if (session === current) session = null
     }
@@ -211,8 +244,11 @@ class TripGuidanceService : Service() {
         phase: TripPhase,
         plan: TripPlan?,
     ) {
-        _trip.value = GuidanceSnapshot(routeId, phase, plan, voiceOn = canSpeak())
+        _trip.value = GuidanceSnapshot(routeId, phase, plan, voiceOn = canSpeak(), here = here)
     }
+
+    // Where the last fix put the rider, for the walk line and the distances to stages on screen.
+    private var here: GeoPoint? = null
 
     // ── Who can hear ─────────────────────────────────────────────────────────
 
@@ -278,6 +314,9 @@ class TripGuidanceService : Service() {
         }
 
     // ── Learning from rides ──────────────────────────────────────────────────
+
+    private suspend fun loadDirectionLine(request: TripRequest): DirectionLine? =
+        (routes.getDirectionLine(request.routeId, request.direction) as? DataResult.Success)?.data
 
     private suspend fun loadKnownPaths(request: TripRequest): List<List<GeoPoint>> =
         (learning.getKnownPaths(request.routeId, request.direction) as? DataResult.Success)?.data.orEmpty()
@@ -393,12 +432,15 @@ class TripGuidanceService : Service() {
         internal const val ACTION_START = "com.samuelokello.mwenyeji.guidance.START"
         internal const val ACTION_ON_BOARD = "com.samuelokello.mwenyeji.guidance.ON_BOARD"
         internal const val ACTION_ALIGHTED = "com.samuelokello.mwenyeji.guidance.ALIGHTED"
+        internal const val ACTION_AT_STAGE = "com.samuelokello.mwenyeji.guidance.AT_STAGE"
+        internal const val ACTION_PICK_STAGE = "com.samuelokello.mwenyeji.guidance.PICK_STAGE"
         internal const val ACTION_CANCEL = "com.samuelokello.mwenyeji.guidance.CANCEL"
 
         private const val LOCATION_INTERVAL_MS = 2_000L
         private const val FIRST_FIX_TIMEOUT_MS = 10_000L
         private const val END_GRACE_MS = 8_000L
-        private const val KNOWN_PATHS_TIMEOUT_MS = 5_000L
+        private const val ROUTE_DATA_TIMEOUT_MS = 5_000L
+        private const val EXTRA_STOP_INDEX = "stopIndex"
 
         private val _trip = MutableStateFlow<GuidanceSnapshot?>(null)
 
@@ -422,6 +464,18 @@ class TripGuidanceService : Service() {
 
         fun alighted(context: Context) = send(context, ACTION_ALIGHTED)
 
+        fun atStage(context: Context) = send(context, ACTION_AT_STAGE)
+
+        /** Board at the stop at [stopIndex] in the running plan's stops instead. */
+        fun pickStage(
+            context: Context,
+            stopIndex: Int,
+        ) {
+            context.startService(
+                Intent(context, TripGuidanceService::class.java).setAction(ACTION_PICK_STAGE).putExtra(EXTRA_STOP_INDEX, stopIndex),
+            )
+        }
+
         private fun send(
             context: Context,
             action: String,
@@ -437,10 +491,12 @@ class TripGuidanceService : Service() {
  * @param routeId The route the trip is on, so a route's screen only offers to open its own trip.
  * @param plan    Null for the first few seconds, while the service waits for a location fix.
  * @param voiceOn False while guidance only vibrates: no earphones, and the loudspeaker not allowed.
+ * @param here    Where the last location fix put the rider, or null before the first.
  */
 data class GuidanceSnapshot(
     val routeId: String,
     val phase: TripPhase,
     val plan: TripPlan?,
     val voiceOn: Boolean = true,
+    val here: GeoPoint? = null,
 )

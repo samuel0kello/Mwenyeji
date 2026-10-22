@@ -55,6 +55,8 @@ object PhraseBook {
             is Message.OffBus -> "You're off the bus. ${message.stopName} stage is ${message.metresBehind} metres behind you"
 
             Message.LostLocation -> "I've lost your location, watch for your stop"
+
+            Message.GuidanceEnded -> "I've stopped guiding this trip. Start it again if you still need me"
         }
 
     private fun CompassDirection.english(): String = name.lowercase().replace('_', '-')

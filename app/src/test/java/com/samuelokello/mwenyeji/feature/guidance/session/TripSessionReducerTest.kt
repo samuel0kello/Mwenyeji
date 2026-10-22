@@ -380,4 +380,138 @@ class TripSessionReducerTest {
         send(TripEvent.GpsLost)
         assertEquals(VibrationPattern.WARNING, vibration())
     }
+
+    // ── Boarding elsewhere, choosing a stage, ending ────────────────────────
+
+    private fun moves(): List<TripEffect.MoveStage> = effects.filterIsInstance<TripEffect.MoveStage>()
+
+    @Test
+    fun `tapping on board on the walk boards at the stop the rider is nearest`() {
+        startIn(TripPhase.WALKING_TO_STAGE)
+        fix(stops[1], east = -50.0)
+
+        send(TripEvent.UserTapsIOnBoard)
+
+        assertEquals(TripPhase.ON_BOARD, state.currentPhase)
+        assertEquals(listOf(TripEffect.MoveStage(1)), moves())
+        assertEquals(Message.OnBoardConfirmed(2, "Stop 3"), spoken())
+    }
+
+    @Test
+    fun `tapping on board near the planned stage keeps it`() {
+        startIn(TripPhase.OFF_ROUTE)
+        fix(stage, east = 40.0)
+
+        send(TripEvent.UserTapsIOnBoard)
+
+        assertEquals(TripPhase.ON_BOARD, state.currentPhase)
+        assertTrue(moves().isEmpty())
+        assertEquals(Message.OnBoardConfirmed(3, "Stop 3"), spoken())
+    }
+
+    @Test
+    fun `tapping at the stage on the walk says which matatu to take`() {
+        startIn(TripPhase.WALKING_TO_STAGE)
+
+        send(TripEvent.UserTapsAtStage)
+
+        assertEquals(TripPhase.AT_STAGE, state.currentPhase)
+        assertEquals(Message.AtStage("Super Metro", "Stop 3", 100), spoken())
+    }
+
+    @Test
+    fun `picking another stage moves the trip there and says how far it is`() {
+        startIn(TripPhase.AT_STAGE)
+        fix(stops[1], east = -300.0, speed = 0.0)
+
+        send(TripEvent.UserPicksStage(1))
+
+        assertEquals(TripPhase.WALKING_TO_STAGE, state.currentPhase)
+        assertEquals(listOf(TripEffect.MoveStage(1)), moves())
+        assertEquals(Message.WalkToStage(300, "Stop 1"), spoken())
+    }
+
+    @Test
+    fun `the planned stage, the stop and stops past it cannot be picked`() {
+        startIn(TripPhase.WALKING_TO_STAGE)
+
+        listOf(0, 3, 4, -1).forEach {
+            send(TripEvent.UserPicksStage(it))
+            assertEquals(TripPhase.WALKING_TO_STAGE, state.currentPhase)
+            assertTrue(effects.isEmpty())
+        }
+    }
+
+    @Test
+    fun `riding along the route before reaching the stage boards where the ride began`() {
+        startIn(TripPhase.WALKING_TO_STAGE)
+
+        // On a matatu from just before stop 1, heading for the stop.
+        fix(stops[1], east = -200.0, speed = driving)
+        fix(stops[1], east = -120.0, speed = driving)
+        assertEquals(TripPhase.WALKING_TO_STAGE, state.currentPhase)
+
+        fix(stops[1], east = -40.0, speed = driving)
+        assertEquals(TripPhase.ON_BOARD, state.currentPhase)
+        assertEquals(listOf(TripEffect.MoveStage(1)), moves())
+        assertEquals(Message.OnBoardConfirmed(2, "Stop 3"), spoken())
+    }
+
+    @Test
+    fun `a matatu going the other way is not boarding`() {
+        startIn(TripPhase.WALKING_TO_STAGE)
+
+        repeat(10) { fix(stops[2], east = -it * 80.0, speed = driving) }
+
+        assertTrue(state.currentPhase != TripPhase.ON_BOARD)
+    }
+
+    @Test
+    fun `riding past the stage in a matatu gives no walking updates`() {
+        startIn(TripPhase.WALKING_TO_STAGE)
+
+        // West of the route's first stop, so not along the route either.
+        (0..9).forEach {
+            fix(stage, east = -500.0 + it * 50, speed = driving)
+            assertTrue(spoken() !is Message.WalkProgress)
+        }
+    }
+
+    @Test
+    fun `reaching the stop without boarding being noticed ends the trip`() {
+        startIn(TripPhase.OFF_ROUTE)
+
+        repeat(2) { fix(alight, east = -100.0) }
+        assertEquals(TripPhase.OFF_ROUTE, state.currentPhase)
+
+        fix(alight, east = -100.0)
+        assertEquals(TripPhase.ARRIVED, state.currentPhase)
+        assertEquals(Message.Arrived("Stop 3"), spoken())
+        assertTrue(TripEffect.EndTrip in effects)
+    }
+
+    @Test
+    fun `dropped short of the stop, two minutes on foot ends the trip`() {
+        startIn(TripPhase.ALIGHT_NOW)
+
+        // 150 m short: further than the arrival radius, so only time can tell.
+        repeat(24) { fix(alight, east = -150.0) }
+        assertEquals(TripPhase.ALIGHT_NOW, state.currentPhase)
+
+        fix(alight, east = -150.0)
+        assertEquals(TripPhase.ARRIVED, state.currentPhase)
+        assertEquals(Message.Arrived("Stop 3"), spoken())
+        assertTrue(TripEffect.EndTrip in effects)
+    }
+
+    @Test
+    fun `a trip that runs too long ends itself and says so`() {
+        startIn(TripPhase.WALKING_TO_STAGE)
+
+        send(TripEvent.TripExpired)
+
+        assertEquals(TripPhase.CANCELLED, state.currentPhase)
+        assertEquals(Message.GuidanceEnded, spoken())
+        assertTrue(TripEffect.EndTrip in effects)
+    }
 }

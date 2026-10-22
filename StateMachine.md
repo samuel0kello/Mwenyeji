@@ -17,6 +17,11 @@ If an event arrives and no guard matches, stay in the current state and do nothi
 | WalkingToStage                                  | Location fix              | Another 100m closer to the stage (to the nearest 10m), still more than 60m away| WalkingToStage  | Say "Kencom stage, 300 metres north-east"; Tick                                                                  |
 | WalkingToStage                                  | Location fix              | Distance to the stage has grown for 30 seconds                           | OffRoute        | Say "You're walking away from the stage"; Warning                                                                |
 | OffRoute                                        | Location fix              | Distance to the stage has shrunk, 3 fixes in a row                       | WalkingToStage  | Tick (no speech)                                                                                                 |
+| WalkingToStage, OffRoute                        | Location fix              | Within 100m of the route and faster than 15 km/h, 3 fixes in a row, and 50m closer to the stop than when it began | OnBoard         | Board at the stop nearest where it began (the plan moves there); say "Sawa, 2 stops to Embakasi…"; Tick |
+| WalkingToStage, OffRoute                        | Location fix              | Within 300m of the stop and more than 600m from the stage, 3 fixes in a row | Arrived         | Say "You've arrived at Embakasi"; Milestone; end trip                                                         |
+| WalkingToStage, OffRoute                        | User taps "I'm at the stage" | Always                                                                | AtStage         | Say "You're at the stage. Look for Super Metro…"; Milestone                                                      |
+| WalkingToStage, OffRoute                        | User taps "I'm on board"  | Always                                                                   | OnBoard         | Board at the stop nearest the last fix (the plan moves there); say "Sawa, 9 stops to Embakasi…"; Tick          |
+| WalkingToStage, OffRoute, AtStage               | User picks a stage        | A stop before the alight stop, not the current stage                     | WalkingToStage  | The plan moves there; say "Walk 300 metres to Mariguini stage"; Tick                                             |
 | AtStage                                         | User taps "I'm on board"  | Always                                                                   | OnBoard         | Say "Sawa, 9 stops to Embakasi. I'll tell you when to get off"; Tick                                             |
 | AtStage                                         | Location fix              | Faster than 15 km/h and more than 100m from the stage, 3 fixes in a row  | OnBoard         | Tick (no speech)                                                                                                 |
 | OnBoard                                         | Location fix              | Within 800m of the stop, or past the stop before it while on route, 3 fixes in a row | ApproachingStop | Say "Get ready, Embakasi is coming up"; GetReady                                                                 |
@@ -24,11 +29,13 @@ If an event arrives and no guard matches, stay in the current state and do nothi
 | OnBoard                                         | Location fix              | Off the route and every learned road, 3 fixes in a row, then 500m further from the stop than where the detour began; not yet warned| OnBoard         | Say "This bus may not be going to Embakasi, check with the conductor" (urgent); Warning; once per trip                    |
 | ApproachingStop                                 | Location fix              | Within 300m of the stop, 2 fixes in a row                                | AlightNow       | Say "Alight at Embakasi in 300 metres" (urgent); Alight                                                                   |
 | AlightNow                                       | Location fix              | Within 50m of the stop and slower than 7 km/h, 3 fixes in a row          | Arrived         | Say "You've arrived at Embakasi"; Milestone; end trip                                                            |
+| AlightNow                                       | Location fix              | Slower than 7 km/h for 2 minutes (dropped short of the stop)             | Arrived         | Say "You've arrived at Embakasi"; Milestone; end trip                                                            |
 | OnBoard, ApproachingStop, AlightNow             | Location fix              | On route, more than 150m past the stop and faster than 15 km/h, 3 fixes in a row | MissedStop      | Say "You've passed your stop. Ask to be dropped now if it's safe, otherwise at the next stage" (urgent); Alight           |
 | MissedStop                                      | Location fix              | Slower than 7 km/h for 60 seconds                                        | Arrived         | Say "You're off the bus. Embakasi stage is X metres behind you"; Milestone; end trip                                   |
 | OnBoard, ApproachingStop, AlightNow, MissedStop | User taps "I've alighted" | Always                                                                   | Arrived         | Milestone; end trip (no speech)                                                                                  |
 | Any except Arrived, Cancelled                   | User taps Cancel          | Always                                                                   | Cancelled       | Tick; end trip (no speech)                                                                                       |
 | Any except Arrived, Cancelled                   | GPS lost                  | No fix for 60 seconds, not yet warned since the last fix                 | Same state      | Say "I've lost your location, watch for your stop" (urgent); Warning                                                      |
+| Any except Arrived, Cancelled                   | Trip expired              | 3 hours since Start                                                      | Cancelled       | Say "I've stopped guiding this trip. Start it again if you still need me"; Warning; end trip                     |
 
 "Past the stop" means the nearest stop on the route comes after the alight stop in the stop sequence.
 
@@ -78,6 +85,11 @@ All of these are starting guesses. Tune them on real trips.
 | Off-route time       | 30 seconds | Walking away from the stage                 |
 | Vehicle speed        | 15 km/h    | Detecting boarding, detecting a missed stop |
 | Walking speed        | 7 km/h     | Detecting that the user is off the bus      |
+| Boarding corridor    | 100m       | Riding along the route before the stage     |
+| Boarding progress    | 50m        | ...and heading for the stop                 |
+| Stage choice radius  | 800m       | Stages offered when the trip starts (up to 3) |
+| Arrived slow time    | 2 minutes  | Off the matatu short of the stop            |
+| Longest trip         | 3 hours    | Guidance stops itself                       |
 | Get-ready distance   | 800m       | First alert before the stop                 |
 | Alight distance      | 300m       | Strong alert before the stop                |
 | Arrival radius       | 50m        | Reaching the alight stop                    |

@@ -43,4 +43,6 @@ val Message.priority: SpeechPriority
 
         // Without GPS the app cannot say when to get off, so the user must watch for the stop.
         Message.LostLocation -> SpeechPriority.URGENT
+
+        Message.GuidanceEnded -> SpeechPriority.NORMAL
     }

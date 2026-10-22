@@ -167,6 +167,9 @@
     <string name="guidance_action_on_board">I\'m on board</string>
     <string name="guidance_action_alighted">I\'ve alighted</string>
     <string name="guidance_action_stop">Stop</string>
+    <string name="guidance_action_at_stage">I\'m at the stage</string>
+    <string name="guidance_board_at">Board at</string>
+    <string name="guidance_stage_choice">%1$s · %2$d m</string>
     <string name="trace_consent_title">Help Mwenyeji learn matatu shortcuts?</string>
     <string name="trace_consent_body">When you arrive, Mwenyeji can send the path the matatu took, so it learns the roads drivers really use. Only the ride is sent: never your walk to or from the stage, your name or your account.</string>
     <string name="trace_consent_allow">Allow</string>

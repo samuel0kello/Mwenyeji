@@ -63,4 +63,7 @@ sealed class Message {
     ) : Message()
 
     data object LostLocation : Message()
+
+    /** The trip ran far longer than any trip should, so guidance stopped itself. */
+    data object GuidanceEnded : Message()
 }

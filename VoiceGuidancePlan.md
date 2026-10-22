@@ -301,3 +301,40 @@ round: **the GTFS data is a first guess, and riders confirm or correct it.**
 Steps 1 and 2 alone stop the app confidently offering route 103 for this trip. Until then, route
 103's Ndumbuini to Gathondeki stretch can be fixed by hand in `route_stops` with a seeder script, so
 the test trip is right.
+
+## First ride to town (2026-10-22): what broke, and the fixes
+
+Samuel rode from Ndumbuini to town with guidance on. Four problems, all fixed in this change:
+
+1. **Guidance never stopped.** He boarded at Mariguini, not at the planned stop, so the trip stayed
+   "walking to the stage" for the whole ride. That phase had no way out. And in town the trip
+   only ended within 50 m of the stop, which is not where the matatu dropped him.
+   - Riding along the route before the stage, heading for the stop, now counts as boarding, from
+     the stop nearest where the ride began.
+   - In the last 300 m, two minutes on foot counts as arrived.
+   - Reaching the stop without boarding being noticed ends the trip too.
+   - No trip runs past 3 hours.
+2. **The line was on the from-town carriageway.** Trips against the stored order reversed the other
+   direction's stops, and the line ran straight between stops. Now the trip uses its own
+   direction's stops (`route_stops.inbound`, found again by name or place), and the road from the
+   GTFS shapes (`/route_shapes`, `seeder/shapes/seed_shapes.js`). The off-route checks use the road
+   too, and `learn_variants.js` measures detours from the same line.
+3. **No way to say "I'm on the bus" or "I'm at the stage".** Both buttons now show on the walk, on
+   the screen and in the notification.
+4. **The wrong stage.** The stop the app picks is not always where locals board. Up to three stages
+   within 800 m are offered when the trip starts, with live distances, and the map shows them. The
+   walk shows as a dotted line from the rider to the stage. It is straight: a line along the streets
+   needs a walking router we would host. Later, "I'm at the stage" away from the stop could teach
+   the app where the stage really is (part of trusting riders over the data).
+
+**To finish it:**
+1. `node shapes/seed_shapes.js` from `seeder/` (136 routes; `--dry-run` first).
+2. Add the rule:
+   ```
+   match /route_shapes/{id} {
+     allow read: if true;
+     allow write: if false;
+   }
+   ```
+   Until both are done the trip still uses the right side's stops, but draws straight lines.
+3. Ride it again, boarding at Mariguini.

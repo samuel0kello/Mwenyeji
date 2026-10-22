@@ -12,7 +12,13 @@ import kotlin.math.sin
 internal fun distanceMetres(
     fix: TripEvent.LocationFix,
     stop: RouteStop,
-): Double = ProximityEngine.haversineKm(fix.lat, fix.lng, stop.lat, stop.lng) * 1000
+): Double = metresBetween(fix.lat, fix.lng, stop)
+
+internal fun metresBetween(
+    lat: Double,
+    lng: Double,
+    stop: RouteStop,
+): Double = ProximityEngine.haversineKm(lat, lng, stop.lat, stop.lng) * 1000
 
 /** Compass bearing from the fix to [stop], in degrees clockwise from north. */
 internal fun bearingDegrees(

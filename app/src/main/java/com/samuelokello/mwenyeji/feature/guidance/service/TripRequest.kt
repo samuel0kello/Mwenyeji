@@ -5,6 +5,7 @@ import com.samuelokello.mwenyeji.data.helpers.ProximityEngine
 import com.samuelokello.mwenyeji.data.models.RouteStop
 import com.samuelokello.mwenyeji.data.models.TravelDirection
 import com.samuelokello.mwenyeji.feature.guidance.session.TripSessionContract.TripPlan
+import com.samuelokello.mwenyeji.feature.guidance.session.TripThresholds
 import kotlin.math.roundToInt
 
 /**
@@ -46,6 +47,21 @@ data class TripRequest(
             }
         val boarding = named ?: nearest ?: 0
 
+        // Other stages the rider could walk to, so they can board where locals board.
+        val choices =
+            if (hereLat != null && hereLng != null) {
+                candidates
+                    .map { it to metresBetween(hereLat, hereLng, stops[it]) }
+                    .filter { (_, metres) -> metres <= TripThresholds.STAGE_CHOICE_RADIUS_M }
+                    .sortedBy { (_, metres) -> metres }
+                    // A stop listed twice under one name is one stage.
+                    .distinctBy { (index, _) -> stops[index].name.normalised() }
+                    .take(TripThresholds.STAGE_CHOICE_MAX)
+                    .map { (index, _) -> index }
+            } else {
+                emptyList()
+            }
+
         return TripPlan(
             stops = stops,
             boardingIndex = boarding,
@@ -58,6 +74,28 @@ data class TripRequest(
                 } else {
                     null
                 },
+            stageChoices = (choices + boarding).distinct().takeIf { it.size > 1 }.orEmpty(),
+        )
+    }
+
+    /**
+     * The same trip on [directionStops], this direction's own stops as the route data stores them.
+     * A request built by reversing the other direction's stops has stops on the wrong side of the
+     * road. The stage and the stop are found again by name, or else as the nearest stop. Unchanged
+     * when the list is too short or the stop cannot be found.
+     */
+    fun onDirectionStops(directionStops: List<RouteStop>): TripRequest {
+        if (directionStops.size < 2 || directionStops.map { it.stopId } == stops.map { it.stopId }) return this
+        val oldAlight = stops.firstOrNull { it.stopId == alightStopId } ?: return this
+        val alight = directionStops.counterpart(oldAlight, from = 1) ?: return this
+        val boarding =
+            stops
+                .firstOrNull { it.stopId == boardingStopId }
+                ?.let { directionStops.counterpart(it, from = 0, before = alight) }
+        return copy(
+            stops = directionStops,
+            alightStopId = directionStops[alight].stopId,
+            boardingStopId = boarding?.let { directionStops[it].stopId },
         )
     }
 
@@ -121,6 +159,25 @@ internal fun RouteStop.matches(place: String?): Boolean {
 }
 
 private fun String.normalised(): String = lowercase().filter { it.isLetterOrDigit() }
+
+/**
+ * Index of the stop in this list that stands for [stop] on the other side of the road: same name,
+ * or failing that the nearest within [COUNTERPART_RADIUS_M]. Searched from [from] up to [before].
+ */
+private fun List<RouteStop>.counterpart(
+    stop: RouteStop,
+    from: Int,
+    before: Int = size,
+): Int? {
+    val range = from until before
+    return range.firstOrNull { this[it].matches(stop.name) }
+        ?: range
+            .minByOrNull { metresBetween(stop.lat, stop.lng, this[it]) }
+            ?.takeIf { metresBetween(stop.lat, stop.lng, this[it]) <= COUNTERPART_RADIUS_M }
+}
+
+// Across a dual carriageway and a little along it.
+private const val COUNTERPART_RADIUS_M = 300.0
 
 private fun metresBetween(
     lat: Double,

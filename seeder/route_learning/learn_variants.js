@@ -34,14 +34,28 @@ const NO_MATCH = flag("no-match");
 const VALHALLA = option("valhalla", "http://localhost:8002");
 const KEEP_DAYS = Number(option("keep-days", "90"));
 
-/** The route's stops in the direction of travel, as the app orders them (inbound is outbound reversed). */
+/**
+ * The line the app holds the route to in this direction: its road from /route_shapes, else the
+ * straight lines through this direction's own stops, else the other direction's stops reversed.
+ */
 async function mainLine(routeId, direction) {
+  const shape = await db.collection("route_shapes").doc(routeId).get();
+  const flat = shape.get(direction) || [];
+  if (flat.length >= 4) {
+    const road = [];
+    for (let i = 0; i + 1 < flat.length; i += 2) road.push({ lat: flat[i], lng: flat[i + 1] });
+    return road;
+  }
+
   const doc = await db.collection("route_stops").doc(routeId).get();
-  const outbound = (doc.get("outbound") || [])
-    .filter((s) => typeof s.lat === "number" && typeof s.lng === "number")
-    .sort((a, b) => a.sequence - b.sequence)
-    .map(({ lat, lng }) => ({ lat, lng }));
-  return direction === "inbound" ? outbound.reverse() : outbound;
+  const stops = (key) =>
+    (doc.get(key) || [])
+      .filter((s) => typeof s.lat === "number" && typeof s.lng === "number")
+      .sort((a, b) => a.sequence - b.sequence)
+      .map(({ lat, lng }) => ({ lat, lng }));
+  if (direction === "outbound") return stops("outbound");
+  const own = stops("inbound");
+  return own.length >= 2 ? own : stops("outbound").reverse();
 }
 
 /** The road the matatu drove, from Valhalla's map matching, or null if Valhalla could not match it. */

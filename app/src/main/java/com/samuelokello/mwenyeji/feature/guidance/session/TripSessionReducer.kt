@@ -10,8 +10,8 @@ import kotlin.math.roundToInt
 internal class TripSessionReducer(
     private val plan: TripPlan,
 ) {
-    // The main line through the stops, then the roads riders' traces showed matatus also take.
-    private val routePaths: List<List<GeoPoint>> = listOf(plan.stops.map { GeoPoint(it.lat, it.lng) }) + plan.knownPaths
+    // The route's road (or the line through its stops), then the roads riders' traces showed matatus also take.
+    private val routePaths: List<List<GeoPoint>> = listOf(plan.mainLine) + plan.knownPaths
 
     /**
      * Pure transition function for a guided trip. See StateMachine.md for the table this implements.
@@ -36,13 +36,36 @@ internal class TripSessionReducer(
                 else -> currentState to listOf(TripEffect.RequestLocationPermission)
             }
 
-            TripEvent.UserTapsIOnBoard -> if (phase == TripPhase.AT_STAGE) {
-                currentState.enter(TripPhase.ON_BOARD) to say(
-                    Message.OnBoardConfirmed(plan.stopsToRide, plan.alightStop.name),
-                    VibrationPattern.TICK,
+            TripEvent.UserTapsIOnBoard -> when (phase) {
+                TripPhase.AT_STAGE -> board(currentState, plan.boardingIndex)
+
+                // Boarded before reaching the planned stage: at whichever stop the rider is nearest.
+                TripPhase.WALKING_TO_STAGE,
+                TripPhase.OFF_ROUTE,
+                -> board(currentState, currentState.lastPosition?.let { nearestStage(it.lat, it.lng) } ?: plan.boardingIndex)
+
+                else -> currentState.unchanged()
+            }
+
+            TripEvent.UserTapsAtStage -> if (phase == TripPhase.WALKING_TO_STAGE || phase == TripPhase.OFF_ROUTE) {
+                currentState.enter(TripPhase.AT_STAGE) to say(
+                    Message.AtStage(plan.vehicleName, plan.alightStop.name, plan.fare),
+                    VibrationPattern.MILESTONE,
                 )
             } else {
                 currentState.unchanged()
+            }
+
+            is TripEvent.UserPicksStage -> {
+                val index = event.stopIndex
+                if (phase.isBeforeBoarding && index in 0 until plan.alightIndex && index != plan.boardingIndex) {
+                    val stage = plan.stops[index]
+                    val metres = currentState.lastPosition?.let { metresBetween(it.lat, it.lng, stage).roundToTens() }
+                    currentState.enter(TripPhase.WALKING_TO_STAGE) to
+                        listOf(TripEffect.MoveStage(index)) + say(Message.WalkToStage(metres, stage.name), VibrationPattern.TICK)
+                } else {
+                    currentState.unchanged()
+                }
             }
 
             TripEvent.UserTapsIHaveAlighted -> if (phase.isRiding || phase == TripPhase.MISSED_STOP) {
@@ -53,6 +76,9 @@ internal class TripSessionReducer(
 
             TripEvent.UserTapsCancel -> currentState.enter(TripPhase.CANCELLED) to buzz(VibrationPattern.TICK) + TripEffect.EndTrip
 
+            TripEvent.TripExpired ->
+                currentState.enter(TripPhase.CANCELLED) to say(Message.GuidanceEnded, VibrationPattern.WARNING) + TripEffect.EndTrip
+
             TripEvent.GpsLost ->
                 // Nothing is tracking the user before Start, so there is nothing to warn about.
                 if (phase == TripPhase.PLANNED || currentState.gpsLostWarningGiven) {
@@ -62,11 +88,11 @@ internal class TripSessionReducer(
                 }
 
             is TripEvent.LocationFix -> {
-                val state = currentState.copy(gpsLostWarningGiven = false)
+                val state = currentState.copy(gpsLostWarningGiven = false, lastPosition = GeoPoint(event.lat, event.lng))
                 when (phase) {
-                    TripPhase.WALKING_TO_STAGE -> walkingToStage(state, event)
+                    TripPhase.WALKING_TO_STAGE -> beforeBoarding(state, event, ::walkingToStage)
 
-                    TripPhase.OFF_ROUTE -> offRoute(state, event)
+                    TripPhase.OFF_ROUTE -> beforeBoarding(state, event, ::offRoute)
 
                     TripPhase.AT_STAGE -> atStage(state, event)
 
@@ -85,6 +111,68 @@ internal class TripSessionReducer(
             }
         }
     }
+
+    /**
+     * Checks that apply on the way to the stage, before the [phaseRules] of the current phase. The
+     * rider may get on at another stage than planned (the stop on the map is not always where
+     * matatus stop), or get all the way to their stop without boarding being noticed.
+     */
+    private fun beforeBoarding(
+        state: TripState,
+        fix: TripEvent.LocationFix,
+        phaseRules: (TripState, TripEvent.LocationFix) -> Pair<TripState, List<TripEffect>>,
+    ): Pair<TripState, List<TripEffect>> {
+        val toStop = distanceMetres(fix, plan.alightStop)
+
+        var next = state.streak(
+            TripGuard.ARRIVED_WITHOUT_RIDE,
+            toStop <= TripThresholds.ALIGHT_DISTANCE_M && distanceMetres(fix, plan.stage) > 2 * TripThresholds.ALIGHT_DISTANCE_M,
+        )
+        if (next.count(TripGuard.ARRIVED_WITHOUT_RIDE) >= 3) {
+            return next.enter(TripPhase.ARRIVED) to
+                say(Message.Arrived(plan.alightStop.name), VibrationPattern.MILESTONE) + TripEffect.EndTrip
+        }
+
+        // Moving at vehicle speed along the route and getting closer to the stop: on a matatu. Where
+        // the rider was when it began says which stage they boarded at. Traffic slows the matatu
+        // without resetting that; leaving the route does.
+        val nearRoute = distanceToPathsMetres(fix, routePaths) <= TripThresholds.BOARDING_CORRIDOR_M
+        next = next.streak(TripGuard.BOARDED_ELSEWHERE, nearRoute && fix.speed > TripThresholds.VEHICLE_SPEED_MPS)
+        next =
+            when {
+                !nearRoute -> next.copy(movingStartToStopMetres = null, movingStartStage = null)
+
+                next.movingStartToStopMetres == null && next.count(TripGuard.BOARDED_ELSEWHERE) > 0 ->
+                    next.copy(movingStartToStopMetres = toStop, movingStartStage = nearestStage(fix.lat, fix.lng))
+
+                else -> next
+            }
+        val start = next.movingStartToStopMetres
+        if (start != null &&
+            next.count(TripGuard.BOARDED_ELSEWHERE) >= 3 &&
+            toStop <= start - TripThresholds.BOARDING_PROGRESS_M
+        ) {
+            return board(next, next.movingStartStage ?: plan.boardingIndex)
+        }
+
+        return phaseRules(next, fix)
+    }
+
+    /** On board, from the stop at [boardingIndex]; the plan moves there if that is not the planned stage. */
+    private fun board(
+        state: TripState,
+        boardingIndex: Int,
+    ): Pair<TripState, List<TripEffect>> {
+        val moved = if (boardingIndex != plan.boardingIndex) listOf(TripEffect.MoveStage(boardingIndex)) else emptyList()
+        return state.enter(TripPhase.ON_BOARD).copy(movingStartToStopMetres = null, movingStartStage = null) to
+            moved + say(Message.OnBoardConfirmed(plan.alightIndex - boardingIndex, plan.alightStop.name), VibrationPattern.TICK)
+    }
+
+    /** The stop before the alight stop nearest to the point. */
+    private fun nearestStage(
+        lat: Double,
+        lng: Double,
+    ): Int = (0 until plan.alightIndex).minBy { metresBetween(lat, lng, plan.stops[it]) }
 
     private fun walkingToStage(
         state: TripState,
@@ -115,7 +203,9 @@ internal class TripSessionReducer(
         val progress =
             lastUpdate != null &&
                 distance.roundToTens() <= lastUpdate.roundToTens() - TripThresholds.WALK_UPDATE_STEP_M &&
-                distance > TripThresholds.WALK_UPDATE_MIN_M
+                distance > TripThresholds.WALK_UPDATE_MIN_M &&
+                // Riding past the stage in a matatu is not walking to it.
+                fix.speed <= TripThresholds.VEHICLE_SPEED_MPS
         val next =
             atStage.copy(
                 previousDistanceToStage = distance,
@@ -213,6 +303,14 @@ internal class TripSessionReducer(
                 if (next.count(TripGuard.ARRIVED) >= 3) {
                     return next.enter(TripPhase.ARRIVED) to say(Message.Arrived(stopName), VibrationPattern.MILESTONE) + TripEffect.EndTrip
                 }
+
+                // Matatus drop riders where they can, not always at the stop. Slow (off and walking)
+                // this close to it for long enough is arrived too.
+                val slowSince = if (fix.speed < TripThresholds.WALKING_SPEED_MPS) state.currentStreakTime ?: fix.elapsedMillis else null
+                if (slowSince != null && fix.elapsedMillis - slowSince >= TripThresholds.ARRIVED_SLOW_TIME_MS) {
+                    return next.enter(TripPhase.ARRIVED) to say(Message.Arrived(stopName), VibrationPattern.MILESTONE) + TripEffect.EndTrip
+                }
+                next = next.copy(currentStreakTime = slowSince)
             }
 
             else -> Unit

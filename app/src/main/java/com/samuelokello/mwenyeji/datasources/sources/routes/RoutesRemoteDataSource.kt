@@ -7,6 +7,7 @@ import com.samuelokello.mwenyeji.datasources.core.firebase.safeFirebaseCall
 import com.samuelokello.mwenyeji.datasources.core.result.NetworkResult
 import com.samuelokello.mwenyeji.datasources.sources.routes.dto.GuideDto
 import com.samuelokello.mwenyeji.datasources.sources.routes.dto.RouteDto
+import com.samuelokello.mwenyeji.datasources.sources.routes.dto.RouteShapesDto
 import com.samuelokello.mwenyeji.datasources.sources.routes.dto.RouteStopsDto
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -27,6 +28,9 @@ interface RoutesRemoteDataSource {
      * Loaded on demand — not during feed loading.
      */
     suspend fun getRouteStops(routeId: String): NetworkResult<RouteStopsDto?>
+
+    /** The road each direction of a route follows. Loaded when a trip starts. */
+    suspend fun getRouteShapes(routeId: String): NetworkResult<RouteShapesDto?>
 
     // ── Guides (community knowledge attached to a route) ─────────────────────
 
@@ -54,6 +58,9 @@ internal class FirebaseRoutesRemoteDataSource(
 
     private val routeStopsCollection
         get() = firestore.collection(RoutesSchema.ROUTE_STOPS_COLLECTION)
+
+    private val routeShapesCollection
+        get() = firestore.collection(RoutesSchema.ROUTE_SHAPES_COLLECTION)
 
     private fun guidesCollection(routeId: String) =
         routesCollection
@@ -100,6 +107,12 @@ internal class FirebaseRoutesRemoteDataSource(
         safeFirebaseCall {
             val snapshot = routeStopsCollection.document(routeId).get().await()
             snapshot.toObject(RouteStopsDto::class.java)
+        }
+
+    override suspend fun getRouteShapes(routeId: String): NetworkResult<RouteShapesDto?> =
+        safeFirebaseCall {
+            val snapshot = routeShapesCollection.document(routeId).get().await()
+            snapshot.toObject(RouteShapesDto::class.java)
         }
 
     override fun observeGuides(routeId: String): Flow<NetworkResult<List<GuideDto>>> =

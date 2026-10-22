@@ -46,6 +46,20 @@ internal object GuidanceNotifications {
             .setContentText(text)
 
         when {
+            // The rider may reach a stage the app does not recognise, or board before it.
+            phase == TripPhase.WALKING_TO_STAGE || phase == TripPhase.OFF_ROUTE -> {
+                builder.addAction(
+                    0,
+                    context.getString(R.string.guidance_action_at_stage),
+                    action(context, TripGuidanceService.ACTION_AT_STAGE),
+                )
+                builder.addAction(
+                    0,
+                    context.getString(R.string.guidance_action_on_board),
+                    action(context, TripGuidanceService.ACTION_ON_BOARD),
+                )
+            }
+
             phase == TripPhase.AT_STAGE ->
                 builder.addAction(
                     0,

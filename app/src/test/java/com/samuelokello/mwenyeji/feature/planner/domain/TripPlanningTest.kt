@@ -3,11 +3,13 @@ package com.samuelokello.mwenyeji.feature.planner.domain
 import com.samuelokello.mwenyeji.core.location.CurrentLocation
 import com.samuelokello.mwenyeji.data.helpers.DataResult
 import com.samuelokello.mwenyeji.data.models.Coordinates
+import com.samuelokello.mwenyeji.data.models.DirectionLine
 import com.samuelokello.mwenyeji.data.models.Guide
 import com.samuelokello.mwenyeji.data.models.Route
 import com.samuelokello.mwenyeji.data.models.RouteStop
 import com.samuelokello.mwenyeji.data.models.SearchRequest
 import com.samuelokello.mwenyeji.data.models.SearchResult
+import com.samuelokello.mwenyeji.data.models.TravelDirection
 import com.samuelokello.mwenyeji.data.models.Verdict
 import com.samuelokello.mwenyeji.data.repository.RoutesRepository
 import com.samuelokello.mwenyeji.data.repository.SearchRepository
@@ -31,6 +33,11 @@ class TripPlanningTest {
                 flowOf(DataResult.Success(listOf(Route(id = "r46", routeNumber = "46"))))
 
             override suspend fun getRouteStops(routeId: String): DataResult<List<RouteStop>> = DataResult.Success(stops)
+
+            override suspend fun getDirectionLine(
+                routeId: String,
+                direction: TravelDirection,
+            ): DataResult<DirectionLine> = DataResult.Success(DirectionLine(stops, emptyList()))
 
             override fun observeGuides(routeId: String): Flow<DataResult<List<Guide>>> =
                 flowOf(

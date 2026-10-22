@@ -74,6 +74,7 @@ class PhraseBookTest {
             Message.OffBus("Ngara", 400),
             Message.LostLocation,
             Message.WalkProgress("Kencom", 150, CompassDirection.NORTH_EAST),
+            Message.GuidanceEnded,
         )
     }
 }

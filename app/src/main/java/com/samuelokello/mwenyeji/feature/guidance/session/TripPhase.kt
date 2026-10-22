@@ -15,4 +15,5 @@ enum class TripPhase {
 
     val isFinal: Boolean get() = this == ARRIVED || this == CANCELLED
     val isRiding: Boolean get() = this == ON_BOARD || this == APPROACHING_STOP || this == ALIGHT_NOW
+    val isBeforeBoarding: Boolean get() = this == WALKING_TO_STAGE || this == OFF_ROUTE || this == AT_STAGE
 }

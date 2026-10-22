@@ -3,6 +3,7 @@ package com.samuelokello.mwenyeji.datasources.sources.routes
 internal object RoutesSchema {
     const val COLLECTION = "routes"
     const val ROUTE_STOPS_COLLECTION = "route_stops"
+    const val ROUTE_SHAPES_COLLECTION = "route_shapes"
     const val STOPS_COLLECTION = "stops"
 
     // Subcollections under /routes/{routeId}

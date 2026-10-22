@@ -113,4 +113,58 @@ class TripRequestTest {
     fun `fewer than two stops cannot make a trip`() {
         assertNull(TripRequest.forDirection("r1", stops.take(1), null, null, false, "Super Metro", null))
     }
+
+    // ── This direction's own stops, and stage choices ───────────────────────
+
+    // The other side of the road: the same stops 20 m north, under their own ids, listed westwards.
+    private val returnStops = stops.reversed().mapIndexed { i, stop ->
+        stop.copy(stopId = "r${stop.stopId}", lat = stop.lat + 0.00018, sequence = i)
+    }
+
+    @Test
+    fun `a reversed trip moves to the return side's own stops`() {
+        val reversed = request(from = "Stop 3", to = "Stop 1")
+
+        val moved = reversed.onDirectionStops(returnStops)
+
+        assertEquals(returnStops, moved.stops)
+        assertEquals("rs3", moved.boardingStopId)
+        assertEquals("rs1", moved.alightStopId)
+    }
+
+    @Test
+    fun `stops named differently on the return side are found by place`() {
+        val renamed = returnStops.map { it.copy(name = it.name + " (towards town)") }
+
+        val moved = request(from = "Stop 3", to = "Stop 1").onDirectionStops(renamed)
+
+        assertEquals("rs3", moved.boardingStopId)
+        assertEquals("rs1", moved.alightStopId)
+    }
+
+    @Test
+    fun `without a usable return side the request is unchanged`() {
+        val reversed = request(from = "Stop 3", to = "Stop 1")
+
+        assertEquals(reversed, reversed.onDirectionStops(emptyList()))
+        // Return stops far from the trip's stop.
+        val elsewhere = returnStops.map { it.copy(name = "Elsewhere ${it.stopId}", lat = it.lat + 0.05) }
+        assertEquals(reversed, reversed.onDirectionStops(elsewhere))
+    }
+
+    @Test
+    fun `stages within walking distance are offered, nearest first`() {
+        // Between stop 1 and stop 2, a little nearer stop 2.
+        val plan = request(to = "Stop 4").toPlan(hereLat = -1.28, hereLng = 36.8355)
+
+        assertEquals(2, plan.boardingIndex)
+        assertEquals(listOf(2, 1), plan.stageChoices)
+    }
+
+    @Test
+    fun `one stage within walking distance offers no choice`() {
+        val plan = request(to = "Stop 4").toPlan(hereLat = -1.28, hereLng = 36.82)
+
+        assertTrue(plan.stageChoices.isEmpty())
+    }
 }

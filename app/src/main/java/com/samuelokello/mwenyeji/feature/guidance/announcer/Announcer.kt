@@ -25,6 +25,7 @@ class Announcer(
 
                 is TripEffect.Vibrate -> haptics.vibrate(effect.pattern)
 
+                is TripEffect.MoveStage,
                 TripEffect.RequestLocationPermission,
                 TripEffect.EndTrip,
                 -> Unit
